@@ -68,9 +68,9 @@
 				the people you know.
 			</p>
 			<div class="hero-actions">
-				<a class="primary-action" href="#start">Start a campaign</a>
-				<a class="text-action" href="#how-it-works"
-					>See how ChipIn works <span aria-hidden="true">→</span></a
+				<a class="primary-action" href="#campaigns">Browse campaigns</a>
+				<a class="text-action" href="#start"
+					>Start a campaign <span aria-hidden="true">→</span></a
 				>
 			</div>
 		</div>

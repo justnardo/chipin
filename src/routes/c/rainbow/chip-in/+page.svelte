@@ -14,6 +14,8 @@
 	type Step = 'pledge' | 'transfer' | 'report' | 'done';
 
 	let step = $state<Step>('pledge');
+	const suggestedAmounts = [25, 50, 100, 200];
+
 	let pledgeInput = $state('50');
 	let reportInput = $state('50');
 	let transferDate = $state(new Date().toISOString().slice(0, 10));
@@ -23,6 +25,17 @@
 	let pledgeCents = $state(5000);
 	let submittedId = $state('');
 	let statusHref = $state('');
+	let selectedSuggestion = $state<number | 'custom'>(50);
+
+	function pickAmount(amount: number) {
+		selectedSuggestion = amount;
+		pledgeInput = String(amount);
+		error = '';
+	}
+
+	function pickCustom() {
+		selectedSuggestion = 'custom';
+	}
 
 	function goTransfer(event: Event) {
 		event.preventDefault();
@@ -107,16 +120,45 @@
 
 	{#if step === 'pledge'}
 		<form class="card" onsubmit={goTransfer}>
-			<h2>How much will you chip in?</h2>
-			<p>This is a pledge — a plan, not a payment.</p>
+			<h2>Choose an amount</h2>
+			<p>
+				Same familiar first step as other fundraisers — then you send it with your own bank. ChipIn
+				does not charge your card.
+			</p>
+			<div class="amount-grid" role="group" aria-label="Suggested amounts">
+				{#each suggestedAmounts as amount}
+					<button
+						type="button"
+						class="amount-chip"
+						class:selected={selectedSuggestion === amount}
+						onclick={() => pickAmount(amount)}
+					>
+						${amount}
+					</button>
+				{/each}
+				<button
+					type="button"
+					class="amount-chip"
+					class:selected={selectedSuggestion === 'custom'}
+					onclick={pickCustom}
+				>
+					Other
+				</button>
+			</div>
 			<label>
-				<span>Pledge amount (BSD)</span>
-				<input type="text" inputmode="decimal" bind:value={pledgeInput} required />
+				<span>Amount (BSD)</span>
+				<input
+					type="text"
+					inputmode="decimal"
+					bind:value={pledgeInput}
+					oninput={() => (selectedSuggestion = 'custom')}
+					required
+				/>
 			</label>
 			{#if error}
 				<p class="error" role="alert">{error}</p>
 			{/if}
-			<button type="submit" class="primary">Continue</button>
+			<button type="submit" class="primary">Continue to transfer steps</button>
 		</form>
 	{:else if step === 'transfer'}
 		<section class="stack">
@@ -314,6 +356,32 @@
 	.card ul {
 		padding-left: var(--space-5);
 		margin: 0 0 var(--space-5);
+	}
+
+	.amount-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-3);
+		margin: var(--space-5) 0;
+	}
+
+	.amount-chip {
+		min-height: 52px;
+		border: 1px solid var(--line);
+		border-radius: var(--radius-md);
+		color: var(--ink);
+		background: var(--paper);
+		font-family: var(--font-display);
+		font-size: var(--text-lg);
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.amount-chip.selected {
+		border-color: var(--aqua-deep);
+		color: var(--aqua-deep);
+		background: var(--aqua-tint);
+		box-shadow: inset 0 0 0 1px var(--aqua-deep);
 	}
 
 	label {

@@ -11,8 +11,58 @@
 		location: 'Nassau, The Bahamas',
 		received: 5240,
 		goal: 8000,
-		supporters: 47
+		supporters: 47,
+		daysLeft: 18
 	};
+
+	const recentChips = [
+		{ name: 'Keisha M.', amount: 100, when: '2 hours ago' },
+		{ name: 'Anonymous', amount: 50, when: 'Yesterday' },
+		{ name: 'Marcus T.', amount: 200, when: 'Yesterday' },
+		{ name: 'The Rolle family', amount: 75, when: '2 days ago' },
+		{ name: 'Anonymous', amount: 25, when: '3 days ago' }
+	];
+
+	const updates = [
+		{
+			date: 'July 30, 2026',
+			title: 'Electrician booked for next week',
+			body: 'Thank you — we scheduled the inspection. Chairs are ordered; we still need help with storage and programme supplies.'
+		},
+		{
+			date: 'July 22, 2026',
+			title: 'Campaign launched',
+			body: 'We are raising what it takes to reopen safely. Every chip-in goes straight to our centre account; ChipIn just helps us keep the record clear.'
+		}
+	];
+
+	let shareNote = $state('');
+
+	async function shareCampaign() {
+		const url = typeof window !== 'undefined' ? window.location.href : 'https://chipin242.com/c/rainbow';
+		const text = `${campaign.title} — chip in on ChipIn`;
+		try {
+			if (navigator.share) {
+				await navigator.share({ title: campaign.title, text, url });
+				shareNote = 'Thanks for sharing.';
+				return;
+			}
+		} catch {
+			/* fall through to clipboard */
+		}
+		try {
+			await navigator.clipboard.writeText(url);
+			shareNote = 'Campaign link copied — paste it in WhatsApp.';
+		} catch {
+			shareNote = 'Copy this link: ' + url;
+		}
+	}
+
+	function shareWhatsApp() {
+		const url = typeof window !== 'undefined' ? window.location.href : 'https://chipin242.com/c/rainbow';
+		const text = encodeURIComponent(`${campaign.title}\nChip in here: ${url}`);
+		window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
+	}
 </script>
 
 <svelte:head>
@@ -74,19 +124,33 @@
 			<p class="amount-label">Marked received</p>
 			<p class="amount">BSD ${campaign.received.toLocaleString('en-BS')}</p>
 			<ProgressCoinBar received={campaign.received} goal={campaign.goal} />
-			<div class="supporter-count">
-				<strong>{campaign.supporters}</strong>
-				<span>people reported chipping in</span>
+			<div class="stat-row">
+				<div>
+					<strong>{campaign.supporters}</strong>
+					<span>chipped in</span>
+				</div>
+				<div>
+					<strong>{campaign.daysLeft}</strong>
+					<span>days left</span>
+				</div>
+				<div>
+					<strong>{Math.round((campaign.received / campaign.goal) * 100)}%</strong>
+					<span>of goal</span>
+				</div>
 			</div>
-			<a class="primary-action" href={resolve('/c/rainbow/chip-in')}>Chip in</a>
-			<a class="share-action host-proto" href={resolve('/c/rainbow/host')}>Host view</a>
-			<button class="share-action" type="button" disabled aria-describedby="prototype-note">
-				Share campaign
-			</button>
-			<p class="card-note" id="prototype-note">
-				Prototype only. Chip-in and host attestation use fictional browser-session data — no money
-				moves and no bank details are shown.
+			<a class="primary-action" href={resolve('/c/rainbow/chip-in')}>Chip in now</a>
+			<div class="share-row">
+				<button class="share-action" type="button" onclick={shareCampaign}>Share</button>
+				<button class="share-action" type="button" onclick={shareWhatsApp}>WhatsApp</button>
+			</div>
+			{#if shareNote}
+				<p class="card-note" role="status">{shareNote}</p>
+			{/if}
+			<p class="card-note">
+				Money goes to the host by bank transfer — not through ChipIn. Progress only counts what the
+				host marks received.
 			</p>
+			<a class="host-proto" href={resolve('/c/rainbow/host')}>Host tools (prototype)</a>
 		</aside>
 	</section>
 
@@ -117,62 +181,110 @@
 				</ul>
 			</section>
 
+			<section class="updates" aria-labelledby="updates-heading">
+				<p class="section-kicker">Updates</p>
+				<h2 id="updates-heading">From the organiser</h2>
+				<ul class="update-list">
+					{#each updates as update}
+						<li>
+							<p class="update-date">{update.date}</p>
+							<h3>{update.title}</h3>
+							<p>{update.body}</p>
+						</li>
+					{/each}
+				</ul>
+			</section>
+
+			<section class="activity" aria-labelledby="activity-heading">
+				<p class="section-kicker">Recent chips</p>
+				<h2 id="activity-heading">People are already helping</h2>
+				<ul class="activity-list">
+					{#each recentChips as chip}
+						<li>
+							<span class="avatar" aria-hidden="true">{chip.name.slice(0, 1)}</span>
+							<div>
+								<strong>{chip.name}</strong>
+								<span>chipped in BSD ${chip.amount}</span>
+							</div>
+							<time>{chip.when}</time>
+						</li>
+					{/each}
+				</ul>
+				<p class="activity-note">
+					Names shown here are fictional for the prototype. Live ChipIn can keep donors anonymous.
+				</p>
+			</section>
+
 			<section class="process" id="how-it-works" aria-labelledby="process-heading">
 				<p class="section-kicker">How it works</p>
-				<h2 id="process-heading">A clear record, not a payment service</h2>
+				<h2 id="process-heading">Familiar fundraising. Local bank transfers.</h2>
 				<ol>
 					<li>
 						<span>01</span>
 						<div>
-							<strong>You pledge</strong>
-							<p>Tell the host what you plan to send.</p>
+							<strong>Chip in</strong>
+							<p>Choose an amount — like donating on a familiar fundraiser page.</p>
 						</div>
 					</li>
 					<li>
 						<span>02</span>
 						<div>
-							<strong>You transfer outside ChipIn</strong>
-							<p>Use your existing local banking channel.</p>
+							<strong>Send with your bank</strong>
+							<p>Transfer goes straight to the host. ChipIn never takes the money.</p>
 						</div>
 					</li>
 					<li>
 						<span>03</span>
 						<div>
-							<strong>The host marks what arrived</strong>
-							<p>Only host-marked receipts count toward public progress.</p>
+							<strong>Host marks it received</strong>
+							<p>Only then does the public total move — honest progress, not guesswork.</p>
 						</div>
 					</li>
 				</ol>
 			</section>
 		</article>
 
-		<aside class="trust-panel" id="trust" aria-labelledby="trust-heading">
-			<p class="section-kicker">Checked by ChipIn</p>
-			<h2 id="trust-heading">What we reviewed</h2>
-			<div class="review-list">
-				<ReviewLabel label="Host identity reviewed" date="July 28, 2026" />
-				<ReviewLabel label="Organization authority reviewed" date="July 28, 2026" />
-				<ReviewLabel label="Receiving-account relationship reviewed" date="July 28, 2026" />
-			</div>
-			<p class="trust-limit">
-				These labels do not mean ChipIn verified each bank transfer or how funds are used. ChipIn
-				cannot reverse or recover an external transfer.
-			</p>
-			<a href="#report">See what each review means</a>
+		<aside class="side-stack">
+			<section class="trust-panel" id="trust" aria-labelledby="trust-heading">
+				<p class="section-kicker">Checked by ChipIn</p>
+				<h2 id="trust-heading">What we reviewed</h2>
+				<div class="review-list">
+					<ReviewLabel label="Host identity reviewed" date="July 28, 2026" />
+					<ReviewLabel label="Organization authority reviewed" date="July 28, 2026" />
+					<ReviewLabel label="Receiving-account relationship reviewed" date="July 28, 2026" />
+				</div>
+				<p class="trust-limit">
+					These labels do not mean ChipIn verified each bank transfer or how funds are used. ChipIn
+					cannot reverse or recover an external transfer.
+				</p>
+				<a href="#report">See what each review means</a>
+			</section>
+
+			<section class="words-panel" aria-labelledby="words-heading">
+				<p class="section-kicker">Words matter</p>
+				<h2 id="words-heading">Not “donate to ChipIn”</h2>
+				<p>
+					You chip in for the campaign. The host receives the transfer. ChipIn keeps the shared page
+					and the record — the GoFundMe-style home for Bahamian giving, without taking custody of the
+					money.
+				</p>
+			</section>
 		</aside>
 	</div>
 
 	<section class="next-steps" id="next-steps" aria-labelledby="next-heading">
 		<BrandMark compact />
-		<p class="section-kicker">Try the prototype</p>
-		<h2 id="next-heading">Pledge, report, and host-mark — with fictional data.</h2>
+		<p class="section-kicker">Start your own</p>
+		<h2 id="next-heading">Ready to put a fundraiser online?</h2>
 		<p>
-			Walk the contribute flow, then open the host view in this browser to mark a report received.
-			Live ChipIn codes and receiving-account disclosure still wait on Stage 0 decisions.
+			ChipIn is building the GoFundMe-style page Bahamians already need — shareable, mobile-first,
+			with progress the host can stand behind. Campaign creation opens after pilot review gates.
 		</p>
 		<div class="next-actions">
-			<a class="next-primary" href={resolve('/c/rainbow/chip-in')}>Start chip-in flow</a>
-			<a class="next-secondary" href={resolve('/c/rainbow/host')}>Open host view</a>
+			<a class="next-primary" href={resolve('/c/rainbow/chip-in')}>Chip in to this one</a>
+			<a class="next-secondary" href="mailto:support@chipin242.com?subject=Start%20a%20campaign"
+				>Ask about starting</a
+			>
 		</div>
 	</section>
 </main>
@@ -338,18 +450,25 @@
 		font-weight: 700;
 		letter-spacing: -0.03em;
 	}
-	.supporter-count {
-		display: flex;
-		align-items: baseline;
-		gap: var(--space-2);
+	.stat-row {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: var(--space-3);
 		margin: var(--space-5) 0;
-		color: var(--ink-60);
-		font-size: var(--text-sm);
+		padding: var(--space-4) 0;
+		border-top: 1px solid var(--line);
+		border-bottom: 1px solid var(--line);
+		text-align: center;
 	}
-	.supporter-count strong {
+	.stat-row strong {
+		display: block;
 		color: var(--ink);
 		font-family: var(--font-display);
-		font-size: var(--text-xl);
+		font-size: var(--text-lg);
+	}
+	.stat-row span {
+		color: var(--ink-60);
+		font-size: var(--text-xs);
 	}
 	.primary-action,
 	.share-action {
@@ -372,18 +491,25 @@
 		background: var(--ink);
 		transform: translateY(-1px);
 	}
-	.share-action {
+	.share-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-3);
 		margin-top: var(--space-3);
+	}
+	.share-action {
 		border: 1px solid var(--line);
-		color: var(--ink-40);
-		background: transparent;
-	}
-	.share-action.host-proto {
 		color: var(--ink);
-		text-decoration: none;
+		background: transparent;
+		cursor: pointer;
 	}
-	.share-action:disabled {
-		cursor: not-allowed;
+	.host-proto {
+		display: block;
+		margin-top: var(--space-4);
+		color: var(--ink-60);
+		font-size: var(--text-xs);
+		font-weight: 600;
+		text-align: center;
 	}
 	.card-note {
 		margin: var(--space-4) 0 0;
@@ -458,14 +584,30 @@
 		color: var(--ink-60);
 		font-size: var(--text-base) !important;
 	}
-	.trust-panel {
+	.side-stack {
+		display: grid;
+		gap: var(--space-5);
 		align-self: start;
+	}
+	.trust-panel,
+	.words-panel {
 		padding: var(--space-6);
 		border-radius: var(--radius-lg);
+	}
+	.trust-panel {
 		background: var(--aqua-tint);
 	}
-	.trust-panel h2 {
+	.words-panel {
+		background: var(--paper-2);
+	}
+	.trust-panel h2,
+	.words-panel h2 {
 		font-size: var(--text-xl);
+	}
+	.words-panel p:not(.section-kicker) {
+		margin: 0;
+		color: var(--ink-60);
+		font-size: var(--text-sm);
 	}
 	.review-list {
 		display: grid;
@@ -483,6 +625,66 @@
 		align-content: center;
 		font-size: var(--text-sm);
 		font-weight: 700;
+	}
+	.update-list,
+	.activity-list {
+		padding: 0;
+		margin: 0;
+		list-style: none;
+	}
+	.update-list li {
+		padding: var(--space-5) 0;
+		border-bottom: 1px solid var(--line);
+	}
+	.update-date {
+		margin: 0 0 var(--space-2);
+		color: var(--ink-60);
+		font-size: var(--text-sm);
+		font-weight: 600;
+	}
+	.update-list h3 {
+		margin: 0 0 var(--space-2);
+		font-size: var(--text-lg);
+	}
+	.update-list p:last-child {
+		margin: 0;
+		color: var(--ink-60);
+	}
+	.activity-list li {
+		display: grid;
+		grid-template-columns: 40px 1fr auto;
+		gap: var(--space-3);
+		align-items: center;
+		padding: var(--space-3) 0;
+		border-bottom: 1px solid var(--line);
+	}
+	.avatar {
+		display: grid;
+		width: 40px;
+		height: 40px;
+		place-items: center;
+		border-radius: 50%;
+		color: var(--paper);
+		background: var(--aqua-deep);
+		font-family: var(--font-display);
+		font-weight: 700;
+	}
+	.activity-list strong {
+		display: block;
+	}
+	.activity-list span {
+		color: var(--ink-60);
+		font-size: var(--text-sm);
+	}
+	.activity-list time {
+		color: var(--ink-40);
+		font-size: var(--text-xs);
+		white-space: nowrap;
+	}
+	.activity-note {
+		margin: var(--space-4) 0 0;
+		color: var(--ink-60);
+		font-size: var(--text-sm);
 	}
 	.next-steps {
 		padding: var(--space-8) var(--space-4);
