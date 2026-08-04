@@ -11,6 +11,23 @@ campaign-host receipt attestations; it does not collect, hold, move, settle, or 
 - Stage 0 bank/channel test protocol and product review
 - No backend, receiving-account data, or transfer-reference assumptions yet
 
+## Source documents
+
+| Document | Path |
+| -------- | ---- |
+| Project master v1.2 (editable) | [docs/chipin-master-v1.2.md](docs/chipin-master-v1.2.md) |
+| Project master v1.2 (archival PDF) | [chipin-master-v1.2.md.pdf](chipin-master-v1.2.md.pdf) |
+| DESIGN.md v1.0 (editable) | [chipin-brand/DESIGN.md](chipin-brand/DESIGN.md) |
+| DESIGN.md v1.0 (archival PDF) | [Chip In Design Markdown.md.pdf](Chip%20In%20Design%20Markdown.md.pdf) |
+| Product review | [docs/PRODUCT-REVIEW.md](docs/PRODUCT-REVIEW.md) |
+| Stage 0 bank matrix | [docs/stage-0/BANK-CHANNEL-MATRIX.md](docs/stage-0/BANK-CHANNEL-MATRIX.md) |
+| Stage 0 state machines | [docs/stage-0/STATE-MACHINES.md](docs/stage-0/STATE-MACHINES.md) |
+| Stage 0 threat model | [docs/stage-0/THREAT-MODEL.md](docs/stage-0/THREAT-MODEL.md) |
+| Stage 0 data categories | [docs/stage-0/DATA-CATEGORIES.md](docs/stage-0/DATA-CATEGORIES.md) |
+
+Locked SVG/PWA brand assets belong in `chipin-brand/` when supplied. The app currently uses a
+temporary CSS wordmark.
+
 ## Local development
 
 ```sh
@@ -34,4 +51,5 @@ npm run build
 - Do not freeze the Supabase schema until lifecycle, timer, matching, and retention decisions close.
 - Replace the temporary CSS wordmark when the locked SVG/PWA brand asset package is supplied.
 
-See `docs/PRODUCT-REVIEW.md` and `docs/stage-0/BANK-CHANNEL-MATRIX.md`.
+See [docs/PRODUCT-REVIEW.md](docs/PRODUCT-REVIEW.md) and
+[docs/stage-0/BANK-CHANNEL-MATRIX.md](docs/stage-0/BANK-CHANNEL-MATRIX.md).
