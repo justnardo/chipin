@@ -6,6 +6,7 @@ import {
 	extractReceipt,
 	extractReference,
 	extractionSummary,
+	screenshotContributed,
 	toLines
 } from './receipt';
 
@@ -142,6 +143,33 @@ describe('extractReceipt', () => {
 		expect(receipt.amountCents).toBeNull();
 		expect(receipt.reference).toBeNull();
 		expect(receipt.bankId).toBeNull();
+	});
+});
+
+describe('screenshotContributed', () => {
+	it('flags a report when the screenshot supplied form fields', () => {
+		expect(screenshotContributed(extractReceipt(RBC_SCREENSHOT), false)).toBe(true);
+	});
+
+	it('flags a report when the bank was the only thing recognised', () => {
+		// The host still receives an OCR-derived claim, so it must carry the warning.
+		const receipt = extractReceipt('Scotiabank\nTransfer complete');
+		expect(receipt.amountCents).toBeNull();
+		expect(receipt.bankId?.value).toBe('scotia');
+		expect(screenshotContributed(receipt, false)).toBe(true);
+	});
+
+	it('does not flag a bank-only read when the donor had already chosen their bank', () => {
+		const receipt = extractReceipt('Scotiabank\nTransfer complete');
+		expect(screenshotContributed(receipt, true)).toBe(false);
+	});
+
+	it('still flags field extraction even when the donor chose their own bank', () => {
+		expect(screenshotContributed(extractReceipt(RBC_SCREENSHOT), true)).toBe(true);
+	});
+
+	it('does not flag an unreadable image', () => {
+		expect(screenshotContributed(extractReceipt('a photo of a beach'), false)).toBe(false);
 	});
 });
 

@@ -44,11 +44,18 @@
 		receipt = null;
 
 		let url = '';
+		// Held outside the try so a failed recognition still tears the worker down. Each
+		// worker holds a WASM heap; leaking one per retry exhausts a low-end phone fast.
+		let worker: {
+			recognize: (i: string) => Promise<{ data: { text: string } }>;
+			terminate: () => Promise<unknown>;
+		} | null = null;
+
 		try {
 			// Loaded on demand so the OCR engine never lands in the main bundle.
 			const { createWorker } = await import('tesseract.js');
 			// Served from ChipIn's own origin, not a public CDN — see scripts/sync_ocr_assets.mjs.
-			const worker = await createWorker('eng', undefined, {
+			worker = await createWorker('eng', undefined, {
 				workerPath: '/ocr/worker.min.js',
 				corePath: '/ocr',
 				langPath: '/ocr',
@@ -59,7 +66,6 @@
 
 			url = URL.createObjectURL(file);
 			const result = await worker.recognize(url);
-			await worker.terminate();
 
 			const parsed = extractReceipt(result.data.text);
 			receipt = parsed;
@@ -69,6 +75,10 @@
 			phase = 'error';
 			errorMessage = 'Could not read that image. Fill the form in yourself instead.';
 		} finally {
+			if (worker) {
+				// Never let a teardown failure mask the outcome above.
+				await worker.terminate().catch(() => {});
+			}
 			// The image is released immediately; it is never uploaded or stored.
 			if (url) URL.revokeObjectURL(url);
 			input.value = '';

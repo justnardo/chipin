@@ -239,6 +239,23 @@ export function extractReceipt(rawText: string): ExtractedReceipt {
 	};
 }
 
+/**
+ * Whether the screenshot actually contributed anything to this report.
+ *
+ * Drives the `screenshot` provenance the host sees. Recognising only the sending bank
+ * still counts: that is an OCR-derived claim reaching the host, and it must carry the
+ * same "ChipIn read this from an image" warning as an OCR-derived amount. It does not
+ * count when the donor had already chosen their bank, because then nothing the host
+ * sees came from the image.
+ */
+export function screenshotContributed(
+	receipt: ExtractedReceipt,
+	senderAlreadyChosen: boolean
+): boolean {
+	if (receipt.amountCents || receipt.transferDate || receipt.reference) return true;
+	return Boolean(receipt.bankId) && !senderAlreadyChosen;
+}
+
 /** How much of the form we managed to fill, for the donor-facing summary line. */
 export function extractionSummary(receipt: ExtractedReceipt): {
 	found: number;

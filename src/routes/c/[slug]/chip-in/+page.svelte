@@ -8,7 +8,7 @@
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import { getBank, resolveRail, settlementWindow } from '$lib/prototype/banks';
 	import { getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
-	import type { ExtractedReceipt } from '$lib/prototype/receipt';
+	import { screenshotContributed, type ExtractedReceipt } from '$lib/prototype/receipt';
 	import { addReport, dollarsToCents, formatBsd, type ReportSource } from '$lib/prototype/reports';
 
 	type Step = 'pledge' | 'transfer' | 'report' | 'done';
@@ -65,12 +65,16 @@
 			bankReference = receipt.reference.value;
 			next.bankReference = bankReference;
 		}
+		// Decide provenance BEFORE adopting the bank, so "did the image tell us this?"
+		// is answered against what the donor had already chosen.
+		const contributed = screenshotContributed(receipt, Boolean(senderBankId));
+
 		if (receipt.bankId && !senderBankId) {
 			senderBankId = receipt.bankId.value;
 		}
 
 		prefilled = next;
-		reportSource = Object.keys(next).length > 0 ? 'screenshot' : reportSource;
+		if (contributed) reportSource = 'screenshot';
 	}
 
 	const slug = $derived(page.params.slug ?? '');
