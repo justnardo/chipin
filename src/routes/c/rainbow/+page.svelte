@@ -29,7 +29,8 @@
 	let shareNote = $state('');
 
 	async function shareCampaign() {
-		const url = typeof window !== 'undefined' ? window.location.href : 'https://chipin242.com/c/rainbow';
+		const url =
+			typeof window !== 'undefined' ? window.location.href : 'https://chipin242.com/c/rainbow';
 		const text = `${campaign.title} — chip in on ChipIn`;
 		try {
 			if (navigator.share) {
@@ -49,7 +50,8 @@
 	}
 
 	function shareWhatsApp() {
-		const url = typeof window !== 'undefined' ? window.location.href : 'https://chipin242.com/c/rainbow';
+		const url =
+			typeof window !== 'undefined' ? window.location.href : 'https://chipin242.com/c/rainbow';
 		const text = encodeURIComponent(`${campaign.title}\nChip in here: ${url}`);
 		window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
 	}
@@ -129,7 +131,9 @@
 					<span>of goal</span>
 				</div>
 			</div>
-			<a class="primary-action" href={resolve('/c/rainbow/chip-in')}>Chip in now</a>
+			<a class="primary-action" href={resolve('/c/[slug]/chip-in', { slug: 'rainbow' })}
+				>Chip in now</a
+			>
 			<div class="share-row">
 				<button class="share-action" type="button" onclick={shareCampaign}>Share</button>
 				<button class="share-action" type="button" onclick={shareWhatsApp}>WhatsApp</button>
@@ -141,7 +145,9 @@
 				Money goes to the host by bank transfer — not through ChipIn. Progress only counts what the
 				host marks received.
 			</p>
-			<a class="host-proto" href={resolve('/c/rainbow/host')}>Host tools (prototype)</a>
+			<a class="host-proto" href={resolve('/c/[slug]/host', { slug: 'rainbow' })}
+				>Host tools (prototype)</a
+			>
 		</aside>
 	</section>
 
@@ -178,7 +184,7 @@
 				<p class="section-kicker">Recent chips</p>
 				<h2 id="activity-heading">People are already helping</h2>
 				<ul class="activity-list">
-					{#each recentChips as chip}
+					{#each recentChips as chip (chip.name + chip.when)}
 						<li>
 							<span class="avatar" aria-hidden="true">{chip.name.slice(0, 1)}</span>
 							<div>
@@ -246,8 +252,8 @@
 				<h2 id="words-heading">Not “donate to ChipIn”</h2>
 				<p>
 					You chip in for the campaign. The host receives the transfer. ChipIn keeps the shared page
-					and the record — the GoFundMe-style home for Bahamian giving, without taking custody of the
-					money.
+					and the record — the GoFundMe-style home for Bahamian giving, without taking custody of
+					the money.
 				</p>
 			</section>
 		</aside>
@@ -262,7 +268,9 @@
 			with progress the host can stand behind. Campaign creation opens after pilot review gates.
 		</p>
 		<div class="next-actions">
-			<a class="next-primary" href={resolve('/c/rainbow/chip-in')}>Chip in to this one</a>
+			<a class="next-primary" href={resolve('/c/[slug]/chip-in', { slug: 'rainbow' })}
+				>Chip in to this one</a
+			>
 			<a class="next-secondary" href={resolve('/start')}>Start your campaign</a>
 		</div>
 	</section>
@@ -277,7 +285,7 @@
 </footer>
 
 <StickyChipInBar
-	href={resolve('/c/rainbow/chip-in')}
+	href={resolve('/c/[slug]/chip-in', { slug: 'rainbow' })}
 	receivedLabel={`BSD $${campaign.received.toLocaleString('en-BS')} marked received`}
 />
 

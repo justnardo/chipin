@@ -28,9 +28,7 @@
 	function refresh() {
 		const stored = loadSupport(campaignSlug);
 		if (campaignSlug === 'rainbow') {
-			const seeds = RAINBOW_SUPPORT_SEED.filter(
-				(seed) => !stored.some((s) => s.id === seed.id)
-			);
+			const seeds = RAINBOW_SUPPORT_SEED.filter((seed) => !stored.some((s) => s.id === seed.id));
 			messages = [...stored, ...seeds];
 			return;
 		}

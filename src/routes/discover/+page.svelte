@@ -51,9 +51,9 @@
 		activeCategory === 'All' ? featured : featured.filter((c) => c.category === activeCategory)
 	);
 
-	let mine = $state<
-		Array<PrototypeCampaign & { received: number; goal: number; href: string }>
-	>([]);
+	let mine = $state<Array<PrototypeCampaign & { received: number; goal: number; href: string }>>(
+		[]
+	);
 
 	$effect(() => {
 		if (!browser) return;
@@ -104,7 +104,7 @@
 		</div>
 	</section>
 
-		{#if mine.length > 0}
+	{#if mine.length > 0}
 		<section class="block" aria-labelledby="mine-heading">
 			<div class="heading">
 				<div>
@@ -114,7 +114,7 @@
 				<p>Saved only on this device session until we add real accounts.</p>
 			</div>
 			<div class="grid mine-grid">
-				{#each mine as campaign}
+				{#each mine as campaign (campaign.href)}
 					<CampaignCard
 						title={campaign.title}
 						category={campaign.category}
@@ -139,7 +139,7 @@
 			<p>Rainbow is the full interactive demo. Other cards preview discovery layout.</p>
 		</div>
 		<div class="filters" role="tablist" aria-label="Filter by category">
-			{#each categories as category}
+			{#each categories as category (category)}
 				<button
 					type="button"
 					class:active={activeCategory === category}
@@ -155,7 +155,7 @@
 			</div>
 		{:else}
 			<div class="grid">
-				{#each filtered as campaign}
+				{#each filtered as campaign (campaign.href)}
 					<CampaignCard {...campaign} />
 				{/each}
 			</div>

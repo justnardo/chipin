@@ -26,9 +26,7 @@
 	function refresh() {
 		const stored = loadUpdates(campaignSlug);
 		if (campaignSlug === 'rainbow') {
-			const seeds = RAINBOW_UPDATE_SEED.filter(
-				(seed) => !stored.some((u) => u.id === seed.id)
-			);
+			const seeds = RAINBOW_UPDATE_SEED.filter((seed) => !stored.some((u) => u.id === seed.id));
 			updates = [...stored, ...seeds];
 			return;
 		}

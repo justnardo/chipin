@@ -23,9 +23,7 @@
 		href?: string;
 	} = $props();
 
-	const resolvedHref = $derived(
-		href === '/c/rainbow' ? resolve('/c/rainbow') : href
-	);
+	const resolvedHref = $derived(href === '/c/rainbow' ? resolve('/c/rainbow') : href);
 </script>
 
 <article class="card">
@@ -37,6 +35,7 @@
 		<p class="location">{location}</p>
 		<h3>
 			{#if resolvedHref}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- resolvedHref comes from resolve() above -->
 				<a href={resolvedHref}>{title}</a>
 			{:else}
 				{title}

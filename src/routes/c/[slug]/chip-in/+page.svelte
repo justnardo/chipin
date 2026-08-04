@@ -2,11 +2,14 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import BankTransferPortal from '$lib/components/BankTransferPortal.svelte';
 	import BrandMark from '$lib/components/BrandMark.svelte';
+	import ReceiptScanner from '$lib/components/ReceiptScanner.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
-	import TransferReferencePanel from '$lib/components/TransferReferencePanel.svelte';
+	import { getBank, resolveRail, settlementWindow } from '$lib/prototype/banks';
 	import { getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
-	import { addReport, dollarsToCents, formatBsd } from '$lib/prototype/reports';
+	import { screenshotContributed, type ExtractedReceipt } from '$lib/prototype/receipt';
+	import { addReport, dollarsToCents, formatBsd, type ReportSource } from '$lib/prototype/reports';
 
 	type Step = 'pledge' | 'transfer' | 'report' | 'done';
 
@@ -24,9 +27,60 @@
 	let submittedId = $state('');
 	let statusHref = $state('');
 	let selectedSuggestion = $state<number | 'custom'>(50);
+	let senderBankId = $state('');
+	let reportSource = $state<ReportSource>('manual');
+	/** Values the screenshot supplied, so we can tell what the donor then changed. */
+	let prefilled = $state<Record<string, string>>({});
+
+	const senderBank = $derived(senderBankId ? getBank(senderBankId) : null);
+	const rail = $derived(
+		campaign && senderBankId ? resolveRail(senderBankId, campaign.receiving.bankId) : null
+	);
+	const window_ = $derived(rail ? settlementWindow(rail) : null);
+
+	/** Fields the donor edited after the scanner filled them in. */
+	const editedFields = $derived(
+		Object.entries(prefilled)
+			.filter(([key, value]) => {
+				if (key === 'reportInput') return reportInput.trim() !== value;
+				if (key === 'transferDate') return transferDate !== value;
+				if (key === 'bankReference') return bankReference.trim() !== value;
+				return false;
+			})
+			.map(([key]) => key)
+	);
+
+	function applyExtraction(receipt: ExtractedReceipt) {
+		const next: Record<string, string> = {};
+
+		if (receipt.amountCents) {
+			reportInput = (receipt.amountCents.value / 100).toFixed(2);
+			next.reportInput = reportInput;
+		}
+		if (receipt.transferDate) {
+			transferDate = receipt.transferDate.value;
+			next.transferDate = transferDate;
+		}
+		if (receipt.reference) {
+			bankReference = receipt.reference.value;
+			next.bankReference = bankReference;
+		}
+		// Decide provenance BEFORE adopting the bank, so "did the image tell us this?"
+		// is answered against what the donor had already chosen.
+		const contributed = screenshotContributed(receipt, Boolean(senderBankId));
+
+		if (receipt.bankId && !senderBankId) {
+			senderBankId = receipt.bankId.value;
+		}
+
+		prefilled = next;
+		if (contributed) reportSource = 'screenshot';
+	}
 
 	const slug = $derived(page.params.slug ?? '');
-	const campaignHref = $derived(campaign ? resolve('/c/[slug]', { slug: campaign.slug }) : resolve('/'));
+	const campaignHref = $derived(
+		campaign ? resolve('/c/[slug]', { slug: campaign.slug }) : resolve('/')
+	);
 
 	$effect(() => {
 		if (!browser) return;
@@ -80,7 +134,10 @@
 			pledgeCents,
 			reportedCents: cents,
 			transferDate,
-			bankReference: bankReference.trim()
+			bankReference: bankReference.trim(),
+			senderBankId,
+			source: reportSource,
+			editedFields
 		});
 		submittedId = report.id;
 		statusHref = resolve('/c/[slug]/status/[token]', {
@@ -117,142 +174,175 @@
 			<a class="primary" href={resolve('/start')}>Start a campaign</a>
 		</section>
 	{:else}
-	<p class="kicker">Chip in</p>
-	<h1>{campaign.title}</h1>
-	<p class="lede">
-		Hosted by {campaign.hostName}. You send money outside ChipIn. ChipIn only records what you report
-		and what the host marks received.
-	</p>
+		<p class="kicker">Chip in</p>
+		<h1>{campaign.title}</h1>
+		<p class="lede">
+			Hosted by {campaign.hostName}. You send money outside ChipIn. ChipIn only records what you
+			report and what the host marks received.
+		</p>
 
-	<ol class="steps" aria-label="Contribution steps">
-		<li class:current={step === 'pledge'} class:done={step !== 'pledge'}>1. Pledge</li>
-		<li
-			class:current={step === 'transfer'}
-			class:done={step === 'report' || step === 'done'}
-		>
-			2. Transfer
-		</li>
-		<li class:current={step === 'report'} class:done={step === 'done'}>3. Report</li>
-		<li class:current={step === 'done'}>4. Done</li>
-	</ol>
+		<ol class="steps" aria-label="Contribution steps">
+			<li class:current={step === 'pledge'} class:done={step !== 'pledge'}>1. Pledge</li>
+			<li class:current={step === 'transfer'} class:done={step === 'report' || step === 'done'}>
+				2. Transfer
+			</li>
+			<li class:current={step === 'report'} class:done={step === 'done'}>3. Report</li>
+			<li class:current={step === 'done'}>4. Done</li>
+		</ol>
 
-	{#if step === 'pledge'}
-		<form class="card" onsubmit={goTransfer}>
-			<h2>Choose an amount</h2>
-			<p>
-				Same familiar first step as other fundraisers — then you send it with your own bank. ChipIn
-				does not charge your card.
-			</p>
-			<div class="amount-grid" role="group" aria-label="Suggested amounts">
-				{#each suggestedAmounts as amount}
+		{#if step === 'pledge'}
+			<form class="card" onsubmit={goTransfer}>
+				<h2>Choose an amount</h2>
+				<p>
+					Same familiar first step as other fundraisers — then you send it with your own bank.
+					ChipIn does not charge your card.
+				</p>
+				<div class="amount-grid" role="group" aria-label="Suggested amounts">
+					{#each suggestedAmounts as amount (amount)}
+						<button
+							type="button"
+							class="amount-chip"
+							class:selected={selectedSuggestion === amount}
+							onclick={() => pickAmount(amount)}
+						>
+							${amount}
+						</button>
+					{/each}
 					<button
 						type="button"
 						class="amount-chip"
-						class:selected={selectedSuggestion === amount}
-						onclick={() => pickAmount(amount)}
+						class:selected={selectedSuggestion === 'custom'}
+						onclick={pickCustom}
 					>
-						${amount}
+						Other
 					</button>
-				{/each}
-				<button
-					type="button"
-					class="amount-chip"
-					class:selected={selectedSuggestion === 'custom'}
-					onclick={pickCustom}
-				>
-					Other
-				</button>
-			</div>
-			<label>
-				<span>Amount (BSD)</span>
-				<input
-					type="text"
-					inputmode="decimal"
-					bind:value={pledgeInput}
-					oninput={() => (selectedSuggestion = 'custom')}
-					required
-				/>
-			</label>
-			{#if error}
-				<p class="error" role="alert">{error}</p>
-			{/if}
-			<button type="submit" class="primary">Continue to transfer steps</button>
-		</form>
-	{:else if step === 'transfer'}
-		<section class="stack">
-			<div class="card">
-				<StatusChip label="Send outside ChipIn" tone="pending" />
-				<h2>Transfer {formatBsd(pledgeCents)} with your bank</h2>
-				<p>
-					Receiving-account details are intentionally hidden in this prototype until ChipIn's
-					disclosure decision closes. In a live pilot, the host's transfer instructions would appear
-					here only after you start contributing — not on the public campaign page preview.
-				</p>
-				<ul>
-					<li>Use your existing local banking channel.</li>
-					<li>Send about {formatBsd(pledgeCents)} (or the amount you can).</li>
-					<li>Save any bank-generated reference you see after sending.</li>
-					<li>ChipIn does not collect, hold, or move the money.</li>
-				</ul>
-				<button type="button" class="primary" onclick={goReport}>I have sent it — report now</button>
-			</div>
-
-			<TransferReferencePanel
-				campaignTitle={campaign.title}
-				campaignHref={`chipin242.com/c/${campaign.slug}`}
-			/>
-		</section>
-	{:else if step === 'report'}
-		<form class="card" onsubmit={submitReport}>
-			<h2>Report what you sent</h2>
-			<p>The host will compare this with their bank activity.</p>
-			<label>
-				<span>Amount sent (BSD)</span>
-				<input type="text" inputmode="decimal" bind:value={reportInput} required />
-			</label>
-			<label>
-				<span>Date sent</span>
-				<input type="date" bind:value={transferDate} required />
-			</label>
-			<label>
-				<span>Bank-generated reference (optional)</span>
-				<input type="text" bind:value={bankReference} placeholder="If your bank showed one" />
-			</label>
-			<label>
-				<span>Contact for follow-up (optional in prototype)</span>
-				<input type="text" bind:value={contact} placeholder="Email or mobile" />
-			</label>
-			{#if error}
-				<p class="error" role="alert">{error}</p>
-			{/if}
-			<button type="submit" class="primary">Submit report</button>
-		</form>
-	{:else}
-		<section class="card done">
-			<StatusChip label="Reported — waiting on host" tone="pending" />
-			<h2>You're all set — the host can see your report</h2>
-			<p>
-				Report <code>{submittedId}</code> for {formatBsd(dollarsToCents(reportInput) ?? pledgeCents)}.
-				Public progress only moves when the host marks what arrived.
-			</p>
-			<p class="status-note">
-				Keep your private status link. In a live product this would be emailed or texted; here it stays in
-				this browser session.
-			</p>
-			<div class="done-actions">
-				{#if statusHref}
-					<a class="primary" href={statusHref}>Open your status link</a>
+				</div>
+				<label>
+					<span>Amount (BSD)</span>
+					<input
+						type="text"
+						inputmode="decimal"
+						bind:value={pledgeInput}
+						oninput={() => (selectedSuggestion = 'custom')}
+						required
+					/>
+				</label>
+				{#if error}
+					<p class="error" role="alert">{error}</p>
 				{/if}
-				<a
-					class="ghost"
-					href={resolve('/c/[slug]/host', { slug: campaign.slug })}
-				>
-					Open host view (prototype)
-				</a>
-				<a class="ghost" href={campaignHref}>Back to campaign</a>
-			</div>
-		</section>
-	{/if}
+				<button type="submit" class="primary">Continue to transfer steps</button>
+			</form>
+		{:else if step === 'transfer'}
+			<section class="stack">
+				<div class="card">
+					<StatusChip label="Send outside ChipIn" tone="pending" />
+					<h2>Transfer {formatBsd(pledgeCents)} with your bank</h2>
+					<p>
+						Copy the details below into your own banking app or wallet. ChipIn does not collect,
+						hold, or move this money — you are sending it directly to the host.
+					</p>
+				</div>
+
+				{#if campaign.receiving.accountNumber || campaign.receiving.handle}
+					<BankTransferPortal
+						receiving={campaign.receiving}
+						hostName={campaign.hostName}
+						amountCents={pledgeCents}
+						bind:senderBankId
+					/>
+				{:else}
+					<div class="card">
+						<h2>This host has not added transfer details yet</h2>
+						<p>
+							Ask the host to add their receiving details to the campaign, then come back. You can
+							still record a transfer you have already sent.
+						</p>
+					</div>
+				{/if}
+
+				<div class="card">
+					<h2>When you have sent it</h2>
+					<ul>
+						<li>Save the confirmation screen — you can upload it on the next step.</li>
+						<li>Save any bank-generated reference you see after sending.</li>
+						{#if window_}
+							<li>{window_.donorGuidance}</li>
+						{/if}
+					</ul>
+					<button type="button" class="primary" onclick={goReport}
+						>I have sent it — report now</button
+					>
+				</div>
+			</section>
+		{:else if step === 'report'}
+			<section class="stack">
+				<ReceiptScanner onextract={applyExtraction} />
+
+				<form class="card" onsubmit={submitReport}>
+					<h2>Report what you sent</h2>
+					<p>The host will compare this with their own bank statement.</p>
+
+					{#if reportSource === 'screenshot'}
+						<p class="prefill-note" role="status">
+							Some fields were filled in from your screenshot. Check each one — ChipIn read them
+							from an image and has not confirmed anything with a bank.
+						</p>
+					{/if}
+
+					<label>
+						<span>Amount sent (BSD)</span>
+						<input type="text" inputmode="decimal" bind:value={reportInput} required />
+					</label>
+					<label>
+						<span>Date sent</span>
+						<input type="date" bind:value={transferDate} required />
+					</label>
+					<label>
+						<span>Bank-generated reference (optional)</span>
+						<input type="text" bind:value={bankReference} placeholder="If your bank showed one" />
+					</label>
+					<label>
+						<span>Contact for follow-up (optional in prototype)</span>
+						<input type="text" bind:value={contact} placeholder="Email or mobile" />
+					</label>
+					{#if error}
+						<p class="error" role="alert">{error}</p>
+					{/if}
+					<button type="submit" class="primary">Submit report</button>
+				</form>
+			</section>
+		{:else}
+			<section class="card done">
+				<StatusChip label="Reported — waiting on host" tone="pending" />
+				<h2>You're all set — the host can see your report</h2>
+				<p>
+					Report <code>{submittedId}</code> for {formatBsd(
+						dollarsToCents(reportInput) ?? pledgeCents
+					)}. Public progress only moves when the host marks what arrived.
+				</p>
+				{#if window_ && senderBank}
+					<p class="status-note">
+						<strong>{window_.label}.</strong>
+						{window_.donorGuidance} The host will not see it on their statement before then, so give them
+						that time before following up.
+					</p>
+				{/if}
+				<p class="status-note">
+					Keep your private status link. In a live product this would be emailed or texted; here it
+					stays in this browser session.
+				</p>
+				<div class="done-actions">
+					{#if statusHref}
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- statusHref comes from resolve() -->
+						<a class="primary" href={statusHref}>Open your status link</a>
+					{/if}
+					<a class="ghost" href={resolve('/c/[slug]/host', { slug: campaign.slug })}>
+						Open host view (prototype)
+					</a>
+					<a class="ghost" href={campaignHref}>Back to campaign</a>
+				</div>
+			</section>
+		{/if}
 	{/if}
 </main>
 
@@ -357,6 +447,15 @@
 	.stack {
 		display: grid;
 		gap: var(--space-5);
+	}
+
+	.prefill-note {
+		margin: 0 0 var(--space-4);
+		padding: var(--space-3);
+		border-radius: var(--radius-sm);
+		background: var(--gold-tint);
+		color: var(--ink-60);
+		font-size: var(--text-sm);
 	}
 
 	.card {
