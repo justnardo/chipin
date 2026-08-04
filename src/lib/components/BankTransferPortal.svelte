@@ -80,6 +80,17 @@
 		].filter((f) => f.value.trim().length > 0)
 	);
 
+	/**
+	 * Names whatever is actually masked, so the toggle never offers to reveal an
+	 * account number on a wallet campaign that only has a handle.
+	 */
+	const sensitiveNoun = $derived.by(() => {
+		const masked = fields.filter((f) => f.sensitive);
+		if (masked.length === 0) return '';
+		if (masked.length > 1) return 'transfer details';
+		return masked[0].key === 'handle' ? 'wallet handle' : 'account number';
+	});
+
 	function mask(value: string): string {
 		const trimmed = value.trim();
 		if (trimmed.length <= 4) return trimmed;
@@ -141,9 +152,9 @@
 		{/each}
 	</ol>
 
-	{#if fields.some((f) => f.sensitive)}
+	{#if sensitiveNoun}
 		<button type="button" class="reveal" onclick={() => (revealed = !revealed)}>
-			{revealed ? 'Hide account number' : 'Show full account number'}
+			{revealed ? `Hide ${sensitiveNoun}` : `Show full ${sensitiveNoun}`}
 		</button>
 	{/if}
 
