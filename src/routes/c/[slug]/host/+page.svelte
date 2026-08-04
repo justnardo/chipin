@@ -6,6 +6,7 @@
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
+	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
 	import { getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
 	import {
 		formatBsd,
@@ -135,6 +136,7 @@
 		{/if}
 	</section>
 
+	<UpdateFeed campaignSlug={campaign.slug} isHost />
 	<SupportWall campaignSlug={campaign.slug} isHost />
 	{/if}
 </main>

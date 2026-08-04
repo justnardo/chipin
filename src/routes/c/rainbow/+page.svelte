@@ -6,6 +6,7 @@
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
+	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
 
 	const campaign = {
 		title: 'Reopen the Rainbow Community Centre',
@@ -23,19 +24,6 @@
 		{ name: 'Marcus T.', amount: 200, when: 'Yesterday' },
 		{ name: 'The Rolle family', amount: 75, when: '2 days ago' },
 		{ name: 'Anonymous', amount: 25, when: '3 days ago' }
-	];
-
-	const updates = [
-		{
-			date: 'July 30, 2026',
-			title: 'Electrician booked for next week',
-			body: 'Thank you — we scheduled the inspection. Chairs are ordered; we still need help with storage and programme supplies.'
-		},
-		{
-			date: 'July 22, 2026',
-			title: 'Campaign launched',
-			body: 'We are raising what it takes to reopen safely. Every chip-in goes straight to our centre account; ChipIn just helps us keep the record clear.'
-		}
 	];
 
 	let shareNote = $state('');
@@ -184,19 +172,7 @@
 				</ul>
 			</section>
 
-			<section class="updates" aria-labelledby="updates-heading">
-				<p class="section-kicker">Updates</p>
-				<h2 id="updates-heading">From the organiser</h2>
-				<ul class="update-list">
-					{#each updates as update}
-						<li>
-							<p class="update-date">{update.date}</p>
-							<h3>{update.title}</h3>
-							<p>{update.body}</p>
-						</li>
-					{/each}
-				</ul>
-			</section>
+			<UpdateFeed campaignSlug="rainbow" />
 
 			<section class="activity" aria-labelledby="activity-heading">
 				<p class="section-kicker">Recent chips</p>
@@ -634,29 +610,10 @@
 		font-size: var(--text-sm);
 		font-weight: 700;
 	}
-	.update-list,
 	.activity-list {
 		padding: 0;
 		margin: 0;
 		list-style: none;
-	}
-	.update-list li {
-		padding: var(--space-5) 0;
-		border-bottom: 1px solid var(--line);
-	}
-	.update-date {
-		margin: 0 0 var(--space-2);
-		color: var(--ink-60);
-		font-size: var(--text-sm);
-		font-weight: 600;
-	}
-	.update-list h3 {
-		margin: 0 0 var(--space-2);
-		font-size: var(--text-lg);
-	}
-	.update-list p:last-child {
-		margin: 0;
-		color: var(--ink-60);
 	}
 	.activity-list li {
 		display: grid;

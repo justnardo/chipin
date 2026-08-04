@@ -7,6 +7,7 @@
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
+	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
 	import { formatGoal, getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
 	import { loadReports } from '$lib/prototype/reports';
 
@@ -113,11 +114,12 @@
 						<span>{campaign.location}</span>
 					</p>
 				</div>
-				<article class="story">
-					<p class="kicker">Their story</p>
-					<p>{campaign.story}</p>
-				</article>
-				<SupportWall campaignSlug={campaign.slug} />
+			<article class="story">
+				<p class="kicker">Their story</p>
+				<p>{campaign.story}</p>
+			</article>
+			<UpdateFeed campaignSlug={campaign.slug} />
+			<SupportWall campaignSlug={campaign.slug} />
 			</div>
 
 			<aside class="card">

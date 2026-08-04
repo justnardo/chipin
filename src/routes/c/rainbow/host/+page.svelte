@@ -5,6 +5,7 @@
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
+	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
 	import {
 		formatBsd,
 		loadReports,
@@ -119,6 +120,7 @@
 		{/if}
 	</section>
 
+	<UpdateFeed campaignSlug={campaign.slug} isHost />
 	<SupportWall campaignSlug={campaign.slug} isHost />
 </main>
 
