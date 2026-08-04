@@ -4,6 +4,7 @@
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import ReviewLabel from '$lib/components/ReviewLabel.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
+	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
 
 	const campaign = {
 		title: 'Reopen the Rainbow Community Centre',
@@ -81,6 +82,7 @@
 <header class="site-header">
 	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
 	<nav aria-label="Primary navigation">
+		<a href={resolve('/discover')}>Discover</a>
 		<a href="#how-it-works">How it works</a>
 		<a href="#trust">Trust & safety</a>
 	</nav>
@@ -294,6 +296,11 @@
 	</p>
 	<a href="mailto:support@chipin242.com?subject=Campaign%20report">Report this campaign</a>
 </footer>
+
+<StickyChipInBar
+	href={resolve('/c/rainbow/chip-in')}
+	receivedLabel={`BSD $${campaign.received.toLocaleString('en-BS')} marked received`}
+/>
 
 <style>
 	.prototype-banner {
@@ -741,6 +748,11 @@
 		padding: var(--space-7) var(--space-4);
 		gap: var(--space-4);
 		font-size: var(--text-sm);
+	}
+	@media (max-width: 760px) {
+		footer {
+			padding-bottom: calc(var(--space-9) + env(safe-area-inset-bottom));
+		}
 	}
 	footer p {
 		max-width: 65ch;

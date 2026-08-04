@@ -5,6 +5,7 @@
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
+	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
 	import { formatGoal, getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
 	import { loadReports } from '$lib/prototype/reports';
 
@@ -160,6 +161,11 @@
 				>
 			</aside>
 		</section>
+
+		<StickyChipInBar
+			href={resolve('/c/[slug]/chip-in', { slug: campaign.slug })}
+			receivedLabel={`${formatGoal(receivedCents)} marked received`}
+		/>
 	{/if}
 </main>
 
@@ -212,6 +218,12 @@
 		max-width: 1100px;
 		margin: 0 auto;
 		padding: var(--space-5) var(--space-4) var(--space-9);
+	}
+
+	@media (max-width: 760px) {
+		main {
+			padding-bottom: calc(var(--space-9) + 4rem + env(safe-area-inset-bottom));
+		}
 	}
 
 	.cover {

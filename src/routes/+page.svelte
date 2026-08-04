@@ -49,7 +49,7 @@
 <header class="site-header">
 	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
 	<nav aria-label="Primary navigation">
-		<a href="#campaigns">Find a campaign</a>
+		<a href={resolve('/discover')}>Discover</a>
 		<a href="#how-it-works">How it works</a>
 		<a href="#trust">Trust & safety</a>
 	</nav>
@@ -68,7 +68,7 @@
 				the people you know.
 			</p>
 			<div class="hero-actions">
-				<a class="primary-action" href="#campaigns">Browse campaigns</a>
+				<a class="primary-action" href={resolve('/discover')}>Browse campaigns</a>
 				<a class="text-action" href={resolve('/start')}
 					>Start a campaign <span aria-hidden="true">→</span></a
 				>

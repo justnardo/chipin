@@ -20,8 +20,12 @@
 		imageAlt: string;
 		received: number;
 		goal: number;
-		href?: '/c/rainbow';
+		href?: string;
 	} = $props();
+
+	const resolvedHref = $derived(
+		href === '/c/rainbow' ? resolve('/c/rainbow') : href
+	);
 </script>
 
 <article class="card">
@@ -32,8 +36,8 @@
 	<div class="body">
 		<p class="location">{location}</p>
 		<h3>
-			{#if href}
-				<a href={resolve(href)}>{title}</a>
+			{#if resolvedHref}
+				<a href={resolvedHref}>{title}</a>
 			{:else}
 				{title}
 			{/if}
