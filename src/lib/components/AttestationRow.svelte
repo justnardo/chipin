@@ -8,9 +8,11 @@
 
 	let {
 		report,
+		statusHref,
 		onattest
 	}: {
 		report: PrototypeReport;
+		statusHref: string;
 		onattest: (payload: {
 			status: Extract<ReportStatus, 'marked_received' | 'marked_not_found' | 'clarification_requested'>;
 			attestedCents?: number;
@@ -115,6 +117,15 @@
 				/>
 			</label>
 			<button type="button" class="ghost" onclick={askClarification}>Send question</button>
+			{#if report.status === 'clarification_requested'}
+				<p class="result">
+					Waiting on donor reply.
+					<a href={statusHref}>Open donor status link</a>
+				</p>
+			{/if}
+			{#if report.clarificationReply && report.status === 'submitted'}
+				<p class="result">Donor replied: {report.clarificationReply}</p>
+			{/if}
 			{#if error}
 				<p class="error" role="alert">{error}</p>
 			{/if}
@@ -138,9 +149,13 @@
 			{#if report.clarificationQuestion}
 				<li>Question: {report.clarificationQuestion}</li>
 			{/if}
+			{#if report.clarificationReply}
+				<li>Donor reply: {report.clarificationReply}</li>
+			{/if}
 			{#if report.attestedCents !== null}
 				<li>Attested amount: {formatBsd(report.attestedCents)}</li>
 			{/if}
+			<li><a href={statusHref}>Donor status link</a></li>
 		</ul>
 	{/if}
 </article>

@@ -22,6 +22,7 @@
 	let error = $state('');
 	let pledgeCents = $state(5000);
 	let submittedId = $state('');
+	let statusHref = $state('');
 
 	function goTransfer(event: Event) {
 		event.preventDefault();
@@ -61,6 +62,7 @@
 			bankReference: bankReference.trim()
 		});
 		submittedId = report.id;
+		statusHref = resolve('/c/rainbow/status/[token]', { token: report.statusToken });
 		step = 'done';
 	}
 </script>
@@ -173,8 +175,15 @@
 				Report <code>{submittedId}</code> for {formatBsd(dollarsToCents(reportInput) ?? pledgeCents)}.
 				Public progress only moves when the host marks what arrived.
 			</p>
+			<p class="status-note">
+				Keep your private status link. In a live product this would be emailed or texted; here it stays in
+				this browser session.
+			</p>
 			<div class="done-actions">
-				<a class="primary" href={resolve('/c/rainbow/host')}>Open host view (prototype)</a>
+				{#if statusHref}
+					<a class="primary" href={statusHref}>Open your status link</a>
+				{/if}
+				<a class="ghost" href={resolve('/c/rainbow/host')}>Open host view (prototype)</a>
 				<a class="ghost" href={resolve('/c/rainbow')}>Back to campaign</a>
 			</div>
 		</section>
@@ -358,6 +367,12 @@
 		display: grid;
 		gap: var(--space-3);
 		margin-top: var(--space-5);
+	}
+
+	.status-note {
+		margin: var(--space-4) 0 0;
+		color: var(--ink-60);
+		font-size: var(--text-sm);
 	}
 
 	.done code {

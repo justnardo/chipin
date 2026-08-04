@@ -110,6 +110,7 @@
 				{#each reports as report (report.id)}
 					<AttestationRow
 						{report}
+						statusHref={resolve('/c/rainbow/status/[token]', { token: report.statusToken })}
 						onattest={(payload) => handleAttest(report.id, payload)}
 					/>
 				{/each}
