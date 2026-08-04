@@ -84,7 +84,7 @@
 		<a href="#how-it-works">How it works</a>
 		<a href="#trust">Trust & safety</a>
 	</nav>
-	<a class="host-link" href="#next-steps">
+	<a class="host-link" href={resolve('/start')}>
 		<span class="wide-label">Start a campaign</span><span class="narrow-label">Start</span>
 	</a>
 </header>
@@ -282,9 +282,7 @@
 		</p>
 		<div class="next-actions">
 			<a class="next-primary" href={resolve('/c/rainbow/chip-in')}>Chip in to this one</a>
-			<a class="next-secondary" href="mailto:support@chipin242.com?subject=Start%20a%20campaign"
-				>Ask about starting</a
-			>
+			<a class="next-secondary" href={resolve('/start')}>Start your campaign</a>
 		</div>
 	</section>
 </main>

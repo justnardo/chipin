@@ -53,7 +53,7 @@
 		<a href="#how-it-works">How it works</a>
 		<a href="#trust">Trust & safety</a>
 	</nav>
-	<a class="header-action" href="#start">
+	<a class="header-action" href={resolve('/start')}>
 		<span class="wide-label">Start a campaign</span><span class="narrow-label">Start</span>
 	</a>
 </header>
@@ -69,7 +69,7 @@
 			</p>
 			<div class="hero-actions">
 				<a class="primary-action" href="#campaigns">Browse campaigns</a>
-				<a class="text-action" href="#start"
+				<a class="text-action" href={resolve('/start')}
 					>Start a campaign <span aria-hidden="true">→</span></a
 				>
 			</div>
@@ -199,10 +199,11 @@
 	<section class="start" id="start" aria-labelledby="start-heading">
 		<p class="eyebrow">The first chip starts the circle</p>
 		<h2 id="start-heading">Give your fundraiser a home people can trust.</h2>
-		<p>Campaign creation will open after the controlled-pilot review gates are complete.</p>
-		<a class="primary-action" href="mailto:hello@chipin242.com?subject=ChipIn%20pilot%20interest"
-			>Join the pilot list</a
-		>
+		<p>
+			Build a shareable campaign page now in the prototype. Live intake and review still wait on
+			pilot gates — this lets you feel the GoFundMe-style flow today.
+		</p>
+		<a class="primary-action" href={resolve('/start')}>Start a campaign</a>
 	</section>
 </main>
 
