@@ -89,9 +89,7 @@
 	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
 	<a
 		class="back"
-		href={campaignMeta
-			? resolve('/c/[slug]', { slug: campaignMeta.slug })
-			: resolve('/')}
+		href={campaignMeta ? resolve('/c/[slug]', { slug: campaignMeta.slug }) : resolve('/')}
 	>
 		Campaign
 	</a>
@@ -105,8 +103,8 @@
 			<StatusChip label="Link not found" tone="disputed" />
 			<h1>We could not open this status link</h1>
 			<p>
-				It may be from another browser session, or the report was never created here. Run the chip-in
-				prototype again to get a fresh link.
+				It may be from another browser session, or the report was never created here. Run the
+				chip-in prototype again to get a fresh link.
 			</p>
 			<a
 				class="primary"
@@ -124,9 +122,7 @@
 			<p>The report still exists for the host, but this link no longer shows it.</p>
 			<a
 				class="ghost"
-				href={campaignMeta
-					? resolve('/c/[slug]', { slug: campaignMeta.slug })
-					: resolve('/')}
+				href={campaignMeta ? resolve('/c/[slug]', { slug: campaignMeta.slug }) : resolve('/')}
 			>
 				Back to campaign
 			</a>
@@ -135,16 +131,13 @@
 		<p class="kicker">Your transfer report</p>
 		<h1>{campaignMeta?.title ?? 'Your campaign'}</h1>
 		<p class="lede">
-			Hosted by {campaignMeta?.hostName ?? 'the campaign host'}. ChipIn records reports and host marks
-			— it does not move money.
+			Hosted by {campaignMeta?.hostName ?? 'the campaign host'}. ChipIn records reports and host
+			marks — it does not move money.
 		</p>
 
 		<section class="card">
 			<div class="status-row">
-				<StatusChip
-					label={donorStatusLabel(report.status)}
-					tone={donorStatusTone(report.status)}
-				/>
+				<StatusChip label={donorStatusLabel(report.status)} tone={donorStatusTone(report.status)} />
 				<button type="button" class="linkish" onclick={copyLink}>
 					{copied ? 'Link copied' : 'Copy this link'}
 				</button>
@@ -179,7 +172,8 @@
 					<blockquote>{report.clarificationQuestion}</blockquote>
 					<label>
 						<span>Your reply</span>
-						<textarea bind:value={reply} rows="4" placeholder="Add the detail the host needs"></textarea>
+						<textarea bind:value={reply} rows="4" placeholder="Add the detail the host needs"
+						></textarea>
 					</label>
 					{#if error}
 						<p class="error" role="alert">{error}</p>
@@ -188,18 +182,18 @@
 				</form>
 			{:else if report.status === 'marked_received'}
 				<p class="outcome">
-					The host marked this transfer received. That updates ChipIn's public total for the campaign. It
-					does not mean ChipIn verified the bank settlement or how funds are used.
+					The host marked this transfer received. That updates ChipIn's public total for the
+					campaign. It does not mean ChipIn verified the bank settlement or how funds are used.
 				</p>
 			{:else if report.status === 'marked_not_found'}
 				<p class="outcome">
-					The host could not find this transfer. If you still sent it, open a new report from the campaign
-					or wait for moderation options in a later build.
+					The host could not find this transfer. If you still sent it, open a new report from the
+					campaign or wait for moderation options in a later build.
 				</p>
 			{:else}
 				<p class="outcome">
-					You're all set for now — the host can see your report. Public progress moves only when they mark
-					what arrived.
+					You're all set for now — the host can see your report. Public progress moves only when
+					they mark what arrived.
 				</p>
 				{#if report.clarificationReply}
 					<p class="outcome subtle">Your last reply: {report.clarificationReply}</p>
@@ -213,9 +207,7 @@
 			<div class="footer-actions">
 				<a
 					class="ghost"
-					href={campaignMeta
-						? resolve('/c/[slug]', { slug: campaignMeta.slug })
-						: resolve('/')}
+					href={campaignMeta ? resolve('/c/[slug]', { slug: campaignMeta.slug }) : resolve('/')}
 				>
 					View campaign
 				</a>

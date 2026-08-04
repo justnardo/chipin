@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import BankMark from '$lib/components/BankMark.svelte';
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
+	import { BANK_CHANNELS, getBank } from '$lib/prototype/banks';
 	import {
 		COVER_PRESETS,
 		dollarsToGoalCents,
@@ -21,7 +23,7 @@
 		'Other'
 	];
 
-	type Step = 'basics' | 'story' | 'preview' | 'done';
+	type Step = 'basics' | 'story' | 'banking' | 'preview' | 'done';
 
 	let step = $state<Step>('basics');
 	let title = $state('');
@@ -36,11 +38,18 @@
 	let published = $state<PrototypeCampaign | null>(null);
 	let shareNote = $state('');
 
+	let receivingBankId = $state('bob');
+	let accountName = $state('');
+	let accountNumber = $state('');
+	let branch = $state('');
+	let handle = $state('');
+
+	const receivingBank = $derived(getBank(receivingBankId));
+	const isWallet = $derived(receivingBank?.kind === 'wallet');
+
 	const cover = $derived(COVER_PRESETS.find((c) => c.id === coverId) ?? COVER_PRESETS[0]);
 	const goalCents = $derived(dollarsToGoalCents(goalInput));
-	const publishedHref = $derived(
-		published ? resolve('/c/[slug]', { slug: published.slug }) : ''
-	);
+	const publishedHref = $derived(published ? resolve('/c/[slug]', { slug: published.slug }) : '');
 
 	function goStory(event: Event) {
 		event.preventDefault();
@@ -67,6 +76,25 @@
 			return;
 		}
 		error = '';
+		step = 'banking';
+	}
+
+	function goPreview2(event: Event) {
+		event.preventDefault();
+		if (accountName.trim().length < 2) {
+			error = 'Add the account name exactly as your bank shows it.';
+			return;
+		}
+		if (isWallet) {
+			if (handle.trim().length < 4) {
+				error = 'Add the wallet handle or number donors should send to.';
+				return;
+			}
+		} else if (accountNumber.replace(/\D/g, '').length < 6) {
+			error = 'Add the account number donors should send to.';
+			return;
+		}
+		error = '';
 		step = 'preview';
 	}
 
@@ -81,7 +109,14 @@
 			story: story.trim(),
 			goalCents,
 			coverImage: cover.image,
-			coverAlt: cover.alt
+			coverAlt: cover.alt,
+			receiving: {
+				bankId: receivingBankId,
+				accountName: accountName.trim(),
+				accountNumber: isWallet ? '' : accountNumber.trim(),
+				branch: branch.trim(),
+				handle: isWallet ? handle.trim() : ''
+			}
 		});
 		publishing = false;
 		step = 'done';
@@ -146,12 +181,15 @@
 		<li class:current={step === 'basics'} class:done={step !== 'basics'}>1. Basics</li>
 		<li
 			class:current={step === 'story'}
-			class:done={step === 'preview' || step === 'done'}
+			class:done={step === 'banking' || step === 'preview' || step === 'done'}
 		>
 			2. Story
 		</li>
-		<li class:current={step === 'preview'} class:done={step === 'done'}>3. Preview</li>
-		<li class:current={step === 'done'}>4. Share</li>
+		<li class:current={step === 'banking'} class:done={step === 'preview' || step === 'done'}>
+			3. Transfer details
+		</li>
+		<li class:current={step === 'preview'} class:done={step === 'done'}>4. Preview</li>
+		<li class:current={step === 'done'}>5. Share</li>
 	</ol>
 
 	<div class="layout">
@@ -160,11 +198,21 @@
 				<h2>Who is this for?</h2>
 				<label>
 					<span>Campaign title</span>
-					<input type="text" bind:value={title} placeholder="Help reopen the youth centre" required />
+					<input
+						type="text"
+						bind:value={title}
+						placeholder="Help reopen the youth centre"
+						required
+					/>
 				</label>
 				<label>
 					<span>Host / organiser name</span>
-					<input type="text" bind:value={hostName} placeholder="Your name or organisation" required />
+					<input
+						type="text"
+						bind:value={hostName}
+						placeholder="Your name or organisation"
+						required
+					/>
 				</label>
 				<label>
 					<span>Location</span>
@@ -173,7 +221,7 @@
 				<label>
 					<span>Category</span>
 					<select bind:value={category}>
-						{#each categories as item}
+						{#each categories as item (item)}
 							<option value={item}>{item}</option>
 						{/each}
 					</select>
@@ -192,8 +240,7 @@
 						bind:value={story}
 						rows="7"
 						placeholder="Share what happened, what the money is for, and how people can help."
-						required
-					></textarea>
+						required></textarea>
 				</label>
 				<label>
 					<span>Goal (BSD)</span>
@@ -202,7 +249,7 @@
 				<fieldset>
 					<legend>Cover photo</legend>
 					<div class="covers">
-						{#each COVER_PRESETS as preset}
+						{#each COVER_PRESETS as preset (preset.id)}
 							<label class="cover-option">
 								<input type="radio" name="cover" value={preset.id} bind:group={coverId} />
 								<img src={preset.image} alt={preset.alt} width="160" height="100" />
@@ -215,6 +262,73 @@
 				{/if}
 				<div class="row-actions">
 					<button type="button" class="ghost" onclick={() => (step = 'basics')}>Back</button>
+					<button type="submit" class="primary">Continue</button>
+				</div>
+			</form>
+		{:else if step === 'banking'}
+			<form class="card" onsubmit={goPreview2}>
+				<h2>Where should donors send money?</h2>
+				<p class="step-lede">
+					Donors see these details only after they start chipping in — never on your public campaign
+					page, and never in a WhatsApp link preview. ChipIn never touches this money; donors send
+					it straight to you.
+				</p>
+
+				<fieldset>
+					<legend>Your bank or wallet</legend>
+					<div class="bank-grid">
+						{#each BANK_CHANNELS as bank (bank.id)}
+							<label class="bank-option" class:selected={receivingBankId === bank.id}>
+								<input
+									type="radio"
+									name="receiving-bank"
+									value={bank.id}
+									bind:group={receivingBankId}
+								/>
+								<BankMark {bank} size="sm" />
+								<span>{bank.shortName}</span>
+							</label>
+						{/each}
+					</div>
+				</fieldset>
+
+				<label>
+					<span>Account name</span>
+					<input
+						type="text"
+						bind:value={accountName}
+						placeholder="Exactly as your bank shows it"
+						required
+					/>
+				</label>
+
+				{#if isWallet}
+					<label>
+						<span>Wallet handle or number</span>
+						<input type="text" bind:value={handle} placeholder="What donors send to" required />
+					</label>
+				{:else}
+					<label>
+						<span>Account number</span>
+						<input type="text" inputmode="numeric" bind:value={accountNumber} required />
+					</label>
+					<label>
+						<span>Branch (optional)</span>
+						<input type="text" bind:value={branch} placeholder="Where the account is held" />
+					</label>
+				{/if}
+
+				<p class="gate-warning">
+					<strong>Prototype only.</strong> Use fictional details. This build stores campaigns in your
+					browser and has no server, no encryption at rest, and no access controls. Do not enter a real
+					account number until the disclosure decision in the threat model is closed.
+				</p>
+
+				{#if error}
+					<p class="error" role="alert">{error}</p>
+				{/if}
+				<div class="row-actions">
+					<button type="button" class="ghost" onclick={() => (step = 'story')}>Back</button>
 					<button type="submit" class="primary">Preview page</button>
 				</div>
 			</form>
@@ -226,7 +340,9 @@
 					public server yet.
 				</p>
 				<div class="row-actions">
-					<button type="button" class="ghost" onclick={() => (step = 'story')}>Edit story</button>
+					<button type="button" class="ghost" onclick={() => (step = 'banking')}
+						>Edit details</button
+					>
 					<button type="button" class="primary" onclick={publish} disabled={publishing}>
 						{publishing ? 'Publishing…' : 'Publish campaign page'}
 					</button>
@@ -248,6 +364,7 @@
 				{#if shareNote}
 					<p class="share-note" role="status">{shareNote}</p>
 				{/if}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- publishedHref comes from resolve() -->
 				<a class="open-page" href={publishedHref}>Open your campaign page</a>
 			</section>
 		{/if}
@@ -455,6 +572,62 @@
 	textarea {
 		min-height: 160px;
 		resize: vertical;
+	}
+
+	.step-lede {
+		margin: 0 0 var(--space-4);
+		color: var(--ink-60);
+		font-size: var(--text-sm);
+	}
+
+	.bank-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+		gap: var(--space-2);
+	}
+
+	.bank-option {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-height: 52px;
+		padding: var(--space-2);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-sm);
+		background: var(--paper);
+		font-size: var(--text-xs);
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.bank-option.selected {
+		border-color: var(--ink);
+		box-shadow: inset 0 0 0 1px var(--ink);
+	}
+
+	.bank-option input {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		opacity: 0;
+	}
+
+	.bank-option:focus-within {
+		outline: 2px solid var(--aqua-deep);
+		outline-offset: 2px;
+	}
+
+	.bank-option span {
+		overflow-wrap: anywhere;
+	}
+
+	.gate-warning {
+		margin: var(--space-2) 0 0;
+		padding: var(--space-3);
+		border-radius: var(--radius-sm);
+		background: var(--gold-tint);
+		color: var(--ink-60);
+		font-size: var(--text-sm);
 	}
 
 	.covers {

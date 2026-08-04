@@ -67,16 +67,16 @@ data.
 
 ## Master §13 deliverable status
 
-| # | Deliverable | Status |
-| - | ----------- | ------ |
-| 1 | DESIGN.md brand foundation | Delivered v1.0 (editable copy in `chipin-brand/DESIGN.md`; SVG package still missing) |
-| 2 | Bank/channel evidence matrix | Active critical path --- [stage-0/BANK-CHANNEL-MATRIX.md](stage-0/BANK-CHANNEL-MATRIX.md); all rows Not tested |
-| 3 | State-machine specification | Draft for approval --- [stage-0/STATE-MACHINES.md](stage-0/STATE-MACHINES.md) |
-| 4 | Ops playbook (review/moderation/AUP) | Not started (pilot-scale; Principle 7) |
-| 5 | Data-category / privacy / retention matrix | Draft with legal placeholders --- [stage-0/DATA-CATEGORIES.md](stage-0/DATA-CATEGORIES.md) |
-| 6 | Threat model + security release checklist | Draft for approval --- [stage-0/THREAT-MODEL.md](stage-0/THREAT-MODEL.md) |
-| 7 | Supabase schema + tested RLS | Blocked until schema-blocking decisions close |
-| 8 | Controlled-pilot plan | Not started |
+| #   | Deliverable                                | Status                                                                                                         |
+| --- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| 1   | DESIGN.md brand foundation                 | Delivered v1.0 (editable copy in `chipin-brand/DESIGN.md`; SVG package still missing)                          |
+| 2   | Bank/channel evidence matrix               | Active critical path --- [stage-0/BANK-CHANNEL-MATRIX.md](stage-0/BANK-CHANNEL-MATRIX.md); all rows Not tested |
+| 3   | State-machine specification                | Draft for approval --- [stage-0/STATE-MACHINES.md](stage-0/STATE-MACHINES.md)                                  |
+| 4   | Ops playbook (review/moderation/AUP)       | Not started (pilot-scale; Principle 7)                                                                         |
+| 5   | Data-category / privacy / retention matrix | Draft with legal placeholders --- [stage-0/DATA-CATEGORIES.md](stage-0/DATA-CATEGORIES.md)                     |
+| 6   | Threat model + security release checklist  | Draft for approval --- [stage-0/THREAT-MODEL.md](stage-0/THREAT-MODEL.md)                                      |
+| 7   | Supabase schema + tested RLS               | Blocked until schema-blocking decisions close                                                                  |
+| 8   | Controlled-pilot plan                      | Not started                                                                                                    |
 
 ## Next decision sequence
 

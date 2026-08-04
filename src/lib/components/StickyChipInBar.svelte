@@ -13,7 +13,8 @@
 <div class="sticky" role="region" aria-label="Quick chip in">
 	<div class="inner">
 		<p>{receivedLabel}</p>
-		<a href={href}>{label}</a>
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- resolved by the parent route -->
+		<a {href}>{label}</a>
 	</div>
 </div>
 

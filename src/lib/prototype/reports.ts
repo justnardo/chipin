@@ -7,6 +7,17 @@ export type ReportStatus =
 	| 'marked_not_found'
 	| 'partially_matched';
 
+/**
+ * How the donor produced the figures on a report.
+ *
+ * 'screenshot' means fields were pre-filled by reading an image on the donor's own
+ * device and then confirmed by the donor. It carries NO verification weight — a
+ * screenshot is trivially forged, and ChipIn never contacted a bank. The host must
+ * reconcile against their own statement either way. This exists so the host knows
+ * what they are looking at, not so ChipIn can vouch for it.
+ */
+export type ReportSource = 'manual' | 'screenshot';
+
 export type PrototypeReport = {
 	id: string;
 	campaignSlug: string;
@@ -21,6 +32,11 @@ export type PrototypeReport = {
 	clarificationQuestion: string;
 	clarificationReply: string;
 	revoked: boolean;
+	/** Which bank or wallet the donor says they sent from. */
+	senderBankId: string;
+	source: ReportSource;
+	/** Fields the donor edited after the screenshot filled them in. */
+	editedFields: string[];
 	createdAt: string;
 	updatedAt: string;
 };
@@ -38,7 +54,9 @@ function createToken(): string {
 	return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-function normalize(report: Partial<PrototypeReport> & Pick<PrototypeReport, 'id' | 'campaignSlug'>): PrototypeReport {
+function normalize(
+	report: Partial<PrototypeReport> & Pick<PrototypeReport, 'id' | 'campaignSlug'>
+): PrototypeReport {
 	return {
 		id: report.id,
 		campaignSlug: report.campaignSlug,
@@ -53,6 +71,9 @@ function normalize(report: Partial<PrototypeReport> & Pick<PrototypeReport, 'id'
 		clarificationQuestion: report.clarificationQuestion ?? '',
 		clarificationReply: report.clarificationReply ?? '',
 		revoked: report.revoked ?? false,
+		senderBankId: report.senderBankId ?? '',
+		source: report.source ?? 'manual',
+		editedFields: report.editedFields ?? [],
 		createdAt: report.createdAt ?? new Date().toISOString(),
 		updatedAt: report.updatedAt ?? new Date().toISOString()
 	};
@@ -106,12 +127,23 @@ export function addReport(
 		| 'createdAt'
 		| 'updatedAt'
 		| 'note'
-	> & { note?: string }
+		| 'senderBankId'
+		| 'source'
+		| 'editedFields'
+	> & {
+		note?: string;
+		senderBankId?: string;
+		source?: ReportSource;
+		editedFields?: string[];
+	}
 ): PrototypeReport {
 	const now = new Date().toISOString();
 	const report = normalize({
 		...input,
 		note: input.note ?? '',
+		senderBankId: input.senderBankId ?? '',
+		source: input.source ?? 'manual',
+		editedFields: input.editedFields ?? [],
 		id: `rpt_${Math.random().toString(36).slice(2, 10)}`,
 		statusToken: createToken(),
 		status: 'submitted',

@@ -20,15 +20,12 @@
 
 	$effect(() => {
 		if (!browser) return;
-		void slug;
-		if (slug === 'rainbow') {
-			// Fancy demo lives at the static /c/rainbow route; keep this as a safety net.
-			campaign = getCampaign('rainbow');
-		} else {
-			campaign = getCampaign(slug);
-		}
-		if (campaign) {
-			const reports = loadReports(campaign.slug);
+		// Resolve into a local first: reading `campaign` back here would make this effect
+		// depend on state it writes, and it would re-run until Svelte bails out.
+		const found = getCampaign(slug);
+		campaign = found;
+		if (found) {
+			const reports = loadReports(found.slug);
 			const attested = reports
 				.filter((r) => r.status === 'marked_received' && r.attestedCents !== null)
 				.reduce((sum, r) => sum + (r.attestedCents ?? 0), 0);
@@ -142,10 +139,7 @@
 						<span>of goal</span>
 					</div>
 				</div>
-				<a
-					class="primary"
-					href={resolve('/c/[slug]/chip-in', { slug: campaign.slug })}
-				>
+				<a class="primary" href={resolve('/c/[slug]/chip-in', { slug: campaign.slug })}>
 					Chip in now
 				</a>
 				<div class="share-row">
@@ -155,11 +149,8 @@
 				{#if shareNote}
 					<p class="note" role="status">{shareNote}</p>
 				{/if}
-				<p class="note">
-					Money goes to the host by bank transfer — not through ChipIn.
-				</p>
-				<a class="host-link" href={resolve('/c/[slug]/host', { slug: campaign.slug })}
-					>Host tools</a
+				<p class="note">Money goes to the host by bank transfer — not through ChipIn.</p>
+				<a class="host-link" href={resolve('/c/[slug]/host', { slug: campaign.slug })}>Host tools</a
 				>
 			</aside>
 		</section>

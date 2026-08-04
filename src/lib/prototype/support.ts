@@ -22,7 +22,9 @@ function canUseStorage(): boolean {
 	return typeof sessionStorage !== 'undefined';
 }
 
-function normalize(entry: Partial<SupportMessage> & Pick<SupportMessage, 'id' | 'campaignSlug'>): SupportMessage {
+function normalize(
+	entry: Partial<SupportMessage> & Pick<SupportMessage, 'id' | 'campaignSlug'>
+): SupportMessage {
 	return {
 		id: entry.id,
 		campaignSlug: entry.campaignSlug,

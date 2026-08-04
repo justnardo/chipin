@@ -1,33 +1,33 @@
 <script lang="ts">
+	import BankMark from '$lib/components/BankMark.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
-	import {
-		formatBsd,
-		type PrototypeReport,
-		type ReportStatus
-	} from '$lib/prototype/reports';
+	import { getBank, isOverdue, resolveRail, settlementWindow } from '$lib/prototype/banks';
+	import { formatBsd, type PrototypeReport, type ReportStatus } from '$lib/prototype/reports';
 
 	let {
 		report,
 		statusHref,
+		recipientBankId = 'other',
 		onattest
 	}: {
 		report: PrototypeReport;
 		statusHref: string;
+		recipientBankId?: string;
 		onattest: (payload: {
-			status: Extract<ReportStatus, 'marked_received' | 'marked_not_found' | 'clarification_requested'>;
+			status: Extract<
+				ReportStatus,
+				'marked_received' | 'marked_not_found' | 'clarification_requested'
+			>;
 			attestedCents?: number;
 			clarificationQuestion?: string;
 		}) => void;
 	} = $props();
 
-	let amountInput = $state('');
+	// Defaults to the reported amount, but the host overwrites it with what actually arrived.
+	let amountInput = $derived((report.reportedCents / 100).toFixed(2));
 	let questionInput = $state('');
 	let error = $state('');
 	let openHistory = $state(false);
-
-	$effect(() => {
-		amountInput = (report.reportedCents / 100).toFixed(2);
-	});
 
 	const tone = $derived(
 		report.status === 'marked_received'
@@ -47,7 +47,25 @@
 				: report.status === 'clarification_requested'
 					? 'Clarification requested'
 					: 'Reported — waiting on host'
-	)
+	);
+
+	const senderBank = $derived(report.senderBankId ? getBank(report.senderBankId) : null);
+	const rail = $derived(
+		report.senderBankId ? resolveRail(report.senderBankId, recipientBankId) : null
+	);
+	const window_ = $derived(rail ? settlementWindow(rail) : null);
+
+	/**
+	 * Whether the expected settlement window has passed. Until it has, "not found"
+	 * usually means "not arrived yet" rather than "did not happen" — which is the
+	 * single most common way a host wrongly rejects a real transfer.
+	 */
+	const stillSettling = $derived.by(() => {
+		if (!rail || !report.transferDate) return false;
+		const sent = new Date(`${report.transferDate}T00:00:00`);
+		if (Number.isNaN(sent.getTime())) return false;
+		return !isOverdue(rail, sent, new Date());
+	});
 
 	function parseAmount(): number | null {
 		const cleaned = amountInput.replace(/[^0-9.]/g, '');
@@ -94,9 +112,34 @@
 					· Bank ref {report.bankReference}
 				{/if}
 			</p>
+			{#if senderBank}
+				<p class="meta sender">
+					<BankMark bank={senderBank} size="sm" />
+					<span>Donor says they sent from {senderBank.name}</span>
+				</p>
+			{/if}
 		</div>
 		<StatusChip label={statusLabel} {tone} />
 	</header>
+
+	{#if report.source === 'screenshot'}
+		<p class="provenance">
+			<strong>Donor-entered, pre-filled from a screenshot.</strong>
+			ChipIn read these figures from an image on the donor's device. It did not contact any bank and has
+			not verified this transfer. Check your own statement before marking anything received.
+			{#if report.editedFields.length > 0}
+				The donor edited {report.editedFields.length} of the pre-filled
+				{report.editedFields.length === 1 ? 'field' : 'fields'} before submitting.
+			{/if}
+		</p>
+	{/if}
+
+	{#if stillSettling && window_ && report.status === 'submitted'}
+		<p class="settling" role="status">
+			<strong>{window_.label}.</strong>
+			{window_.hostGuidance}
+		</p>
+	{/if}
 
 	{#if report.status === 'submitted' || report.status === 'clarification_requested'}
 		<div class="actions">
@@ -110,16 +153,13 @@
 			</div>
 			<label>
 				<span>Ask for clarification</span>
-				<input
-					type="text"
-					bind:value={questionInput}
-					placeholder="What should the donor check?"
-				/>
+				<input type="text" bind:value={questionInput} placeholder="What should the donor check?" />
 			</label>
 			<button type="button" class="ghost" onclick={askClarification}>Send question</button>
 			{#if report.status === 'clarification_requested'}
 				<p class="result">
 					Waiting on donor reply.
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- resolved by the parent route -->
 					<a href={statusHref}>Open donor status link</a>
 				</p>
 			{/if}
@@ -132,8 +172,8 @@
 		</div>
 	{:else if report.status === 'marked_received' && report.attestedCents !== null}
 		<p class="result">
-			Host marked {formatBsd(report.attestedCents)} received. This updates ChipIn's record only — it
-			does not reverse a bank transfer.
+			Host marked {formatBsd(report.attestedCents)} received. This updates ChipIn's record only — it does
+			not reverse a bank transfer.
 		</p>
 	{:else if report.status === 'marked_not_found'}
 		<p class="result">Host could not find this transfer in their bank activity.</p>
@@ -155,6 +195,7 @@
 			{#if report.attestedCents !== null}
 				<li>Attested amount: {formatBsd(report.attestedCents)}</li>
 			{/if}
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- resolved by the parent route -->
 			<li><a href={statusHref}>Donor status link</a></li>
 		</ul>
 	{/if}
@@ -188,6 +229,30 @@
 		margin: var(--space-2) 0 0;
 		color: var(--ink-60);
 		font-size: var(--text-sm);
+	}
+
+	.meta.sender {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.provenance,
+	.settling {
+		margin: var(--space-4) 0 0;
+		padding: var(--space-3);
+		border-radius: var(--radius-sm);
+		color: var(--ink-60);
+		font-size: var(--text-sm);
+	}
+
+	.provenance {
+		background: var(--gold-tint);
+	}
+
+	.settling {
+		border: 1px solid var(--line);
+		background: var(--paper);
 	}
 
 	.actions {

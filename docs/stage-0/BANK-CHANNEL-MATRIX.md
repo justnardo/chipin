@@ -81,39 +81,39 @@ Outcome values: `reference_supported` · `fallback_required` · `channel_unsuppo
 Copy this table for each Test ID (keep filled copies outside the repo if they contain sensitive
 transcripts; paste redacted summaries back here if useful).
 
-| Field                                         | Observation                                             |
-| --------------------------------------------- | ------------------------------------------------------- |
-| Test ID                                       |                                                         |
-| Date/time and timezone                        |                                                         |
-| Sender bank                                   |                                                         |
-| Recipient bank                                |                                                         |
-| Channel                                       | Mobile / web / branch / scheduled / standing order      |
-| Same-bank or interbank                        |                                                         |
-| Editable memo available                       | Yes / no                                                |
-| Memo entered                                  |                                                         |
-| Input character/length rules                  |                                                         |
-| Sender confirmation display                   |                                                         |
-| Bank-generated reference shown to sender      |                                                         |
-| Recipient list-view display                   |                                                         |
-| Recipient detail-view display                 |                                                         |
-| Memo survived exactly                         | Yes / no; describe case, spacing, or truncation changes |
-| Bank-generated reference visible to recipient |                                                         |
-| Pending and settled timestamps                |                                                         |
-| Evidence location                             | Private location only; do not commit sensitive evidence |
-| Repeated result                               |                                                         |
+| Field                                         | Observation                                                   |
+| --------------------------------------------- | ------------------------------------------------------------- |
+| Test ID                                       |                                                               |
+| Date/time and timezone                        |                                                               |
+| Sender bank                                   |                                                               |
+| Recipient bank                                |                                                               |
+| Channel                                       | Mobile / web / branch / scheduled / standing order            |
+| Same-bank or interbank                        |                                                               |
+| Editable memo available                       | Yes / no                                                      |
+| Memo entered                                  |                                                               |
+| Input character/length rules                  |                                                               |
+| Sender confirmation display                   |                                                               |
+| Bank-generated reference shown to sender      |                                                               |
+| Recipient list-view display                   |                                                               |
+| Recipient detail-view display                 |                                                               |
+| Memo survived exactly                         | Yes / no; describe case, spacing, or truncation changes       |
+| Bank-generated reference visible to recipient |                                                               |
+| Pending and settled timestamps                |                                                               |
+| Evidence location                             | Private location only; do not commit sensitive evidence       |
+| Repeated result                               |                                                               |
 | Path outcome                                  | reference_supported / fallback_required / channel_unsupported |
-| Confidence                                    | Low / medium / high                                     |
-| Reviewer                                      |                                                         |
-| Notes                                         |                                                         |
+| Confidence                                    | Low / medium / high                                           |
+| Reviewer                                      |                                                               |
+| Notes                                         |                                                               |
 
 ## Decision log
 
 Record product-level conclusions here after evidence review. Leave rows empty until real tests
 exist --- do not invent results.
 
-| Date | Scope | Decision | Evidence (Test IDs) | Owner |
-| ---- | ----- | -------- | ------------------- | ----- |
-|      | Same-bank mobile (which banks?) |  |  |  |
-|      | ChipIn code format / level / collision / expiry / reuse |  |  |  |
-|      | Pilot fallback matching rules (amount + date + bank ref + audit) |  |  |  |
-|      | Channels excluded from pilot |  |  |  |
+| Date | Scope                                                            | Decision | Evidence (Test IDs) | Owner |
+| ---- | ---------------------------------------------------------------- | -------- | ------------------- | ----- |
+|      | Same-bank mobile (which banks?)                                  |          |                     |       |
+|      | ChipIn code format / level / collision / expiry / reuse          |          |                     |       |
+|      | Pilot fallback matching rules (amount + date + bank ref + audit) |          |                     |       |
+|      | Channels excluded from pilot                                     |          |                     |       |

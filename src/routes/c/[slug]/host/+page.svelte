@@ -22,9 +22,11 @@
 
 	$effect(() => {
 		if (!browser) return;
-		void slug;
-		campaign = getCampaign(slug);
-		reports = campaign ? loadReports(campaign.slug) : [];
+		// Resolve into a local first: reading `campaign` back here would make this effect
+		// depend on state it writes, and it would re-run until Svelte bails out.
+		const found = getCampaign(slug);
+		campaign = found;
+		reports = found ? loadReports(found.slug) : [];
 	});
 
 	const baselineReceivedCents = $derived(campaign?.slug === 'rainbow' ? 524_000 : 0);
@@ -91,51 +93,52 @@
 			<a class="primary" href={resolve('/start')}>Start a campaign</a>
 		</section>
 	{:else}
-	<p class="kicker">Host dashboard</p>
-	<h1>{campaign.title}</h1>
-	<p class="lede">
-		Mark what actually arrived in your bank. Only amounts you mark received count toward public
-		progress. ChipIn cannot reverse an external transfer.
-	</p>
-
-	<section class="summary" aria-label="Progress summary">
-		<div>
-			<p class="amount-label">Marked received</p>
-			<p class="amount">{formatBsd(receivedCents)}</p>
-			<ProgressCoinBar received={receivedCents / 100} goal={campaign.goalCents / 100} />
-		</div>
-		<p class="pending">
-			<strong>{pendingCount}</strong>
-			<span>report{pendingCount === 1 ? '' : 's'} waiting on you</span>
+		<p class="kicker">Host dashboard</p>
+		<h1>{campaign.title}</h1>
+		<p class="lede">
+			Mark what actually arrived in your bank. Only amounts you mark received count toward public
+			progress. ChipIn cannot reverse an external transfer.
 		</p>
-	</section>
 
-	<section aria-labelledby="inbox-heading">
-		<h2 id="inbox-heading">Reported transfers</h2>
-		{#if reports.length === 0}
-			<div class="empty">
-				<p>No reports in this browser session yet.</p>
-				<a class="primary" href={resolve('/c/[slug]/chip-in', { slug: campaign.slug })}
-					>Run the chip-in prototype</a
-				>
+		<section class="summary" aria-label="Progress summary">
+			<div>
+				<p class="amount-label">Marked received</p>
+				<p class="amount">{formatBsd(receivedCents)}</p>
+				<ProgressCoinBar received={receivedCents / 100} goal={campaign.goalCents / 100} />
 			</div>
-		{:else}
-			<div class="list">
-				{#each reports as report (report.id)}
-					<AttestationRow
-						{report}
-						statusHref={resolve('/c/[slug]/status/[token]', {
-							slug: campaign.slug,
-							token: report.statusToken
-						})}
-						onattest={(payload) => handleAttest(report.id, payload)}
-					/>
-				{/each}
-			</div>
-		{/if}
-	</section>
+			<p class="pending">
+				<strong>{pendingCount}</strong>
+				<span>report{pendingCount === 1 ? '' : 's'} waiting on you</span>
+			</p>
+		</section>
 
-	<SupportWall campaignSlug={campaign.slug} isHost />
+		<section aria-labelledby="inbox-heading">
+			<h2 id="inbox-heading">Reported transfers</h2>
+			{#if reports.length === 0}
+				<div class="empty">
+					<p>No reports in this browser session yet.</p>
+					<a class="primary" href={resolve('/c/[slug]/chip-in', { slug: campaign.slug })}
+						>Run the chip-in prototype</a
+					>
+				</div>
+			{:else}
+				<div class="list">
+					{#each reports as report (report.id)}
+						<AttestationRow
+							{report}
+							recipientBankId={campaign.receiving.bankId}
+							statusHref={resolve('/c/[slug]/status/[token]', {
+								slug: campaign.slug,
+								token: report.statusToken
+							})}
+							onattest={(payload) => handleAttest(report.id, payload)}
+						/>
+					{/each}
+				</div>
+			{/if}
+		</section>
+
+		<SupportWall campaignSlug={campaign.slug} isHost />
 	{/if}
 </main>
 

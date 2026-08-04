@@ -70,17 +70,17 @@ transfer. Any later receipt mark creates a new attestation and allocation event.
 Required for one-to-many and many-to-one matching. Each row allocates a portion of a transfer
 report to a pledge (or to an unmatched bucket).
 
-| Field                 | Notes                                                                 |
-| --------------------- | --------------------------------------------------------------------- |
-| `id`                  | Stable allocation id                                                  |
-| `transfer_report_id`  | Parent report                                                         |
-| `pledge_id`           | Nullable when amount is intentionally unmatched                       |
-| `amount_cents`        | Positive integer; sum of active rows for a report <= attested amount  |
-| `status`              | `active` \| `voided`                                                  |
-| `created_event_id`    | Append-only event that created the row                                |
-| `voided_event_id`     | Set when status becomes `voided`                                      |
-| `matching_method`     | `chipin_code` \| `bank_reference` \| `amount_date` \| `manual_audit`  |
-| `matcher_actor`       | Host or moderator who attested the allocation                         |
+| Field                | Notes                                                                |
+| -------------------- | -------------------------------------------------------------------- |
+| `id`                 | Stable allocation id                                                 |
+| `transfer_report_id` | Parent report                                                        |
+| `pledge_id`          | Nullable when amount is intentionally unmatched                      |
+| `amount_cents`       | Positive integer; sum of active rows for a report <= attested amount |
+| `status`             | `active` \| `voided`                                                 |
+| `created_event_id`   | Append-only event that created the row                               |
+| `voided_event_id`    | Set when status becomes `voided`                                     |
+| `matching_method`    | `chipin_code` \| `bank_reference` \| `amount_date` \| `manual_audit` |
+| `matcher_actor`      | Host or moderator who attested the allocation                        |
 
 Rules:
 
@@ -133,22 +133,22 @@ version history, and re-review before reactivation.
 The schema should store explicit timestamps per transfer report so policy can vary by tested
 channel without rewriting history:
 
-| Field                     | Meaning                                                                 |
-| ------------------------- | ----------------------------------------------------------------------- |
-| `next_action_at`          | Next reminder or system nudge                                           |
-| `moderation_eligible_at`  | Earliest time donor may open a dispute/moderation case                  |
-| `close_after`             | Earliest time system/moderator may move report to `closed_unresolved`   |
+| Field                    | Meaning                                                               |
+| ------------------------ | --------------------------------------------------------------------- |
+| `next_action_at`         | Next reminder or system nudge                                         |
+| `moderation_eligible_at` | Earliest time donor may open a dispute/moderation case                |
+| `close_after`            | Earliest time system/moderator may move report to `closed_unresolved` |
 
 ### Proposed default intervals (Bahamas business days, Mon–Fri excluding public holidays)
 
-| Milestone                 | Proposed interval                         | Notes                                              |
-| ------------------------- | ----------------------------------------- | -------------------------------------------------- |
-| First host reminder       | 2 business days after `submitted`         | Sets `next_action_at`                              |
-| Second host reminder      | 5 business days after `submitted`         | Updates `next_action_at`                           |
-| Donor moderation eligibility | 7 business days after `submitted`      | Sets `moderation_eligible_at`                      |
-| Auto-close eligible       | 15 business days after `submitted`        | Sets `close_after`; moderator or system may close  |
-| Clarification pause       | Timers pause while `clarification_requested` | Resume when donor returns to `submitted`        |
-| Campaign paused           | Timers pause for that campaign's reports  | Resume on reactivation                             |
+| Milestone                    | Proposed interval                            | Notes                                             |
+| ---------------------------- | -------------------------------------------- | ------------------------------------------------- |
+| First host reminder          | 2 business days after `submitted`            | Sets `next_action_at`                             |
+| Second host reminder         | 5 business days after `submitted`            | Updates `next_action_at`                          |
+| Donor moderation eligibility | 7 business days after `submitted`            | Sets `moderation_eligible_at`                     |
+| Auto-close eligible          | 15 business days after `submitted`           | Sets `close_after`; moderator or system may close |
+| Clarification pause          | Timers pause while `clarification_requested` | Resume when donor returns to `submitted`          |
+| Campaign paused              | Timers pause for that campaign's reports     | Resume on reactivation                            |
 
 These values are **not frozen**. Stage 0 must approve or amend them after bank-channel settlement
 timing evidence is reviewed. Per-channel overrides may be stored as policy version ids on the
@@ -156,15 +156,15 @@ report without mutating past events.
 
 ## Notifications (draft)
 
-| Trigger                         | Audience            | Channel (pilot)      |
-| ------------------------------- | ------------------- | -------------------- |
-| Report submitted                | Host                | Email / in-app       |
-| Reminder at `next_action_at`    | Host                | Email / WhatsApp ops |
-| Clarification requested         | Donor status-link   | Status-link message  |
-| Marked received / not found     | Donor status-link   | Status-link message  |
-| Moderation eligibility reached  | Donor status-link   | Status-link message  |
-| Case assigned / resolved        | Parties + moderator | Email / in-app       |
-| Receiving-account change pause  | Host + reviewers    | Email / in-app       |
+| Trigger                        | Audience            | Channel (pilot)      |
+| ------------------------------ | ------------------- | -------------------- |
+| Report submitted               | Host                | Email / in-app       |
+| Reminder at `next_action_at`   | Host                | Email / WhatsApp ops |
+| Clarification requested        | Donor status-link   | Status-link message  |
+| Marked received / not found    | Donor status-link   | Status-link message  |
+| Moderation eligibility reached | Donor status-link   | Status-link message  |
+| Case assigned / resolved       | Parties + moderator | Email / in-app       |
+| Receiving-account change pause | Host + reviewers    | Email / in-app       |
 
 ## Owner approval checklist
 

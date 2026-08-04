@@ -20,17 +20,17 @@ automated bank feeds.
 
 ## Assets
 
-| Asset                         | Sensitivity | Notes                                      |
-| ----------------------------- | ----------- | ------------------------------------------ |
-| Receiving-account details     | High        | Disclosure surface is an open decision     |
-| Government IDs / KYC docs     | High        | Private storage only                       |
-| Transfer proofs               | High        | May contain unrelated account activity     |
-| Donor contact + status links  | High        | Capability URLs; forwarding risk           |
-| Host auth sessions            | High        | MFA for privileged roles                   |
-| Reviewer notes / cases        | High        | Never public                               |
-| Public campaign story/photo   | Medium      | Consent and redaction guidance             |
-| Host-attested totals          | Medium      | Integrity and label-comprehension risk     |
-| Analytics aggregates          | Low–medium  | Needs event/privacy spec before SDK        |
+| Asset                        | Sensitivity | Notes                                  |
+| ---------------------------- | ----------- | -------------------------------------- |
+| Receiving-account details    | High        | Disclosure surface is an open decision |
+| Government IDs / KYC docs    | High        | Private storage only                   |
+| Transfer proofs              | High        | May contain unrelated account activity |
+| Donor contact + status links | High        | Capability URLs; forwarding risk       |
+| Host auth sessions           | High        | MFA for privileged roles               |
+| Reviewer notes / cases       | High        | Never public                           |
+| Public campaign story/photo  | Medium      | Consent and redaction guidance         |
+| Host-attested totals         | Medium      | Integrity and label-comprehension risk |
+| Analytics aggregates         | Low–medium  | Needs event/privacy spec before SDK    |
 
 ## Actors
 
@@ -72,34 +72,44 @@ visible in UI copy and threat assumptions.
 Master document leaves disclosure open. DESIGN.md mentions no-JS server-rendered bank details.
 Those conflict until resolved.
 
-| Option | Summary | Main risks | Mitigations if chosen |
-| ------ | ------- | ---------- | --------------------- |
-| A. No public bank details | Instructions only; host shares details out-of-band or after authenticated step | Friction; hosts paste details into WhatsApp anyway | Clear host guidance; campaign still coordinates reports |
-| B. Authenticated / gated reveal | Details after donor starts contribute flow (session or one-time gate) | Determined scrapers; screenshots; referrer leaks on bank links | No prefetch of full details on public GET; cache `private`; strip referrers; rate limit |
-| C. Full public SSR of bank details | Lowest friction; matches many flyer habits | Cache, OG scrapers, search, bulk harvest, long-lived exposure | Strongest anti-abuse still cannot stop screenshots; pause/hide control mandatory |
+| Option                             | Summary                                                                        | Main risks                                                     | Mitigations if chosen                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| A. No public bank details          | Instructions only; host shares details out-of-band or after authenticated step | Friction; hosts paste details into WhatsApp anyway             | Clear host guidance; campaign still coordinates reports                                 |
+| B. Authenticated / gated reveal    | Details after donor starts contribute flow (session or one-time gate)          | Determined scrapers; screenshots; referrer leaks on bank links | No prefetch of full details on public GET; cache `private`; strip referrers; rate limit |
+| C. Full public SSR of bank details | Lowest friction; matches many flyer habits                                     | Cache, OG scrapers, search, bulk harvest, long-lived exposure  | Strongest anti-abuse still cannot stop screenshots; pause/hide control mandatory        |
 
 **Working recommendation for pilot (PROPOSED, not approved):** Option B --- do not put full
 receiving-account details on the anonymous public campaign GET or in OG/WhatsApp previews.
 Serve details only after an intentional contribute step with `Cache-Control: private, no-store`.
 Keep administrator "hide public bank details" as an emergency control for any residual surface.
-Current prototype correctly renders no bank information until this decision closes.
+
+**Prototype status:** the transfer portal now implements the Option B _shape_ using fictional
+account values only. Details render inside the contribute flow, never on the campaign GET or in
+previews, and the account number is masked until the donor reveals it. This does not close the
+decision. Before real details are accepted, the following must still land:
+
+- Owner sign-off on A/B/C, recorded in the decision log below.
+- `Cache-Control: private, no-store` on the response carrying the details (needs a server route;
+  the prototype is client-rendered and therefore has no such header).
+- Rate limiting and anti-automation on the reveal step, so the gate is not trivially harvested.
+- `Referrer-Policy` and the administrator hide/pause control (T1).
 
 ## Key threats and controls
 
-| ID | Threat | Impact | Proposed controls |
-| -- | ------ | ------ | ----------------- |
-| T1 | Scraping or caching of receiving accounts | Targeted fraud / harassment | Disclosure Option B; private cache; hide control; no bank data in OG images |
-| T2 | Status-link guessing or forwarding | Donor PII / report takeover | High-entropy tokens; expiry; revoke on request; bind minimal contact; rate limit |
-| T3 | Fake host / misleading campaign | Donor loss outside platform | Tiered verification; precise labels; report action; pause controls |
-| T4 | Host rubber-stamps fake receipts | Inflated public totals | Donor-originated reports only; per-row amount; step-up auth; void events; risk signals |
-| T5 | Malicious upload (malware, active content) | Reviewer compromise | MIME/size checks; reject active content; malware scan; metadata strip; private bucket |
-| T6 | RLS misconfiguration | Cross-tenant document or PII leak | Independent RLS tests per table/object before pilot |
-| T7 | Service-role key exposure | Full data breach | Least privilege; secrets rotation; no service role in client |
-| T8 | Referrer leakage to third parties | Account numbers in logs | `Referrer-Policy`; no outbound bank deep-links carrying secrets in query |
-| T9 | Preview bots indexing private paths | Accidental publication | Robots rules; auth on private routes; signed URLs only |
-| T10 | Users believe ChipIn holds or verifies funds | Reputational / regulatory | Repeated disclosure; label copy tests; no "verified payment" language |
-| T11 | Insider misuse of ID/medical docs | Severe privacy harm | MFA; access logs; need-to-know roles; emergency revocation |
-| T12 | Campaign photo/story re-identifies beneficiary | Privacy harm | Redaction guidance; medical defaults; review checklist |
+| ID  | Threat                                         | Impact                            | Proposed controls                                                                      |
+| --- | ---------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------- |
+| T1  | Scraping or caching of receiving accounts      | Targeted fraud / harassment       | Disclosure Option B; private cache; hide control; no bank data in OG images            |
+| T2  | Status-link guessing or forwarding             | Donor PII / report takeover       | High-entropy tokens; expiry; revoke on request; bind minimal contact; rate limit       |
+| T3  | Fake host / misleading campaign                | Donor loss outside platform       | Tiered verification; precise labels; report action; pause controls                     |
+| T4  | Host rubber-stamps fake receipts               | Inflated public totals            | Donor-originated reports only; per-row amount; step-up auth; void events; risk signals |
+| T5  | Malicious upload (malware, active content)     | Reviewer compromise               | MIME/size checks; reject active content; malware scan; metadata strip; private bucket  |
+| T6  | RLS misconfiguration                           | Cross-tenant document or PII leak | Independent RLS tests per table/object before pilot                                    |
+| T7  | Service-role key exposure                      | Full data breach                  | Least privilege; secrets rotation; no service role in client                           |
+| T8  | Referrer leakage to third parties              | Account numbers in logs           | `Referrer-Policy`; no outbound bank deep-links carrying secrets in query               |
+| T9  | Preview bots indexing private paths            | Accidental publication            | Robots rules; auth on private routes; signed URLs only                                 |
+| T10 | Users believe ChipIn holds or verifies funds   | Reputational / regulatory         | Repeated disclosure; label copy tests; no "verified payment" language                  |
+| T11 | Insider misuse of ID/medical docs              | Severe privacy harm               | MFA; access logs; need-to-know roles; emergency revocation                             |
+| T12 | Campaign photo/story re-identifies beneficiary | Privacy harm                      | Redaction guidance; medical defaults; review checklist                                 |
 
 ## Status-link lifecycle (draft requirements)
 
@@ -117,6 +127,25 @@ Current prototype correctly renders no bank information until this decision clos
 - Strip EXIF/metadata where feasible; warn hosts to redact unrelated transactions before upload.
 - Access via short-lived signed URLs for authorized reviewers/hosts only.
 - Append-only access log for sensitive objects.
+
+### Screenshot reading (client-side only)
+
+The donor report form can pre-fill itself from a bank confirmation screenshot. The design
+deliberately avoids creating a proof-storage surface at all:
+
+- OCR runs in the donor's browser (WASM). The image is **never uploaded and never stored**, so
+  T5 (malicious upload) and the "transfer proofs may contain unrelated account activity" asset
+  row do not apply to this path.
+- The OCR engine and language model are served from ChipIn's own origin, not a public CDN, so
+  no third party learns that a donor is scanning a bank receipt (T8) and the CSP stays narrow.
+- Extraction **pre-fills a form; it never confirms anything**. A screenshot is trivially forged.
+  Any UI that labelled an extracted figure as verified would breach Principle 3 and T10, and
+  would make a forged receipt _more_ persuasive than the plain claim it replaced.
+- Reports carry a `source` of `manual` or `screenshot` so the host knows what they are looking
+  at. The host still reconciles against their own statement in every case.
+
+If proof upload/storage is ever added, it re-enters the full T5 control set above and must not
+reuse this path's assumptions.
 
 ## Security release checklist (testable)
 
@@ -139,8 +168,8 @@ Mandatory before controlled-pilot intake (master §12.10; refine with pilot caps
 
 ## Decision log
 
-| Date | Topic | Decision | Owner |
-| ---- | ----- | -------- | ----- |
-|      | Receiving-account disclosure (A/B/C) |  |  |
-|      | Status-link TTL / recovery |  |  |
-|      | Release-checklist amendments |  |  |
+| Date | Topic                                | Decision | Owner |
+| ---- | ------------------------------------ | -------- | ----- |
+|      | Receiving-account disclosure (A/B/C) |          |       |
+|      | Status-link TTL / recovery           |          |       |
+|      | Release-checklist amendments         |          |       |

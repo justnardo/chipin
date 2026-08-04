@@ -16,35 +16,35 @@ Parent: [Project Master Document v1.2](../chipin-master-v1.2.md) §5.1, §5.3, �
 
 ## Roles (draft)
 
-| Role | Description |
-| ---- | ----------- |
-| Controller | Traceline Bahamas Ltd. operating ChipIn (confirm with counsel) |
-| Host | Campaign owner; responsible for story/consent and receiving-account authority |
-| Donor (Tier 0) | No-account contributor using status link + minimum contact |
-| Beneficiary | Person or cause described; may differ from host |
-| Guardian | Required when beneficiary is a minor (rules TBD --- legal) |
-| Organization representative | Authorized actor for org campaigns |
-| Reviewer / moderator / admin | Privileged operators under least privilege + MFA |
+| Role                         | Description                                                                   |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| Controller                   | Traceline Bahamas Ltd. operating ChipIn (confirm with counsel)                |
+| Host                         | Campaign owner; responsible for story/consent and receiving-account authority |
+| Donor (Tier 0)               | No-account contributor using status link + minimum contact                    |
+| Beneficiary                  | Person or cause described; may differ from host                               |
+| Guardian                     | Required when beneficiary is a minor (rules TBD --- legal)                    |
+| Organization representative  | Authorized actor for org campaigns                                            |
+| Reviewer / moderator / admin | Privileged operators under least privilege + MFA                              |
 
 ## Category matrix
 
-| ID | Category | Examples | Public? | Authority / purpose (draft) | Retention | Deletion / export | Legal hold |
-| -- | -------- | -------- | ------- | --------------------------- | --------- | ----------------- | ---------- |
-| C1 | Public campaign content | Title, story, photo, goal, host display name, review labels, attested total | Yes | Host publication rights; ChipIn display for coordination | TBD --- legal; keep while campaign public + archive policy | Takedown/appeal path; cache purge process TBD | Suspend takedown while hold active |
-| C2 | Receiving-account details | Bank name, account name, account number / alias | **Open threat decision** --- not on public GET until decided | Host authority over account; purpose = enable out-of-platform transfer | TBD --- legal | Hide control; version history on change | Yes |
-| C3 | Host identity / KYC | Phone, government ID images, selfie/OTP evidence | No | Host verification; fraud prevention | TBD --- legal | Access limited to reviewers; export/erasure TBD --- legal | Yes |
-| C4 | Organization evidence | Registration docs, authority letters | No | Org campaign authority | TBD --- legal | Same as C3 | Yes |
-| C5 | Pledge records | Amount, campaign id, status, timestamps | No (aggregates may be public later only if approved) | Operate contribution flow | TBD --- legal | Donor correction via status link within policy | Yes if disputed |
-| C6 | Transfer reports | Reported amount, channel metadata, bank-generated reference, ChipIn code | No | Reconciliation coordination | TBD --- legal | Compensating events, not silent edits | Yes |
-| C7 | Transfer matches | Allocation rows, method, void status | No | Public-total integrity | Align with C6 | Void via compensating row | Yes |
-| C8 | Transfer proofs | Uploaded screenshots/PDFs | No | Host/moderator matching aid | TBD --- legal; prefer short retention | Hard delete from storage + unlink; metadata strip on ingest | Yes |
-| C9 | Donor contact + status links | Email/phone, token hash, expiry, revoke state | No | Follow-up, clarification, disputes | TBD --- legal; link TTL separate from record retention | Revoke link immediately on request; contact erasure TBD --- legal | Yes |
-| C10 | Contribution / review events | Append-only audit trail | No | Accountability, dispute integrity | TBD --- legal; may outlive source records under lawful basis | Compensating events; true erase may be restricted --- legal | Yes |
-| C11 | Moderation cases | Reports, disputes, notes, resolutions | No | Safety and abuse response | TBD --- legal | Party export rules TBD --- legal | Yes |
-| C12 | Verification & review decisions | Checklist results, rejection reasons, conflicts | No | Campaign gatekeeping | TBD --- legal | Appeal path retains prior decision visibility | Yes |
-| C13 | Notifications logs | Reminder delivery metadata | No | Operations | TBD --- legal; short operational window preferred | Delete with contact or sooner | Rare |
-| C14 | Analytics events | Page views, funnel counts | Aggregate only | Product improvement; privacy-preserving | TBD --- legal; needs event spec before SDK | No raw PII in analytics; low-volume suppression | N/A |
-| C15 | Blood / medical request data | Blood type, facility, urgency | Phase 1B only | Deferred; open risk until counsel + institution agreements | Phase 1B gate | Phase 1B gate | Phase 1B |
+| ID  | Category                        | Examples                                                                    | Public?                                                      | Authority / purpose (draft)                                            | Retention                                                    | Deletion / export                                                 | Legal hold                         |
+| --- | ------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- | ---------------------------------- |
+| C1  | Public campaign content         | Title, story, photo, goal, host display name, review labels, attested total | Yes                                                          | Host publication rights; ChipIn display for coordination               | TBD --- legal; keep while campaign public + archive policy   | Takedown/appeal path; cache purge process TBD                     | Suspend takedown while hold active |
+| C2  | Receiving-account details       | Bank name, account name, account number / alias                             | **Open threat decision** --- not on public GET until decided | Host authority over account; purpose = enable out-of-platform transfer | TBD --- legal                                                | Hide control; version history on change                           | Yes                                |
+| C3  | Host identity / KYC             | Phone, government ID images, selfie/OTP evidence                            | No                                                           | Host verification; fraud prevention                                    | TBD --- legal                                                | Access limited to reviewers; export/erasure TBD --- legal         | Yes                                |
+| C4  | Organization evidence           | Registration docs, authority letters                                        | No                                                           | Org campaign authority                                                 | TBD --- legal                                                | Same as C3                                                        | Yes                                |
+| C5  | Pledge records                  | Amount, campaign id, status, timestamps                                     | No (aggregates may be public later only if approved)         | Operate contribution flow                                              | TBD --- legal                                                | Donor correction via status link within policy                    | Yes if disputed                    |
+| C6  | Transfer reports                | Reported amount, channel metadata, bank-generated reference, ChipIn code    | No                                                           | Reconciliation coordination                                            | TBD --- legal                                                | Compensating events, not silent edits                             | Yes                                |
+| C7  | Transfer matches                | Allocation rows, method, void status                                        | No                                                           | Public-total integrity                                                 | Align with C6                                                | Void via compensating row                                         | Yes                                |
+| C8  | Transfer proofs                 | Uploaded screenshots/PDFs                                                   | No                                                           | Host/moderator matching aid                                            | TBD --- legal; prefer short retention                        | Hard delete from storage + unlink; metadata strip on ingest       | Yes                                |
+| C9  | Donor contact + status links    | Email/phone, token hash, expiry, revoke state                               | No                                                           | Follow-up, clarification, disputes                                     | TBD --- legal; link TTL separate from record retention       | Revoke link immediately on request; contact erasure TBD --- legal | Yes                                |
+| C10 | Contribution / review events    | Append-only audit trail                                                     | No                                                           | Accountability, dispute integrity                                      | TBD --- legal; may outlive source records under lawful basis | Compensating events; true erase may be restricted --- legal       | Yes                                |
+| C11 | Moderation cases                | Reports, disputes, notes, resolutions                                       | No                                                           | Safety and abuse response                                              | TBD --- legal                                                | Party export rules TBD --- legal                                  | Yes                                |
+| C12 | Verification & review decisions | Checklist results, rejection reasons, conflicts                             | No                                                           | Campaign gatekeeping                                                   | TBD --- legal                                                | Appeal path retains prior decision visibility                     | Yes                                |
+| C13 | Notifications logs              | Reminder delivery metadata                                                  | No                                                           | Operations                                                             | TBD --- legal; short operational window preferred            | Delete with contact or sooner                                     | Rare                               |
+| C14 | Analytics events                | Page views, funnel counts                                                   | Aggregate only                                               | Product improvement; privacy-preserving                                | TBD --- legal; needs event spec before SDK                   | No raw PII in analytics; low-volume suppression                   | N/A                                |
+| C15 | Blood / medical request data    | Blood type, facility, urgency                                               | Phase 1B only                                                | Deferred; open risk until counsel + institution agreements             | Phase 1B gate                                                | Phase 1B gate                                                     | Phase 1B                           |
 
 ## Status-link lifecycle (ties to C9)
 
@@ -67,13 +67,13 @@ Draft product requirements (exact numbers TBD --- legal/ops):
 
 ## Backup, cache, and subprocessors
 
-| Surface | Requirement |
-| ------- | ----------- |
-| Database backups | Retention and restore tested before pilot; RPO/RTO TBD --- ops |
+| Surface                 | Requirement                                                     |
+| ----------------------- | --------------------------------------------------------------- |
+| Database backups        | Retention and restore tested before pilot; RPO/RTO TBD --- ops  |
 | Object storage versions | Align deletion with proof/KYC policy; legal hold suspends purge |
-| CDN / OG caches | Purge procedure for takedown and bank-detail hide |
-| Email / WhatsApp ops | Minimize PII in message bodies; subprocessors listed TBD |
-| Hosting / Supabase | Data location and cross-border transfer notes TBD --- legal |
+| CDN / OG caches         | Purge procedure for takedown and bank-detail hide               |
+| Email / WhatsApp ops    | Minimize PII in message bodies; subprocessors listed TBD        |
+| Hosting / Supabase      | Data location and cross-border transfer notes TBD --- legal     |
 
 ## Pragmatic Stage 0 legal consult checklist
 
@@ -90,9 +90,9 @@ Log residual open risks explicitly; do not block Stage 0 bank testing on Phase 1
 
 ## Decision log
 
-| Date | Topic | Decision | Owner |
-| ---- | ----- | -------- | ----- |
-|      | Controller / processor role |  |  |
-|      | Retention ranges C1–C14 |  |  |
-|      | Status-link TTL + recovery |  |  |
-|      | Donor erasure vs audit retention |  |  |
+| Date | Topic                            | Decision | Owner |
+| ---- | -------------------------------- | -------- | ----- |
+|      | Controller / processor role      |          |       |
+|      | Retention ranges C1–C14          |          |       |
+|      | Status-link TTL + recovery       |          |       |
+|      | Donor erasure vs audit retention |          |       |
