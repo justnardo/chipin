@@ -78,12 +78,14 @@
 				<strong>{campaign.supporters}</strong>
 				<span>people reported chipping in</span>
 			</div>
-			<a class="primary-action" href="#next-steps">Chip in</a>
+			<a class="primary-action" href={resolve('/c/rainbow/chip-in')}>Chip in</a>
+			<a class="share-action host-proto" href={resolve('/c/rainbow/host')}>Host view</a>
 			<button class="share-action" type="button" disabled aria-describedby="prototype-note">
 				Share campaign
 			</button>
 			<p class="card-note" id="prototype-note">
-				Prototype only. Contribution and sharing actions will be connected after Stage 0 validation.
+				Prototype only. Chip-in and host attestation use fictional browser-session data — no money
+				moves and no bank details are shown.
 			</p>
 		</aside>
 	</section>
@@ -162,12 +164,16 @@
 
 	<section class="next-steps" id="next-steps" aria-labelledby="next-heading">
 		<BrandMark compact />
-		<p class="section-kicker">Building carefully</p>
-		<h2 id="next-heading">The public campaign page is taking shape.</h2>
+		<p class="section-kicker">Try the prototype</p>
+		<h2 id="next-heading">Pledge, report, and host-mark — with fictional data.</h2>
 		<p>
-			Pledge and transfer-reporting flows will follow after local bank-channel tests settle the
-			reference and fallback rules.
+			Walk the contribute flow, then open the host view in this browser to mark a report received.
+			Live ChipIn codes and receiving-account disclosure still wait on Stage 0 decisions.
 		</p>
+		<div class="next-actions">
+			<a class="next-primary" href={resolve('/c/rainbow/chip-in')}>Start chip-in flow</a>
+			<a class="next-secondary" href={resolve('/c/rainbow/host')}>Open host view</a>
+		</div>
 	</section>
 </main>
 
@@ -372,6 +378,13 @@
 		color: var(--ink-40);
 		background: transparent;
 	}
+	.share-action.host-proto {
+		color: var(--ink);
+		text-decoration: none;
+	}
+	.share-action:disabled {
+		cursor: not-allowed;
+	}
 	.card-note {
 		margin: var(--space-4) 0 0;
 		color: var(--ink-60);
@@ -489,10 +502,36 @@
 		margin-inline: auto;
 		font-size: var(--text-3xl);
 	}
-	.next-steps > p:last-child {
+	.next-steps > p {
 		max-width: 60ch;
 		margin: 0 auto;
 		color: #c8d0cf;
+	}
+	.next-actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: var(--space-3);
+		margin-top: var(--space-6);
+	}
+	.next-primary,
+	.next-secondary {
+		display: inline-grid;
+		min-height: 52px;
+		min-width: 180px;
+		place-items: center;
+		padding: 0 var(--space-5);
+		border-radius: var(--radius-md);
+		font-weight: 700;
+		text-decoration: none;
+	}
+	.next-primary {
+		color: var(--ink);
+		background: var(--gold);
+	}
+	.next-secondary {
+		border: 1px solid #5a6b69;
+		color: var(--paper);
 	}
 	footer {
 		display: grid;
