@@ -5,6 +5,7 @@
 	import ReviewLabel from '$lib/components/ReviewLabel.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
+	import SupportWall from '$lib/components/SupportWall.svelte';
 
 	const campaign = {
 		title: 'Reopen the Rainbow Community Centre',
@@ -216,6 +217,8 @@
 					Names shown here are fictional for the prototype. Live ChipIn can keep donors anonymous.
 				</p>
 			</section>
+
+			<SupportWall campaignSlug="rainbow" />
 
 			<section class="process" id="how-it-works" aria-labelledby="process-heading">
 				<p class="section-kicker">How it works</p>

@@ -6,6 +6,7 @@
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
+	import SupportWall from '$lib/components/SupportWall.svelte';
 	import { formatGoal, getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
 	import { loadReports } from '$lib/prototype/reports';
 
@@ -116,6 +117,7 @@
 					<p class="kicker">Their story</p>
 					<p>{campaign.story}</p>
 				</article>
+				<SupportWall campaignSlug={campaign.slug} />
 			</div>
 
 			<aside class="card">

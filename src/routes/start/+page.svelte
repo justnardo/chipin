@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
@@ -9,7 +8,8 @@
 		dollarsToGoalCents,
 		formatGoal,
 		saveCampaign,
-		type CampaignCategory
+		type CampaignCategory,
+		type PrototypeCampaign
 	} from '$lib/prototype/campaigns';
 
 	const categories: CampaignCategory[] = [
@@ -21,7 +21,7 @@
 		'Other'
 	];
 
-	type Step = 'basics' | 'story' | 'preview';
+	type Step = 'basics' | 'story' | 'preview' | 'done';
 
 	let step = $state<Step>('basics');
 	let title = $state('');
@@ -33,9 +33,14 @@
 	let coverId = $state<(typeof COVER_PRESETS)[number]['id']>('friends');
 	let error = $state('');
 	let publishing = $state(false);
+	let published = $state<PrototypeCampaign | null>(null);
+	let shareNote = $state('');
 
 	const cover = $derived(COVER_PRESETS.find((c) => c.id === coverId) ?? COVER_PRESETS[0]);
 	const goalCents = $derived(dollarsToGoalCents(goalInput));
+	const publishedHref = $derived(
+		published ? resolve('/c/[slug]', { slug: published.slug }) : ''
+	);
 
 	function goStory(event: Event) {
 		event.preventDefault();
@@ -65,10 +70,10 @@
 		step = 'preview';
 	}
 
-	async function publish() {
+	function publish() {
 		if (goalCents === null) return;
 		publishing = true;
-		const campaign = saveCampaign({
+		published = saveCampaign({
 			title: title.trim(),
 			hostName: hostName.trim(),
 			location: location.trim() || 'The Bahamas',
@@ -78,7 +83,36 @@
 			coverImage: cover.image,
 			coverAlt: cover.alt
 		});
-		await goto(resolve('/c/[slug]', { slug: campaign.slug }));
+		publishing = false;
+		step = 'done';
+	}
+
+	async function sharePublished() {
+		if (!published || !publishedHref) return;
+		const url = `${window.location.origin}${publishedHref}`;
+		const text = `${published.title} — chip in on ChipIn`;
+		try {
+			if (navigator.share) {
+				await navigator.share({ title: published.title, text, url });
+				shareNote = 'Shared — thank you.';
+				return;
+			}
+		} catch {
+			/* clipboard fallback */
+		}
+		try {
+			await navigator.clipboard.writeText(url);
+			shareNote = 'Link copied — paste it in WhatsApp.';
+		} catch {
+			shareNote = url;
+		}
+	}
+
+	function shareWhatsApp() {
+		if (!published || !publishedHref) return;
+		const url = `${window.location.origin}${publishedHref}`;
+		const text = encodeURIComponent(`${published.title}\nChip in here: ${url}`);
+		window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
 	}
 </script>
 
@@ -110,8 +144,14 @@
 
 	<ol class="steps" aria-label="Create steps">
 		<li class:current={step === 'basics'} class:done={step !== 'basics'}>1. Basics</li>
-		<li class:current={step === 'story'} class:done={step === 'preview'}>2. Story</li>
-		<li class:current={step === 'preview'}>3. Preview</li>
+		<li
+			class:current={step === 'story'}
+			class:done={step === 'preview' || step === 'done'}
+		>
+			2. Story
+		</li>
+		<li class:current={step === 'preview'} class:done={step === 'done'}>3. Preview</li>
+		<li class:current={step === 'done'}>4. Share</li>
 	</ol>
 
 	<div class="layout">
@@ -178,7 +218,7 @@
 					<button type="submit" class="primary">Preview page</button>
 				</div>
 			</form>
-		{:else}
+		{:else if step === 'preview'}
 			<section class="card">
 				<h2>Looking good?</h2>
 				<p>
@@ -191,6 +231,24 @@
 						{publishing ? 'Publishing…' : 'Publish campaign page'}
 					</button>
 				</div>
+			</section>
+		{:else if published}
+			<section class="card done-card">
+				<StatusChip label="Campaign published" tone="received" />
+				<h2>Your page is ready — share it</h2>
+				<p>
+					Same instinct as GoFundMe: get the link into WhatsApp. This prototype link works in this
+					browser session.
+				</p>
+				<code class="share-url">{publishedHref}</code>
+				<div class="row-actions">
+					<button type="button" class="primary" onclick={sharePublished}>Copy / share link</button>
+					<button type="button" class="ghost" onclick={shareWhatsApp}>WhatsApp</button>
+				</div>
+				{#if shareNote}
+					<p class="share-note" role="status">{shareNote}</p>
+				{/if}
+				<a class="open-page" href={publishedHref}>Open your campaign page</a>
 			</section>
 		{/if}
 
@@ -288,13 +346,47 @@
 
 	.steps {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: var(--space-2);
 		padding: 0;
 		margin: 0 0 var(--space-6);
 		list-style: none;
 		font-size: var(--text-xs);
 		font-weight: 700;
+	}
+
+	.done-card h2 {
+		margin-top: var(--space-4);
+	}
+
+	.share-url {
+		display: block;
+		margin: var(--space-4) 0;
+		padding: var(--space-3);
+		border-radius: var(--radius-sm);
+		background: var(--gold-tint);
+		font-family: var(--font-mono);
+		font-size: var(--text-sm);
+		word-break: break-all;
+	}
+
+	.share-note {
+		margin: var(--space-3) 0 0;
+		color: var(--status-received);
+		font-size: var(--text-sm);
+		font-weight: 600;
+	}
+
+	.open-page {
+		display: grid;
+		min-height: 52px;
+		margin-top: var(--space-4);
+		place-items: center;
+		border-radius: var(--radius-md);
+		color: var(--ink);
+		background: var(--paper-2);
+		font-weight: 700;
+		text-decoration: none;
 	}
 
 	.steps li {
