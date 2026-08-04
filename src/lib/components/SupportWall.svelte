@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { formatBsd } from '$lib/prototype/reports';
 	import {
+		addHostReply,
 		addSupport,
 		loadSupport,
 		RAINBOW_SUPPORT_SEED,
@@ -9,9 +10,11 @@
 	} from '$lib/prototype/support';
 
 	let {
-		campaignSlug
+		campaignSlug,
+		isHost = false
 	}: {
 		campaignSlug: string;
+		isHost?: boolean;
 	} = $props();
 
 	let messages = $state<SupportMessage[]>([]);
@@ -19,15 +22,19 @@
 	let message = $state('');
 	let error = $state('');
 	let notice = $state('');
+	let replyDrafts = $state<Record<string, string>>({});
+	let openReply = $state<string | null>(null);
 
 	function refresh() {
 		const stored = loadSupport(campaignSlug);
-		if (campaignSlug === 'rainbow' && stored.length === 0) {
-			messages = RAINBOW_SUPPORT_SEED;
+		if (campaignSlug === 'rainbow') {
+			const seeds = RAINBOW_SUPPORT_SEED.filter(
+				(seed) => !stored.some((s) => s.id === seed.id)
+			);
+			messages = [...stored, ...seeds];
 			return;
 		}
-		messages =
-			campaignSlug === 'rainbow' ? [...stored, ...RAINBOW_SUPPORT_SEED] : stored;
+		messages = stored;
 	}
 
 	$effect(() => {
@@ -51,6 +58,15 @@
 		name = '';
 		message = '';
 		notice = 'Thank you — your words are on the wall.';
+		refresh();
+	}
+
+	function submitReply(id: string) {
+		const draft = (replyDrafts[id] ?? '').trim();
+		if (draft.length < 4) return;
+		addHostReply(id, draft);
+		replyDrafts = { ...replyDrafts, [id]: '' };
+		openReply = null;
 		refresh();
 	}
 </script>
@@ -84,7 +100,7 @@
 		{#each messages as entry (entry.id)}
 			<li>
 				<div class="avatar" aria-hidden="true">{entry.name.slice(0, 1)}</div>
-				<div>
+				<div class="thread">
 					<p class="meta">
 						<strong>{entry.name}</strong>
 						{#if entry.amountCents}
@@ -92,6 +108,39 @@
 						{/if}
 					</p>
 					<p class="body">{entry.message}</p>
+
+					{#each entry.replies as reply (reply.id)}
+						<div class="reply">
+							<p class="meta host">
+								<strong>Host reply</strong>
+								<span>· thank-you note</span>
+							</p>
+							<p class="body">{reply.message}</p>
+						</div>
+					{/each}
+
+					{#if isHost}
+						{#if openReply === entry.id}
+							<div class="reply-form">
+								<label>
+									<span>Thank-you reply</span>
+									<textarea bind:value={replyDrafts[entry.id]} rows="2" required></textarea>
+								</label>
+								<div class="reply-actions">
+									<button type="button" class="small" onclick={() => submitReply(entry.id)}>
+										Post reply
+									</button>
+									<button type="button" class="small ghost" onclick={() => (openReply = null)}>
+										Cancel
+									</button>
+								</div>
+							</div>
+						{:else}
+							<button type="button" class="reply-toggle" onclick={() => (openReply = entry.id)}>
+								Reply
+							</button>
+						{/if}
+					{/if}
 				</div>
 			</li>
 		{/each}
@@ -187,7 +236,7 @@
 		list-style: none;
 	}
 
-	.list li {
+	.list > li {
 		display: grid;
 		grid-template-columns: 40px 1fr;
 		gap: var(--space-3);
@@ -207,6 +256,10 @@
 		font-weight: 700;
 	}
 
+	.thread {
+		min-width: 0;
+	}
+
 	.meta {
 		margin: 0 0 var(--space-1);
 		font-size: var(--text-sm);
@@ -217,8 +270,56 @@
 		font-weight: 400;
 	}
 
+	.meta.host strong {
+		color: var(--aqua-deep);
+	}
+
 	.body {
 		margin: 0;
 		color: var(--ink-60);
+	}
+
+	.reply {
+		margin-top: var(--space-3);
+		padding-left: var(--space-4);
+		border-left: 2px solid var(--line);
+	}
+
+	.reply-toggle {
+		min-height: 40px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--aqua-deep);
+		font-size: var(--text-sm);
+		font-weight: 700;
+		text-align: left;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.reply-form {
+		display: grid;
+		gap: var(--space-3);
+		margin-top: var(--space-3);
+		padding-top: var(--space-3);
+		border-top: 1px dashed var(--line);
+	}
+
+	.reply-actions {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-3);
+	}
+
+	button.small {
+		min-height: 44px;
+		font-size: var(--text-sm);
+	}
+
+	button.small.ghost {
+		border: 1px solid var(--line);
+		color: var(--ink);
+		background: transparent;
 	}
 </style>

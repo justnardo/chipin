@@ -4,6 +4,7 @@
 	import AttestationRow from '$lib/components/AttestationRow.svelte';
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
+	import SupportWall from '$lib/components/SupportWall.svelte';
 	import {
 		formatBsd,
 		loadReports,
@@ -117,6 +118,8 @@
 			</div>
 		{/if}
 	</section>
+
+	<SupportWall campaignSlug={campaign.slug} isHost />
 </main>
 
 <style>

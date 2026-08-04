@@ -19,7 +19,7 @@ export default defineConfig({
 	],
 	test: {
 		expect: { requireAssertions: true },
-		environment: 'node',
+		environment: 'jsdom',
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	}
 });

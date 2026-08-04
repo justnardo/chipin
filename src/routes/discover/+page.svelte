@@ -43,6 +43,14 @@
 		}
 	];
 
+	const categories = ['All', ...new Set(featured.map((c) => c.category))];
+
+	let activeCategory = $state('All');
+
+	const filtered = $derived(
+		activeCategory === 'All' ? featured : featured.filter((c) => c.category === activeCategory)
+	);
+
 	let mine = $state<
 		Array<PrototypeCampaign & { received: number; goal: number; href: string }>
 	>([]);
@@ -96,7 +104,7 @@
 		</div>
 	</section>
 
-	{#if mine.length > 0}
+		{#if mine.length > 0}
 		<section class="block" aria-labelledby="mine-heading">
 			<div class="heading">
 				<div>
@@ -105,7 +113,7 @@
 				</div>
 				<p>Saved only on this device session until we add real accounts.</p>
 			</div>
-			<div class="grid">
+			<div class="grid mine-grid">
 				{#each mine as campaign}
 					<CampaignCard
 						title={campaign.title}
@@ -130,11 +138,28 @@
 			</div>
 			<p>Rainbow is the full interactive demo. Other cards preview discovery layout.</p>
 		</div>
-		<div class="grid">
-			{#each featured as campaign}
-				<CampaignCard {...campaign} />
+		<div class="filters" role="tablist" aria-label="Filter by category">
+			{#each categories as category}
+				<button
+					type="button"
+					class:active={activeCategory === category}
+					onclick={() => (activeCategory = category)}
+				>
+					{category}
+				</button>
 			{/each}
 		</div>
+		{#if filtered.length === 0}
+			<div class="empty">
+				<p>No featured campaigns in this category yet.</p>
+			</div>
+		{:else}
+			<div class="grid">
+				{#each filtered as campaign}
+					<CampaignCard {...campaign} />
+				{/each}
+			</div>
+		{/if}
 	</section>
 </main>
 
@@ -256,9 +281,52 @@
 		font-size: var(--text-2xl);
 	}
 
+	.filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		margin-bottom: var(--space-6);
+	}
+
+	.filters button {
+		min-height: 44px;
+		padding: 0 var(--space-4);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-full);
+		color: var(--ink-60);
+		background: transparent;
+		font-size: var(--text-sm);
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.filters button.active {
+		border-color: var(--aqua-deep);
+		color: white;
+		background: var(--aqua-deep);
+	}
+
+	.empty {
+		padding: var(--space-6);
+		border: 1px dashed var(--line);
+		border-radius: var(--radius-md);
+		text-align: center;
+	}
+
+	.empty p {
+		margin: 0;
+		color: var(--ink-60);
+	}
+
 	.grid {
 		display: grid;
 		gap: var(--space-5);
+	}
+
+	@media (max-width: 719px) {
+		.mine-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	@media (min-width: 720px) {
