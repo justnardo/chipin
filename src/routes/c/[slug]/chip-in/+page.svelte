@@ -8,7 +8,12 @@
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import BankMark from '$lib/components/BankMark.svelte';
 	import { getBank, resolveRail, settlementWindow } from '$lib/prototype/banks';
-	import { getCampaign, usableAccounts, type PrototypeCampaign } from '$lib/prototype/campaigns';
+	import {
+		accountTail,
+		getCampaign,
+		usableAccounts,
+		type PrototypeCampaign
+	} from '$lib/prototype/campaigns';
 	import { screenshotContributed, type ExtractedReceipt } from '$lib/prototype/receipt';
 	import { addReport, dollarsToCents, formatBsd, type ReportSource } from '$lib/prototype/reports';
 
@@ -160,6 +165,7 @@
 			bankReference: bankReference.trim(),
 			senderBankId,
 			recipientBankId: selectedAccount?.bankId ?? '',
+			recipientTail: selectedAccount ? accountTail(selectedAccount) : '',
 			source: reportSource,
 			editedFields
 		});

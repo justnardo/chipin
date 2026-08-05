@@ -50,9 +50,16 @@
 	);
 
 	const senderBank = $derived(report.senderBankId ? getBank(report.senderBankId) : null);
-	// Which of the host's accounts the donor targeted — tells the host which
-	// statement to reconcile against when they receive at more than one place.
-	const recipientBank = $derived(getBank(recipientBankId));
+	/**
+	 * Which of the host's accounts the donor targeted — tells the host which
+	 * statement to reconcile against when they receive at more than one place.
+	 * Display uses only what the REPORT states; the `recipientBankId` prop falls
+	 * back to the host's first account for legacy reports, which is fine for
+	 * settlement-window guidance but must not be shown as a donor claim.
+	 */
+	const statedRecipient = $derived(report.recipientBankId ? getBank(report.recipientBankId) : null);
+	/** Whichever bank we can name for the meta line's mark. */
+	const metaBank = $derived(senderBank ?? statedRecipient);
 	const rail = $derived(
 		report.senderBankId ? resolveRail(report.senderBankId, recipientBankId) : null
 	);
@@ -115,14 +122,18 @@
 					· Bank ref {report.bankReference}
 				{/if}
 			</p>
-			{#if senderBank}
+			{#if metaBank}
 				<p class="meta sender">
-					<BankMark bank={senderBank} size="sm" />
+					<BankMark bank={metaBank} size="sm" />
 					<span>
-						{#if recipientBank && recipientBank.id !== 'other'}
-							Donor says they sent from {senderBank.name} to your {recipientBank.shortName} account
-						{:else}
+						{#if senderBank && statedRecipient}
+							Donor says they sent from {senderBank.name} to your {statedRecipient.shortName} account{#if report.recipientTail}
+								&nbsp;··{report.recipientTail}{/if}
+						{:else if senderBank}
 							Donor says they sent from {senderBank.name}
+						{:else if statedRecipient}
+							Sent to your {statedRecipient.shortName} account{#if report.recipientTail}
+								&nbsp;··{report.recipientTail}{/if}
 						{/if}
 					</span>
 				</p>

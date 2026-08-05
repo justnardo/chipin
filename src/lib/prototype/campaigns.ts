@@ -46,6 +46,18 @@ export type PrototypeCampaign = {
 	receivingAccounts: ReceivingAccount[];
 };
 
+/**
+ * Last few characters of wherever money is sent, e.g. "5678" from an account
+ * number or "0142" from a wallet handle. A host can hold two accounts at the
+ * same institution (chequing + savings), so a bank id alone cannot tell them
+ * which statement a report belongs to — the tail can, without carrying the
+ * full number anywhere it does not need to be.
+ */
+export function accountTail(account: ReceivingAccount): string {
+	const target = (account.accountNumber.trim() || account.handle.trim()).replace(/\s+/g, '');
+	return target.slice(-4);
+}
+
 /** An account is usable in the portal only if it has somewhere to send money. */
 export function usableAccounts(campaign: PrototypeCampaign): ReceivingAccount[] {
 	return campaign.receivingAccounts.filter(

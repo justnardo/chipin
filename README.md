@@ -16,11 +16,11 @@ campaign-host receipt attestations; it does not collect, hold, move, settle, or 
 - Stage 0 bank/channel test protocol and product review
 - No backend, real receiving-account data, or transfer-reference assumptions yet
 
-Bank marks default to original monogram tiles. Real logos are a drop-in: place `<id>.svg` files
-in `static/banks/` (see the README there) and they render everywhere automatically. The repo
-ships no logo artwork — those files are the institutions' trademarks shown beside
-receiving-account details, so source them from the banks' own brand pages and get written
-permission; the Stage 0 bank-testing conversations are the natural moment to ask.
+Bank marks render `<id>.svg` files from `static/banks/` (see the README there), falling back to
+original monogram tiles for any channel without a file. The commercial-bank logos currently in
+that folder are the institutions' trademarks, shown beside receiving-account details — written
+permission from each bank should be in hand before any public deploy, and the Stage 0
+bank-testing conversations are the natural moment to ask.
 
 ## Source documents
 

@@ -314,7 +314,14 @@
 				</div>
 			</form>
 		{:else if step === 'banking'}
-			<form class="card" onsubmit={goPreview2}>
+			<!--
+				novalidate: the account fields carry `required`, but once the host has
+				saved an account the form is legitimately empty — native constraint
+				validation would block "Preview page" before goPreview2 could see the
+				saved list. readAccountForm() does the real validation with better
+				messages either way.
+			-->
+			<form class="card" novalidate onsubmit={goPreview2}>
 				<h2>Where should donors send money?</h2>
 				<p class="step-lede">
 					Donors see these details only after they start chipping in — never on your public campaign

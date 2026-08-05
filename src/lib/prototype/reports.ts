@@ -43,6 +43,8 @@ export type PrototypeReport = {
 	 * wait-time guidance whenever the donor picked another one.
 	 */
 	recipientBankId: string;
+	/** Last-4 of the targeted account/handle; disambiguates same-bank accounts. */
+	recipientTail: string;
 	source: ReportSource;
 	/** Fields the donor edited after the screenshot filled them in. */
 	editedFields: string[];
@@ -78,6 +80,7 @@ function normalize(
 		revoked: report.revoked ?? false,
 		senderBankId: report.senderBankId ?? '',
 		recipientBankId: report.recipientBankId ?? '',
+		recipientTail: report.recipientTail ?? '',
 		source: report.source ?? 'manual',
 		editedFields: report.editedFields ?? [],
 		createdAt: report.createdAt ?? new Date().toISOString(),
@@ -127,12 +130,14 @@ export function addReport(
 		| 'note'
 		| 'senderBankId'
 		| 'recipientBankId'
+		| 'recipientTail'
 		| 'source'
 		| 'editedFields'
 	> & {
 		note?: string;
 		senderBankId?: string;
 		recipientBankId?: string;
+		recipientTail?: string;
 		source?: ReportSource;
 		editedFields?: string[];
 	}
@@ -143,6 +148,7 @@ export function addReport(
 		note: input.note ?? '',
 		senderBankId: input.senderBankId ?? '',
 		recipientBankId: input.recipientBankId ?? '',
+		recipientTail: input.recipientTail ?? '',
 		source: input.source ?? 'manual',
 		editedFields: input.editedFields ?? [],
 		id: prototypeId('rpt'),

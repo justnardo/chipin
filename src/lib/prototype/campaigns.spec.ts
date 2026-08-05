@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+	accountTail,
 	getCampaign,
 	listSessionCampaigns,
 	RAINBOW_CAMPAIGN,
@@ -81,6 +82,30 @@ describe('campaign receiving accounts', () => {
 			]
 		});
 		expect(usableAccounts(saved)).toHaveLength(1);
+	});
+
+	it('derives a disambiguating tail from account number or handle', () => {
+		expect(
+			accountTail({
+				bankId: 'bob',
+				accountName: 'x',
+				accountNumber: '0000 1234 5678',
+				branch: '',
+				handle: ''
+			})
+		).toBe('5678');
+		expect(
+			accountTail({
+				bankId: 'kanoo',
+				accountName: 'x',
+				accountNumber: '',
+				branch: '',
+				handle: '242-555-0142'
+			})
+		).toBe('0142');
+		expect(
+			accountTail({ bankId: 'other', accountName: 'x', accountNumber: '', branch: '', handle: '' })
+		).toBe('');
 	});
 
 	it('keeps the rainbow demo exercising the account picker', () => {

@@ -18,7 +18,8 @@ No file → the original monogram tile shows instead.
 | `omni.svg`        | Omni Financial           |
 
 These files are the institutions' trademarks, shown beside receiving-account
-details. The repo deliberately ships none: source the artwork from the bank's
-own brand/press page and get written permission — the Stage 0 bank-testing
-conversations are the natural moment to ask. Square or near-square marks look
-best; they render at 44px and 32px on a white tile.
+details. Before any public deploy, have written permission from each bank whose
+mark is present — the Stage 0 bank-testing conversations are the natural moment
+to ask. Prefer true vector artwork from the bank's own brand/press page over
+traced bitmaps. Square or near-square marks look best; they render at 44px and
+32px on a white tile.
