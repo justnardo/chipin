@@ -74,11 +74,39 @@ has no server side. Host it anywhere:
   `npm run build` with a publish directory of `build`.
 
 A project site served from a subpath needs `BASE_PATH` set at build time (the Pages workflow
-does this): `BASE_PATH=/chipin npm run build`. Leave it unset for root-hosted deploys.
+does this): `BASE_PATH=/chipin npm run build`. Leave it unset for root-hosted deploys, which is
+what a custom domain is.
 
-Swap `@sveltejs/adapter-static` for a server adapter when real routes arrive — closing the
-disclosure decision requires `Cache-Control: private, no-store` on the response carrying
-receiving details, which static hosting cannot set.
+## Putting the prototype on a custom domain
+
+`static/_headers` and `static/_redirects` are copied to the output root by the build. Cloudflare
+Pages and Netlify read both; GitHub Pages ignores both and cannot set response headers at all,
+which is why it is the wrong host for anything past this prototype.
+
+**Cloudflare Pages**, with the domain already at Cloudflare, needs no DNS records typed by hand:
+
+1. Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git → this repo.
+2. Framework preset **SvelteKit**, build command `npm run build`, output directory `build`.
+   Leave `BASE_PATH` unset.
+3. Deploy, confirm the `*.pages.dev` URL works, then Custom domains → Set up a custom domain.
+   Cloudflare writes the DNS record itself because the zone is in the same account.
+
+Verify after the first deploy — a deep link is the thing that breaks on a misconfigured static
+host, and headers are easy to get wrong silently:
+
+```sh
+curl -sI https://<your-domain>/discover | head -1              # expect HTTP/2 200, not 404
+curl -sI https://<your-domain>/ | grep -i cache-control        # expect private, no-store
+curl -s  https://<your-domain>/robots.txt                      # expect Disallow: /
+```
+
+The prototype is `Disallow: /` in `robots.txt` on purpose: the campaigns and receiving accounts
+on it are invented, and an indexed fake campaign soliciting bank transfers is indistinguishable
+from a real one to anyone arriving from a search. Open it up at launch, not before.
+
+Swap `@sveltejs/adapter-static` for a server adapter when real routes arrive. `_headers` covers
+the static case, but per-response control over what carries receiving details — and the reveal-step
+rate limiting in the threat model — needs a server.
 
 ## Where prototype data lives
 

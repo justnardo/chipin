@@ -1,3 +1,11 @@
-# allow crawling everything by default
+# Prototype: not for indexing.
+#
+# What this site serves is fictional — invented campaigns, demo receiving accounts,
+# and reports that live only in the visitor's own browser. Indexed on the real
+# domain, someone searching for ChipIn would find a fake campaign asking for bank
+# transfers with nothing to tell them it is not the real thing.
+#
+# Change back to the allow-everything form (`Disallow:` with no path) at launch,
+# once campaigns and receiving details are real and the README build gates close.
 User-agent: *
-Disallow:
+Disallow: /

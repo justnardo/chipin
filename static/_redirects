@@ -1,0 +1,11 @@
+# SPA routing for Cloudflare Pages and Netlify.
+#
+# Campaign slugs and donor status tokens are created in the browser and cannot be
+# prerendered, so every unknown path has to return the app shell. Without this,
+# Cloudflare Pages falls back to 404.html — which is the same shell, so the app
+# still loads, but every deep link answers with an HTTP 404 status.
+#
+# Static files that exist are served first; this only catches what does not.
+# GitHub Pages ignores this file and uses 404.html instead.
+
+/*  /index.html  200
