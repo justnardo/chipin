@@ -9,7 +9,7 @@
 	import SupportWall from '$lib/components/SupportWall.svelte';
 	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
 	import { formatGoal, getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
-	import { loadReports } from '$lib/prototype/reports';
+	import { campaignAttestedCents, loadReports } from '$lib/prototype/reports';
 
 	let campaign = $state<PrototypeCampaign | null>(null);
 	let loaded = $state(false);
@@ -27,10 +27,7 @@
 		campaign = found;
 		if (found) {
 			const reports = loadReports(found.slug);
-			const attested = reports
-				.filter((r) => r.status === 'marked_received' && r.attestedCents !== null)
-				.reduce((sum, r) => sum + (r.attestedCents ?? 0), 0);
-			receivedCents = attested;
+			receivedCents = campaignAttestedCents(reports);
 			supporters = reports.length;
 		}
 		loaded = true;

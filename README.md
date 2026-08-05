@@ -12,6 +12,9 @@ campaign-host receipt attestations; it does not collect, hold, move, settle, or 
   rail-aware settlement windows (fictional account values only)
 - Hosts list every account they can receive on; donors pick the one at their own bank,
   turning a 2-5 day interbank wait into a usually-same-day transfer
+- Append-only attestation ledger: hosts record partial receipts, add later deposits against the
+  same report, and correct or withdraw an amount with a reason the donor sees — nothing is
+  edited or deleted in place
 - Client-side screenshot reading that pre-fills the donor report form and uploads nothing
 - Stage 0 bank/channel test protocol and product review
 - No backend, real receiving-account data, or transfer-reference assumptions yet

@@ -93,6 +93,19 @@ Rules:
 - Partial receipt: host sets attested amount; active allocations cover the matched portion; the
   report status is `partially_matched` until remaining amount is matched, closed, or voided.
 
+### Prototype coverage
+
+`src/lib/prototype/reports.ts` implements this relation client-side so the shape can be exercised
+before the schema freezes. Covered: append-only rows with `amount_cents`, `status`, `matching_method`,
+and correction links; status as a projection of active rows; void and correct as two events rather
+than an edit; public totals summing active rows only.
+
+Not covered, and still open: `pledge_id` (the prototype has no pledge record separate from the
+report, so one-to-many allocation across pledges is unproven), `chipin_code` as a matching method
+(gated on the evidence matrix), moderator-only reopen and `closed_unresolved` (no moderator role
+exists yet), step-up auth on void, and every timer below. The prototype is evidence about the
+shape, not a substitute for owner approval.
+
 ## Moderation case
 
 | From                                                  | To             | Actor                            | Conditions                                                        |
