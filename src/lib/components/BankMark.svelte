@@ -57,6 +57,14 @@
 	.mark-img {
 		object-fit: contain;
 		background: #fff;
+		border: 1px solid var(--line);
+		/* Breathing room so wordmark-shaped logos don't touch the tile edges. */
+		padding: 3px;
+		box-sizing: border-box;
+	}
+
+	.mark-img.sm {
+		padding: 2px;
 	}
 
 	.mark.md,
