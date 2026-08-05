@@ -11,6 +11,7 @@
 		matchingMethodLabel,
 		overMatchedCents,
 		unmatchedCents,
+		type Allocation,
 		type HostAction,
 		type MatchingMethod,
 		type PrototypeReport
@@ -37,9 +38,18 @@
 
 	/**
 	 * Defaults to whatever the host has not accounted for yet, so recording the
-	 * second half of a split deposit is one tap rather than mental arithmetic.
+	 * second half of a split deposit is one tap rather than mental arithmetic. On a
+	 * fresh report that is the whole reported amount already.
+	 *
+	 * Blank once nothing is outstanding. Re-offering the full figure there would put
+	 * a duplicate of the entire transfer one tap away, and every tap of it inflates
+	 * the public total — the one number this ledger exists to keep honest.
+	 *
+	 * Derived, not `$state`: it has to resettle after each command (record $120 of
+	 * $200 and the field should offer the remaining $80). Typing does not touch the
+	 * report, so nothing overwrites the host mid-entry.
 	 */
-	let amountInput = $derived(((unmatched || report.reportedCents) / 100).toFixed(2));
+	let amountInput = $derived(unmatched > 0 ? (unmatched / 100).toFixed(2) : '');
 	/**
 	 * Only the initial value is wanted: this is the host's editable choice from here
 	 * on, and each row is keyed to one report, so re-deriving it would overwrite what
@@ -55,6 +65,13 @@
 	let editing = $state<{ allocationId: string; mode: 'correct' | 'void' } | null>(null);
 	let editAmount = $state('');
 	let editReason = $state('');
+	/**
+	 * Scoped to the row being corrected, seeded from that row. Reusing the form's
+	 * dropdown would relabel an old entry with whatever method the host last picked
+	 * for a different one — a correction should not silently rewrite how the original
+	 * was matched, though the host can say so if re-checking is what changed it.
+	 */
+	let editMethod = $state<MatchingMethod>('manual_audit');
 	let editError = $state('');
 
 	const tone = $derived(
@@ -141,9 +158,10 @@
 		if (!error) questionInput = '';
 	}
 
-	function openEdit(allocationId: string, mode: 'correct' | 'void', amountCents: number) {
-		editing = { allocationId, mode };
-		editAmount = (amountCents / 100).toFixed(2);
+	function openEdit(row: Allocation, mode: 'correct' | 'void') {
+		editing = { allocationId: row.id, mode };
+		editAmount = (row.amountCents / 100).toFixed(2);
+		editMethod = row.method;
 		editReason = '';
 		editError = '';
 	}
@@ -173,12 +191,18 @@
 				allocationId: editing.allocationId,
 				amountCents: cents,
 				reason,
-				method
+				method: editMethod
 			});
 		}
 		if (!editError) closeEdit();
 	}
 </script>
+
+{#snippet methodOptions()}
+	<option value="bank_reference">Bank reference</option>
+	<option value="amount_date">Amount and date</option>
+	<option value="manual_audit">Checked my statement by hand</option>
+{/snippet}
 
 <article class="row">
 	<header class="row-head">
@@ -275,6 +299,12 @@
 											<span>Corrected amount</span>
 											<input type="text" inputmode="decimal" bind:value={editAmount} />
 										</label>
+										<label>
+											<span>How did you match it?</span>
+											<select bind:value={editMethod}>
+												{@render methodOptions()}
+											</select>
+										</label>
 									{/if}
 									<label>
 										<span>Reason (shown to the donor)</span>
@@ -298,17 +328,13 @@
 								</div>
 							{:else}
 								<div class="ledger-actions">
-									<button
-										type="button"
-										class="linkish"
-										onclick={() => openEdit(row.id, 'correct', row.amountCents)}
-									>
+									<button type="button" class="linkish" onclick={() => openEdit(row, 'correct')}>
 										Correct amount
 									</button>
 									<button
 										type="button"
 										class="linkish danger"
-										onclick={() => openEdit(row.id, 'void', row.amountCents)}
+										onclick={() => openEdit(row, 'void')}
 									>
 										Withdraw
 									</button>
@@ -334,9 +360,7 @@
 			<label>
 				<span>How did you match it?</span>
 				<select bind:value={method}>
-					<option value="bank_reference">Bank reference</option>
-					<option value="amount_date">Amount and date</option>
-					<option value="manual_audit">Checked my statement by hand</option>
+					{@render methodOptions()}
 				</select>
 			</label>
 			<div class="action-cluster">

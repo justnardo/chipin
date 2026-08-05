@@ -118,6 +118,31 @@ describe('attestation ledger', () => {
 		expect(rows[1].amountCents).toBe(18_000);
 	});
 
+	it('keeps the corrected row on the method it was originally matched by', () => {
+		const report = newReport(20_000);
+		const matched = recordMatch(report.id, { amountCents: 20_000, method: 'bank_reference' });
+
+		const corrected = correctMatch(report.id, matched!.allocations[0].id, {
+			amountCents: 18_000,
+			reason: 'Bank fee came off the deposit.'
+		});
+
+		expect(ledger(corrected!)[1].method).toBe('bank_reference');
+	});
+
+	it('lets the host say a correction came from re-checking the statement', () => {
+		const report = newReport(20_000);
+		const matched = recordMatch(report.id, { amountCents: 20_000, method: 'bank_reference' });
+
+		const corrected = correctMatch(report.id, matched!.allocations[0].id, {
+			amountCents: 18_000,
+			reason: 'Found the real figure on the statement.',
+			method: 'manual_audit'
+		});
+
+		expect(ledger(corrected!)[1].method).toBe('manual_audit');
+	});
+
 	it('will not correct a row that is already voided', () => {
 		const report = newReport();
 		const matched = recordMatch(report.id, { amountCents: 20_000, method: 'amount_date' });
