@@ -127,7 +127,9 @@
 					{#each reports as report (report.id)}
 						<AttestationRow
 							{report}
-							recipientBankId={campaign.receiving.bankId}
+							recipientBankId={report.recipientBankId ||
+								campaign.receivingAccounts[0]?.bankId ||
+								'other'}
 							statusHref={resolve('/c/[slug]/status/[token]', {
 								slug: campaign.slug,
 								token: report.statusToken
