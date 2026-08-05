@@ -10,13 +10,17 @@ campaign-host receipt attestations; it does not collect, hold, move, settle, or 
 - Brand tokens and signature trust/progress components
 - Gated transfer portal: copy-paste receiving details, local bank/wallet picker, and
   rail-aware settlement windows (fictional account values only)
+- Hosts list every account they can receive on; donors pick the one at their own bank,
+  turning a 2-5 day interbank wait into a usually-same-day transfer
 - Client-side screenshot reading that pre-fills the donor report form and uploads nothing
 - Stage 0 bank/channel test protocol and product review
 - No backend, real receiving-account data, or transfer-reference assumptions yet
 
-Bank marks are original monogram tiles, not reproductions of any institution's logo. ChipIn has
-no relationship with these banks; a real logo beside receiving-account details would imply an
-endorsement that does not exist. Do not swap them for real logos without written permission.
+Bank marks default to original monogram tiles. Real logos are a drop-in: place `<id>.svg` files
+in `static/banks/` (see the README there) and they render everywhere automatically. The repo
+ships no logo artwork — those files are the institutions' trademarks shown beside
+receiving-account details, so source them from the banks' own brand pages and get written
+permission; the Stage 0 bank-testing conversations are the natural moment to ask.
 
 ## Source documents
 

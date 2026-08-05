@@ -11,7 +11,8 @@
 		formatGoal,
 		saveCampaign,
 		type CampaignCategory,
-		type PrototypeCampaign
+		type PrototypeCampaign,
+		type ReceivingAccount
 	} from '$lib/prototype/campaigns';
 
 	const categories: CampaignCategory[] = [
@@ -38,6 +39,11 @@
 	let published = $state<PrototypeCampaign | null>(null);
 	let shareNote = $state('');
 
+	// Hosts routinely receive on more than one channel; each saved account becomes
+	// an option the donor can pick, and picking the bank they already use turns an
+	// interbank wait into a same-day transfer. The form below edits one candidate
+	// account; `accounts` is the list already saved.
+	let accounts = $state<ReceivingAccount[]>([]);
 	let receivingBankId = $state('bob');
 	let accountName = $state('');
 	let accountNumber = $state('');
@@ -46,6 +52,52 @@
 
 	const receivingBank = $derived(getBank(receivingBankId));
 	const isWallet = $derived(receivingBank?.kind === 'wallet');
+	const formEmpty = $derived(
+		!accountName.trim() && !accountNumber.trim() && !handle.trim() && !branch.trim()
+	);
+
+	/** Validate the in-progress form; returns the account or an error message. */
+	function readAccountForm(): ReceivingAccount | string {
+		if (accountName.trim().length < 2) {
+			return 'Add the account name exactly as your bank shows it.';
+		}
+		if (isWallet) {
+			if (handle.trim().length < 4) {
+				return 'Add the wallet handle or number donors should send to.';
+			}
+		} else if (accountNumber.replace(/\D/g, '').length < 6) {
+			return 'Add the account number donors should send to.';
+		}
+		return {
+			bankId: receivingBankId,
+			accountName: accountName.trim(),
+			accountNumber: isWallet ? '' : accountNumber.trim(),
+			branch: branch.trim(),
+			handle: isWallet ? handle.trim() : ''
+		};
+	}
+
+	function clearAccountForm() {
+		accountName = '';
+		accountNumber = '';
+		branch = '';
+		handle = '';
+	}
+
+	function addAccount() {
+		const result = readAccountForm();
+		if (typeof result === 'string') {
+			error = result;
+			return;
+		}
+		error = '';
+		accounts = [...accounts, result];
+		clearAccountForm();
+	}
+
+	function removeAccount(index: number) {
+		accounts = accounts.filter((_, i) => i !== index);
+	}
 
 	const cover = $derived(COVER_PRESETS.find((c) => c.id === coverId) ?? COVER_PRESETS[0]);
 	const goalCents = $derived(dollarsToGoalCents(goalInput));
@@ -81,17 +133,19 @@
 
 	function goPreview2(event: Event) {
 		event.preventDefault();
-		if (accountName.trim().length < 2) {
-			error = 'Add the account name exactly as your bank shows it.';
-			return;
-		}
-		if (isWallet) {
-			if (handle.trim().length < 4) {
-				error = 'Add the wallet handle or number donors should send to.';
+		// A half-filled form on Continue is almost always "I typed my details and
+		// didn't press Save" — fold it in rather than losing it or nagging.
+		if (!formEmpty) {
+			const result = readAccountForm();
+			if (typeof result === 'string') {
+				error = result;
 				return;
 			}
-		} else if (accountNumber.replace(/\D/g, '').length < 6) {
-			error = 'Add the account number donors should send to.';
+			accounts = [...accounts, result];
+			clearAccountForm();
+		}
+		if (accounts.length === 0) {
+			error = 'Add at least one account or wallet donors can send to.';
 			return;
 		}
 		error = '';
@@ -110,13 +164,7 @@
 			goalCents,
 			coverImage: cover.image,
 			coverAlt: cover.alt,
-			receiving: {
-				bankId: receivingBankId,
-				accountName: accountName.trim(),
-				accountNumber: isWallet ? '' : accountNumber.trim(),
-				branch: branch.trim(),
-				handle: isWallet ? handle.trim() : ''
-			}
+			receivingAccounts: accounts
 		});
 		publishing = false;
 		step = 'done';
@@ -271,8 +319,29 @@
 				<p class="step-lede">
 					Donors see these details only after they start chipping in — never on your public campaign
 					page, and never in a WhatsApp link preview. ChipIn never touches this money; donors send
-					it straight to you.
+					it straight to you. Add every account you can receive on — when a donor banks where you
+					do, their transfer usually lands the same day instead of taking days.
 				</p>
+
+				{#if accounts.length > 0}
+					<ul class="account-list" aria-label="Accounts donors can send to">
+						{#each accounts as account, index (index)}
+							{@const bank = getBank(account.bankId)}
+							<li>
+								{#if bank}
+									<BankMark {bank} size="sm" />
+								{/if}
+								<div class="account-text">
+									<strong>{bank?.shortName ?? account.bankId}</strong>
+									<span>{account.accountName} · {account.handle || account.accountNumber}</span>
+								</div>
+								<button type="button" class="remove" onclick={() => removeAccount(index)}>
+									Remove
+								</button>
+							</li>
+						{/each}
+					</ul>
+				{/if}
 
 				<fieldset>
 					<legend>Your bank or wallet</legend>
@@ -317,6 +386,10 @@
 						<input type="text" bind:value={branch} placeholder="Where the account is held" />
 					</label>
 				{/if}
+
+				<button type="button" class="add-account" onclick={addAccount}>
+					Save this account · add another
+				</button>
 
 				<p class="gate-warning">
 					<strong>Prototype only.</strong> Use fictional details. This build stores campaigns in your
@@ -619,6 +692,60 @@
 
 	.bank-option span {
 		overflow-wrap: anywhere;
+	}
+
+	.account-list {
+		display: grid;
+		gap: var(--space-2);
+		margin: 0 0 var(--space-2);
+		padding: 0;
+		list-style: none;
+	}
+
+	.account-list li {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		padding: var(--space-3);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-sm);
+		background: var(--paper);
+	}
+
+	.account-text {
+		display: grid;
+		gap: 2px;
+		min-width: 0;
+		font-size: var(--text-sm);
+	}
+
+	.account-text span {
+		color: var(--ink-60);
+		overflow-wrap: anywhere;
+	}
+
+	.remove {
+		margin-left: auto;
+		min-height: 40px;
+		padding: 0 var(--space-3);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-sm);
+		background: transparent;
+		color: var(--ink-60);
+		font-size: var(--text-xs);
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.add-account {
+		min-height: 48px;
+		border: 1px dashed var(--ink);
+		border-radius: var(--radius-sm);
+		background: transparent;
+		color: var(--ink);
+		font-size: var(--text-sm);
+		font-weight: 700;
+		cursor: pointer;
 	}
 
 	.gate-warning {

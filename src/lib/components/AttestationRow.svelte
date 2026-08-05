@@ -50,6 +50,9 @@
 	);
 
 	const senderBank = $derived(report.senderBankId ? getBank(report.senderBankId) : null);
+	// Which of the host's accounts the donor targeted — tells the host which
+	// statement to reconcile against when they receive at more than one place.
+	const recipientBank = $derived(getBank(recipientBankId));
 	const rail = $derived(
 		report.senderBankId ? resolveRail(report.senderBankId, recipientBankId) : null
 	);
@@ -115,7 +118,13 @@
 			{#if senderBank}
 				<p class="meta sender">
 					<BankMark bank={senderBank} size="sm" />
-					<span>Donor says they sent from {senderBank.name}</span>
+					<span>
+						{#if recipientBank && recipientBank.id !== 'other'}
+							Donor says they sent from {senderBank.name} to your {recipientBank.shortName} account
+						{:else}
+							Donor says they sent from {senderBank.name}
+						{/if}
+					</span>
 				</p>
 			{/if}
 		</div>

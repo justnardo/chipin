@@ -6,8 +6,9 @@
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import ReceiptScanner from '$lib/components/ReceiptScanner.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
+	import BankMark from '$lib/components/BankMark.svelte';
 	import { getBank, resolveRail, settlementWindow } from '$lib/prototype/banks';
-	import { getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
+	import { getCampaign, usableAccounts, type PrototypeCampaign } from '$lib/prototype/campaigns';
 	import { screenshotContributed, type ExtractedReceipt } from '$lib/prototype/receipt';
 	import { addReport, dollarsToCents, formatBsd, type ReportSource } from '$lib/prototype/reports';
 
@@ -32,11 +33,33 @@
 	/** Values the screenshot supplied, so we can tell what the donor then changed. */
 	let prefilled = $state<Record<string, string>>({});
 
+	/** Which of the host's accounts the donor is sending to. */
+	let accountIndex = $state(0);
+
+	const accounts = $derived(campaign ? usableAccounts(campaign) : []);
+	const selectedAccount = $derived(accounts[accountIndex] ?? accounts[0] ?? null);
+
 	const senderBank = $derived(senderBankId ? getBank(senderBankId) : null);
 	const rail = $derived(
-		campaign && senderBankId ? resolveRail(senderBankId, campaign.receiving.bankId) : null
+		selectedAccount && senderBankId ? resolveRail(senderBankId, selectedAccount.bankId) : null
 	);
 	const window_ = $derived(rail ? settlementWindow(rail) : null);
+
+	/**
+	 * The host account at the donor's own bank, when it exists and is not the one
+	 * currently selected. Same-bank transfers usually land the same day, so once
+	 * the donor tells us where they bank we can point at the faster option — a
+	 * suggestion only, never an auto-switch, because the donor may have reasons
+	 * (transfer limits, which of their accounts has funds) we cannot see.
+	 */
+	const sameBankIndex = $derived(
+		senderBankId && senderBankId !== 'other'
+			? accounts.findIndex((a) => a.bankId === senderBankId)
+			: -1
+	);
+	const sameBankSuggestion = $derived(
+		sameBankIndex >= 0 && sameBankIndex !== accountIndex ? accounts[sameBankIndex] : null
+	);
 
 	/** Fields the donor edited after the scanner filled them in. */
 	const editedFields = $derived(
@@ -136,6 +159,7 @@
 			transferDate,
 			bankReference: bankReference.trim(),
 			senderBankId,
+			recipientBankId: selectedAccount?.bankId ?? '',
 			source: reportSource,
 			editedFields
 		});
@@ -243,9 +267,54 @@
 					</p>
 				</div>
 
-				{#if campaign.receiving.accountNumber || campaign.receiving.handle}
+				{#if selectedAccount}
+					{#if accounts.length > 1}
+						<div class="card account-picker">
+							<h2>Pick the bank that works for you</h2>
+							<p>
+								{campaign.hostName} can receive at {accounts.length} places. Sending inside your own bank
+								usually arrives the same day.
+							</p>
+							<div class="account-options" role="group" aria-label="Host's receiving accounts">
+								{#each accounts as account, index (index)}
+									{@const bank = getBank(account.bankId)}
+									<button
+										type="button"
+										class="account-option"
+										class:selected={index === accountIndex}
+										aria-pressed={index === accountIndex}
+										onclick={() => (accountIndex = index)}
+									>
+										{#if bank}
+											<BankMark {bank} size="sm" />
+										{/if}
+										<span class="account-option-text">
+											<strong>{bank?.shortName ?? account.bankId}</strong>
+											{#if senderBankId && account.bankId === senderBankId}
+												<em>Same bank as you — usually same day</em>
+											{/if}
+										</span>
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
+
+					{#if sameBankSuggestion}
+						{@const suggestedBank = getBank(sameBankSuggestion.bankId)}
+						<div class="same-bank-tip" role="status">
+							<p>
+								You bank with {suggestedBank?.shortName ?? sameBankSuggestion.bankId}, and so does
+								{campaign.hostName} — sending there usually arrives the same day instead of taking days.
+							</p>
+							<button type="button" onclick={() => (accountIndex = sameBankIndex)}>
+								Use their {suggestedBank?.shortName ?? sameBankSuggestion.bankId} account
+							</button>
+						</div>
+					{/if}
+
 					<BankTransferPortal
-						receiving={campaign.receiving}
+						receiving={selectedAccount}
 						hostName={campaign.hostName}
 						amountCents={pledgeCents}
 						bind:senderBankId
@@ -447,6 +516,70 @@
 	.stack {
 		display: grid;
 		gap: var(--space-5);
+	}
+
+	.account-options {
+		display: grid;
+		gap: var(--space-2);
+		margin-top: var(--space-4);
+	}
+
+	.account-option {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		min-height: 56px;
+		padding: var(--space-3);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-sm);
+		background: var(--paper);
+		color: var(--ink);
+		font-size: var(--text-sm);
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.account-option.selected {
+		border-color: var(--ink);
+		box-shadow: inset 0 0 0 1px var(--ink);
+	}
+
+	.account-option-text {
+		display: grid;
+		gap: 2px;
+	}
+
+	.account-option-text em {
+		color: var(--aqua-deep);
+		font-size: var(--text-xs);
+		font-style: normal;
+		font-weight: 700;
+	}
+
+	.same-bank-tip {
+		display: grid;
+		gap: var(--space-3);
+		padding: var(--space-4);
+		border-radius: var(--radius-md);
+		background: var(--gold-tint);
+	}
+
+	.same-bank-tip p {
+		margin: 0;
+		font-size: var(--text-sm);
+	}
+
+	.same-bank-tip button {
+		min-height: 44px;
+		justify-self: start;
+		padding: 0 var(--space-4);
+		border: 1px solid var(--ink);
+		border-radius: var(--radius-sm);
+		background: var(--paper);
+		color: var(--ink);
+		font-size: var(--text-sm);
+		font-weight: 700;
+		cursor: pointer;
 	}
 
 	.prefill-note {

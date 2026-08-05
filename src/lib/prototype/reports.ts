@@ -36,6 +36,13 @@ export type PrototypeReport = {
 	revoked: boolean;
 	/** Which bank or wallet the donor says they sent from. */
 	senderBankId: string;
+	/**
+	 * Which of the host's receiving accounts the donor said they sent to.
+	 * Hosts can list several; the settlement window the host is shown depends on
+	 * the sender/recipient pair, so guessing "the first account" would give wrong
+	 * wait-time guidance whenever the donor picked another one.
+	 */
+	recipientBankId: string;
 	source: ReportSource;
 	/** Fields the donor edited after the screenshot filled them in. */
 	editedFields: string[];
@@ -70,6 +77,7 @@ function normalize(
 		clarificationReply: report.clarificationReply ?? '',
 		revoked: report.revoked ?? false,
 		senderBankId: report.senderBankId ?? '',
+		recipientBankId: report.recipientBankId ?? '',
 		source: report.source ?? 'manual',
 		editedFields: report.editedFields ?? [],
 		createdAt: report.createdAt ?? new Date().toISOString(),
@@ -118,11 +126,13 @@ export function addReport(
 		| 'updatedAt'
 		| 'note'
 		| 'senderBankId'
+		| 'recipientBankId'
 		| 'source'
 		| 'editedFields'
 	> & {
 		note?: string;
 		senderBankId?: string;
+		recipientBankId?: string;
 		source?: ReportSource;
 		editedFields?: string[];
 	}
@@ -132,6 +142,7 @@ export function addReport(
 		...input,
 		note: input.note ?? '',
 		senderBankId: input.senderBankId ?? '',
+		recipientBankId: input.recipientBankId ?? '',
 		source: input.source ?? 'manual',
 		editedFields: input.editedFields ?? [],
 		id: prototypeId('rpt'),

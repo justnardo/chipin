@@ -36,8 +36,22 @@ export type PrototypeCampaign = {
 	coverAlt: string;
 	createdAt: string;
 	source: 'builtin' | 'session';
-	receiving: ReceivingAccount;
+	/**
+	 * Every channel the host can receive on, in the order they added them.
+	 * Hosts routinely hold accounts at more than one institution; letting the
+	 * donor pick the one where THEY bank turns an interbank transfer (2-5
+	 * business days) into a same-bank one (usually same day). The donor-facing
+	 * picker only appears when there is more than one usable entry.
+	 */
+	receivingAccounts: ReceivingAccount[];
 };
+
+/** An account is usable in the portal only if it has somewhere to send money. */
+export function usableAccounts(campaign: PrototypeCampaign): ReceivingAccount[] {
+	return campaign.receivingAccounts.filter(
+		(a) => a.accountNumber.trim().length > 0 || a.handle.trim().length > 0
+	);
+}
 
 const STORAGE_KEY = 'chipin.prototype.campaigns.v1';
 
@@ -81,14 +95,24 @@ export const RAINBOW_CAMPAIGN: PrototypeCampaign = {
 	coverAlt: COVER_PRESETS[0].alt,
 	createdAt: '2026-07-22T12:00:00.000Z',
 	source: 'builtin',
-	// Fictional. Not a real account at any institution.
-	receiving: {
-		bankId: 'bob',
-		accountName: 'Rainbow Community Centre (DEMO)',
-		accountNumber: '0000 1234 5678',
-		branch: 'Demo Branch — Nassau',
-		handle: ''
-	}
+	// Fictional. Not real accounts at any institution. Two channels on purpose,
+	// so the donor-side account picker is exercised by the flagship demo.
+	receivingAccounts: [
+		{
+			bankId: 'bob',
+			accountName: 'Rainbow Community Centre (DEMO)',
+			accountNumber: '0000 1234 5678',
+			branch: 'Demo Branch — Nassau',
+			handle: ''
+		},
+		{
+			bankId: 'sanddollar',
+			accountName: 'Rainbow Community Centre (DEMO)',
+			accountNumber: '',
+			branch: '',
+			handle: 'rainbow-centre-demo'
+		}
+	]
 };
 
 export const EMPTY_RECEIVING: ReceivingAccount = {
@@ -99,11 +123,19 @@ export const EMPTY_RECEIVING: ReceivingAccount = {
 	handle: ''
 };
 
+/** Shape of records written by older builds, kept only for migration. */
+type StoredCampaign = PrototypeCampaign & { receiving?: ReceivingAccount };
+
 function loadSessionCampaigns(): PrototypeCampaign[] {
-	// Campaigns stored before receiving details existed must not break the portal.
-	return readList<PrototypeCampaign>(STORAGE_KEY).map((c) => ({
+	// Two generations of stored data must not break the portal: campaigns saved
+	// before receiving details existed, and campaigns saved when there was a
+	// single `receiving` object rather than a list.
+	return readList<StoredCampaign>(STORAGE_KEY).map(({ receiving, ...c }) => ({
 		...c,
-		receiving: { ...EMPTY_RECEIVING, ...(c.receiving ?? {}) }
+		receivingAccounts: (c.receivingAccounts ?? (receiving ? [receiving] : [])).map((a) => ({
+			...EMPTY_RECEIVING,
+			...a
+		}))
 	}));
 }
 
@@ -131,14 +163,14 @@ export function listSessionCampaigns(): PrototypeCampaign[] {
 }
 
 export function saveCampaign(
-	input: Omit<PrototypeCampaign, 'slug' | 'createdAt' | 'source' | 'receiving'> & {
+	input: Omit<PrototypeCampaign, 'slug' | 'createdAt' | 'source' | 'receivingAccounts'> & {
 		slug?: string;
-		receiving?: ReceivingAccount;
+		receivingAccounts?: ReceivingAccount[];
 	}
 ): PrototypeCampaign {
 	const campaign: PrototypeCampaign = {
 		...input,
-		receiving: input.receiving ?? { ...EMPTY_RECEIVING },
+		receivingAccounts: input.receivingAccounts ?? [],
 		slug: input.slug || slugifyTitle(input.title),
 		createdAt: new Date().toISOString(),
 		source: 'session'
