@@ -79,17 +79,21 @@ what a custom domain is.
 
 ## Putting the prototype on a custom domain
 
-`static/_headers` and `static/_redirects` are copied to the output root by the build. Cloudflare
-Pages and Netlify read both; GitHub Pages ignores both and cannot set response headers at all,
-which is why it is the wrong host for anything past this prototype.
+Deployed on **Vercel** from the connected GitHub repo. `vercel.json` carries the pieces Vercel
+needs: `outputDirectory` (adapter-static writes to `build/`, not the `.vercel/output` the
+SvelteKit preset expects), a catch-all rewrite so browser-created slugs and tokens resolve, and
+the response headers.
 
-**Cloudflare Pages**, with the domain already at Cloudflare, needs no DNS records typed by hand:
+Vercel ignores `static/_headers` and `static/_redirects` — those are Cloudflare Pages and Netlify
+conventions. They stay in the tree so this build still deploys correctly on either without
+edits; the two files and `vercel.json` say the same thing in three dialects. GitHub Pages reads
+neither and cannot set response headers at all, which is why it is the wrong host for anything
+past this prototype.
 
-1. Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git → this repo.
-2. Framework preset **SvelteKit**, build command `npm run build`, output directory `build`.
-   Leave `BASE_PATH` unset.
-3. Deploy, confirm the `*.pages.dev` URL works, then Custom domains → Set up a custom domain.
-   Cloudflare writes the DNS record itself because the zone is in the same account.
+To attach the domain: Vercel project → Settings → Domains → add it, then create the record it
+shows you in the Cloudflare dashboard (Cloudflare stays the registrar and DNS; Vercel serves).
+Set the DNS record to **DNS only**, not proxied — Vercel issues its own certificate, and
+Cloudflare's orange-cloud proxy in front of it causes redirect loops.
 
 Verify after the first deploy — a deep link is the thing that breaks on a misconfigured static
 host, and headers are easy to get wrong silently:

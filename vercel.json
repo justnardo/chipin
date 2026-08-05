@@ -1,0 +1,44 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+
+	"//": "adapter-static writes to build/, but Vercel's SvelteKit preset looks for adapter-vercel output in .vercel/output and then falls back to public/. Without this the build succeeds and the deploy fails. Delete outputDirectory when swapping to adapter-vercel for the dynamic phase; the headers and rewrite below move into hooks/handlers at that point too, since Vercel ignores static/_headers and static/_redirects (those are for Cloudflare Pages and Netlify).",
+	"outputDirectory": "build",
+
+	"rewrites": [
+		{
+			"//": "Campaign slugs and donor status tokens are created in the browser, so nothing past / can be prerendered. Vercel checks the filesystem before rewrites, so real assets under /_app and /ocr still win.",
+			"source": "/(.*)",
+			"destination": "/index.html"
+		}
+	],
+
+	"headers": [
+		{
+			"source": "/(.*)",
+			"headers": [
+				{
+					"//": "The header the open disclosure decision needs, in place before any real receiving detail can reach it.",
+					"key": "Cache-Control",
+					"value": "private, no-store"
+				},
+				{
+					"//": "A campaign URL carries a slug and a donor status URL carries a token; neither should follow the visitor onward.",
+					"key": "Referrer-Policy",
+					"value": "no-referrer"
+				},
+				{ "key": "X-Content-Type-Options", "value": "nosniff" },
+				{ "key": "X-Frame-Options", "value": "DENY" }
+			]
+		},
+		{
+			"//": "Fingerprinted by the build — new content means a new filename, so this is safe.",
+			"source": "/_app/immutable/(.*)",
+			"headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+		},
+		{
+			"//": "~15MB OCR engine, versioned with the dependency. Re-fetching it per scan would hurt on mobile data.",
+			"source": "/ocr/(.*)",
+			"headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+		}
+	]
+}
