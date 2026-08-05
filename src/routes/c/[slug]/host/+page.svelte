@@ -74,7 +74,7 @@
 
 <div class="prototype-banner">
 	<strong>Host prototype</strong>
-	<span>Reports live in this browser session only. Nothing is saved to a server.</span>
+	<span>Reports live in this browser on this device. Nothing is saved to a server.</span>
 </div>
 
 <header class="site-header">
@@ -90,7 +90,7 @@
 <main>
 	{#if !campaign}
 		<section class="empty">
-			<p>Campaign not found in this browser session.</p>
+			<p>Campaign not found in this browser.</p>
 			<a class="primary" href={resolve('/start')}>Start a campaign</a>
 		</section>
 	{:else}
@@ -117,7 +117,7 @@
 			<h2 id="inbox-heading">Reported transfers</h2>
 			{#if reports.length === 0}
 				<div class="empty">
-					<p>No reports in this browser session yet.</p>
+					<p>No reports in this browser yet.</p>
 					<a class="primary" href={resolve('/c/[slug]/chip-in', { slug: campaign.slug })}
 						>Run the chip-in prototype</a
 					>

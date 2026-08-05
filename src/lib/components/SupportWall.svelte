@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { formatBsd } from '$lib/prototype/reports';
 	import {
 		addHostReply,
 		addSupport,
@@ -101,9 +100,6 @@
 				<div class="thread">
 					<p class="meta">
 						<strong>{entry.name}</strong>
-						{#if entry.amountCents}
-							<span>· chipped in {formatBsd(entry.amountCents)}</span>
-						{/if}
 					</p>
 					<p class="body">{entry.message}</p>
 

@@ -1,0 +1,67 @@
+name: Deploy prototype to GitHub Pages
+
+# Manual only, on purpose. This publishes the prototype to the public internet, so
+# it should be a deliberate act rather than something a push triggers. Run it from
+# Actions -> "Deploy prototype to GitHub Pages" -> "Run workflow".
+#
+# Before the first run, set Settings -> Pages -> Source to "GitHub Actions".
+#
+# What goes live is fictional prototype data behind prototype banners. Receiving
+# details are demo values -- see the build gates in README.md. Do not point this at
+# a build containing real receiving-account details while the disclosure decision in
+# docs/stage-0/THREAT-MODEL.md is still open.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; let a newer one wait rather than cancel mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        # A project site is served from /<repo>, so absolute paths need that prefix.
+        run: npm run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+
+      - name: Confirm OCR assets shipped
+        run: |
+          test -s build/ocr/worker.min.js
+          test -s build/ocr/eng.traineddata.gz
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

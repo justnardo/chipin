@@ -4,7 +4,7 @@ import { addHostReply, addSupport, loadSupport } from './support';
 const slug = 'test-campaign';
 
 function clearSession() {
-	sessionStorage.clear();
+	localStorage.clear();
 }
 
 describe('prototype support wall', () => {

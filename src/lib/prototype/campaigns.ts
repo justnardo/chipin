@@ -1,5 +1,7 @@
 /** Client-only campaign drafts for the Stage 0 / GoFundMe-style prototype. */
 
+import { readList, writeList } from './storage';
+
 export type CampaignCategory =
 	'Community' | 'Medical' | 'Education' | 'Funeral' | 'Emergency' | 'Other';
 
@@ -97,28 +99,16 @@ export const EMPTY_RECEIVING: ReceivingAccount = {
 	handle: ''
 };
 
-function canUseStorage(): boolean {
-	return typeof sessionStorage !== 'undefined';
-}
-
 function loadSessionCampaigns(): PrototypeCampaign[] {
-	if (!canUseStorage()) return [];
-	try {
-		const raw = sessionStorage.getItem(STORAGE_KEY);
-		if (!raw) return [];
-		// Campaigns stored before receiving details existed must not break the portal.
-		return (JSON.parse(raw) as PrototypeCampaign[]).map((c) => ({
-			...c,
-			receiving: { ...EMPTY_RECEIVING, ...(c.receiving ?? {}) }
-		}));
-	} catch {
-		return [];
-	}
+	// Campaigns stored before receiving details existed must not break the portal.
+	return readList<PrototypeCampaign>(STORAGE_KEY).map((c) => ({
+		...c,
+		receiving: { ...EMPTY_RECEIVING, ...(c.receiving ?? {}) }
+	}));
 }
 
 function saveSessionCampaigns(campaigns: PrototypeCampaign[]) {
-	if (!canUseStorage()) return;
-	sessionStorage.setItem(STORAGE_KEY, JSON.stringify(campaigns));
+	writeList(STORAGE_KEY, campaigns);
 }
 
 export function slugifyTitle(title: string): string {
