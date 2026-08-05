@@ -1,5 +1,7 @@
 /** Client-only fictional transfer reports for the Stage 0 UI prototype. */
 
+import { prototypeId, readList, writeList } from './storage';
+
 export type ReportStatus =
 	| 'submitted'
 	| 'clarification_requested'
@@ -44,10 +46,6 @@ export type PrototypeReport = {
 const STORAGE_KEY = 'chipin.prototype.reports.v2';
 const LEGACY_KEY = 'chipin.prototype.reports.v1';
 
-function canUseStorage(): boolean {
-	return typeof sessionStorage !== 'undefined';
-}
-
 function createToken(): string {
 	const bytes = new Uint8Array(18);
 	crypto.getRandomValues(bytes);
@@ -80,27 +78,19 @@ function normalize(
 }
 
 function saveAll(reports: PrototypeReport[]) {
-	if (!canUseStorage()) return;
-	sessionStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+	writeList(STORAGE_KEY, reports);
 }
 
 function loadAll(): PrototypeReport[] {
-	if (!canUseStorage()) return [];
-	try {
-		const raw = sessionStorage.getItem(STORAGE_KEY);
-		if (raw) {
-			return (JSON.parse(raw) as PrototypeReport[]).map((r) => normalize(r));
-		}
+	const current = readList<PrototypeReport>(STORAGE_KEY);
+	if (current.length > 0) return current.map((r) => normalize(r));
 
-		const legacy = sessionStorage.getItem(LEGACY_KEY);
-		if (!legacy) return [];
-		const migrated = (JSON.parse(legacy) as PrototypeReport[]).map((r) => normalize(r));
-		saveAll(migrated);
-		sessionStorage.removeItem(LEGACY_KEY);
-		return migrated;
-	} catch {
-		return [];
-	}
+	const legacy = readList<PrototypeReport>(LEGACY_KEY);
+	if (legacy.length === 0) return [];
+	const migrated = legacy.map((r) => normalize(r));
+	saveAll(migrated);
+	writeList(LEGACY_KEY, []);
+	return migrated;
 }
 
 export function loadReports(campaignSlug: string): PrototypeReport[] {
@@ -144,7 +134,7 @@ export function addReport(
 		senderBankId: input.senderBankId ?? '',
 		source: input.source ?? 'manual',
 		editedFields: input.editedFields ?? [],
-		id: `rpt_${Math.random().toString(36).slice(2, 10)}`,
+		id: prototypeId('rpt'),
 		statusToken: createToken(),
 		status: 'submitted',
 		attestedCents: null,

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { getBank } from '$lib/prototype/banks';
 	import { extractReceipt, extractionSummary, type ExtractedReceipt } from '$lib/prototype/receipt';
 	import { formatBsd } from '$lib/prototype/reports';
@@ -55,10 +56,11 @@
 			// Loaded on demand so the OCR engine never lands in the main bundle.
 			const { createWorker } = await import('tesseract.js');
 			// Served from ChipIn's own origin, not a public CDN — see scripts/sync_ocr_assets.mjs.
+			// `base` keeps these correct when the site is hosted under a subpath.
 			worker = await createWorker('eng', undefined, {
-				workerPath: '/ocr/worker.min.js',
-				corePath: '/ocr',
-				langPath: '/ocr',
+				workerPath: `${base}/ocr/worker.min.js`,
+				corePath: `${base}/ocr`,
+				langPath: `${base}/ocr`,
 				logger: (m: { status: string; progress: number }) => {
 					if (m.status === 'recognizing text') progress = Math.round(m.progress * 100);
 				}

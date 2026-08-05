@@ -4,7 +4,7 @@ import { addUpdate, formatUpdateDate, loadUpdates } from './updates';
 const slug = 'test-campaign';
 
 describe('prototype organizer updates', () => {
-	beforeEach(() => sessionStorage.clear());
+	beforeEach(() => localStorage.clear());
 
 	it('adds and loads updates for the campaign', () => {
 		const first = addUpdate({ campaignSlug: slug, title: 'Launched', body: 'We are live.' });

@@ -75,7 +75,9 @@
 
 <div class="prototype-banner">
 	<strong>Your campaign page</strong>
-	<span>Saved in this browser only. Share the link on this device/session for the prototype.</span>
+	<span
+		>Saved in this browser on this device. Links work in any tab here, but not on another phone.</span
+	>
 </div>
 
 <header class="site-header">
@@ -89,7 +91,7 @@
 	{:else if !campaign}
 		<section class="missing">
 			<h1>Campaign not found</h1>
-			<p>This prototype page may be from another browser session.</p>
+			<p>This prototype page may be from another device or browser.</p>
 			<a class="primary" href={resolve('/start')}>Start a campaign</a>
 		</section>
 	{:else}

@@ -55,6 +55,31 @@ The OCR engine is copied out of `node_modules` into `static/ocr/` (gitignored) b
 `npm run sync:ocr`, which `predev` and `prebuild` run automatically. It is served from ChipIn's
 own origin rather than a public CDN so no third party sees that a donor is scanning a receipt.
 
+## Putting the prototype on a phone
+
+`npm run build` writes a static site to `build/` — plain files, no server, because the prototype
+has no server side. Host it anywhere:
+
+- **GitHub Pages** — set Settings → Pages → Source to "GitHub Actions", then run the
+  **Deploy prototype to GitHub Pages** workflow from the Actions tab. It is manual on purpose:
+  publishing to the open internet should be a deliberate act, not a side effect of a push.
+- **Netlify / Vercel / any static host** — drag `build/` in, or point the host at
+  `npm run build` with a publish directory of `build`.
+
+A project site served from a subpath needs `BASE_PATH` set at build time (the Pages workflow
+does this): `BASE_PATH=/chipin npm run build`. Leave it unset for root-hosted deploys.
+
+Swap `@sveltejs/adapter-static` for a server adapter when real routes arrive — closing the
+disclosure decision requires `Cache-Control: private, no-store` on the response carrying
+receiving details, which static hosting cannot set.
+
+## Where prototype data lives
+
+Campaigns, reports, support notes, and updates are stored in the visitor's own `localStorage`.
+There is no server, no account, and no sync between devices. A donor status link opens in any
+tab on the same device; it will not open on a different phone. Clearing site data clears
+everything.
+
 ## Build gates
 
 - Do not add real receiving-account details until the disclosure threat-model decision is closed.

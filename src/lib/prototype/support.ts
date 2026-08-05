@@ -1,26 +1,33 @@
 /** Client-only words of support for the GoFundMe-style campaign wall. */
 
+import { prototypeId, readList, writeList } from './storage';
+
 export type SupportReply = {
 	id: string;
 	message: string;
 	createdAt: string;
 };
 
+/**
+ * A public note of encouragement. Deliberately carries NO amount.
+ *
+ * The wall used to render "chipped in BSD $100" beside a self-typed name. Nothing
+ * backed that number: the author was anonymous, no transfer report was linked, and
+ * no host had attested anything. It contradicted Product Principle 3 on the same
+ * page that states public totals move only on host attestation, and it was the
+ * cheapest way to fake momentum on a campaign. Amounts belong to the attested
+ * total and nowhere else.
+ */
 export type SupportMessage = {
 	id: string;
 	campaignSlug: string;
 	name: string;
 	message: string;
-	amountCents: number | null;
 	createdAt: string;
 	replies: SupportReply[];
 };
 
 const STORAGE_KEY = 'chipin.prototype.support.v1';
-
-function canUseStorage(): boolean {
-	return typeof sessionStorage !== 'undefined';
-}
 
 function normalize(
 	entry: Partial<SupportMessage> & Pick<SupportMessage, 'id' | 'campaignSlug'>
@@ -30,25 +37,18 @@ function normalize(
 		campaignSlug: entry.campaignSlug,
 		name: entry.name ?? 'Anonymous',
 		message: entry.message ?? '',
-		amountCents: entry.amountCents ?? null,
 		createdAt: entry.createdAt ?? new Date().toISOString(),
 		replies: entry.replies ?? []
 	};
 }
 
 function loadAll(): SupportMessage[] {
-	if (!canUseStorage()) return [];
-	try {
-		const raw = sessionStorage.getItem(STORAGE_KEY);
-		return raw ? (JSON.parse(raw) as SupportMessage[]).map((m) => normalize(m)) : [];
-	} catch {
-		return [];
-	}
+	// normalize() also strips the amount off anything stored before it was removed.
+	return readList<SupportMessage>(STORAGE_KEY).map((m) => normalize(m));
 }
 
 function saveAll(messages: SupportMessage[]) {
-	if (!canUseStorage()) return;
-	sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+	writeList(STORAGE_KEY, messages);
 }
 
 export function loadSupport(campaignSlug: string): SupportMessage[] {
@@ -61,14 +61,12 @@ export function addSupport(input: {
 	campaignSlug: string;
 	name: string;
 	message: string;
-	amountCents?: number | null;
 }): SupportMessage {
 	const entry = normalize({
-		id: `sup_${Math.random().toString(36).slice(2, 10)}`,
+		id: prototypeId('sup'),
 		campaignSlug: input.campaignSlug,
 		name: input.name.trim() || 'Anonymous',
 		message: input.message.trim(),
-		amountCents: input.amountCents ?? null,
 		createdAt: new Date().toISOString(),
 		replies: []
 	});
@@ -83,7 +81,7 @@ export function addHostReply(id: string, message: string): SupportMessage | null
 	const index = all.findIndex((m) => m.id === id);
 	if (index < 0) return null;
 	const reply: SupportReply = {
-		id: `rep_${Math.random().toString(36).slice(2, 10)}`,
+		id: prototypeId('rep'),
 		message: message.trim(),
 		createdAt: new Date().toISOString()
 	};
@@ -102,7 +100,6 @@ export const RAINBOW_SUPPORT_SEED: SupportMessage[] = [
 		campaignSlug: 'rainbow',
 		name: 'Keisha M.',
 		message: 'The centre meant everything to my nephew. Glad to chip in.',
-		amountCents: 10000,
 		createdAt: '2026-07-30T14:00:00.000Z',
 		replies: [
 			{
@@ -117,7 +114,6 @@ export const RAINBOW_SUPPORT_SEED: SupportMessage[] = [
 		campaignSlug: 'rainbow',
 		name: 'Anonymous',
 		message: 'Praying the doors open again soon. One love.',
-		amountCents: 5000,
 		createdAt: '2026-07-29T18:00:00.000Z',
 		replies: []
 	},
@@ -126,7 +122,6 @@ export const RAINBOW_SUPPORT_SEED: SupportMessage[] = [
 		campaignSlug: 'rainbow',
 		name: 'Marcus T.',
 		message: 'For the homework club — keep going.',
-		amountCents: 20000,
 		createdAt: '2026-07-28T11:00:00.000Z',
 		replies: []
 	}

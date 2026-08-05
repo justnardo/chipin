@@ -1,5 +1,7 @@
 /** Client-only organizer updates for the GoFundMe-style campaign feed. */
 
+import { prototypeId, readList, writeList } from './storage';
+
 export type CampaignUpdate = {
 	id: string;
 	campaignSlug: string;
@@ -10,23 +12,12 @@ export type CampaignUpdate = {
 
 const STORAGE_KEY = 'chipin.prototype.updates.v1';
 
-function canUseStorage(): boolean {
-	return typeof sessionStorage !== 'undefined';
-}
-
 function loadAll(): CampaignUpdate[] {
-	if (!canUseStorage()) return [];
-	try {
-		const raw = sessionStorage.getItem(STORAGE_KEY);
-		return raw ? (JSON.parse(raw) as CampaignUpdate[]) : [];
-	} catch {
-		return [];
-	}
+	return readList<CampaignUpdate>(STORAGE_KEY);
 }
 
 function saveAll(updates: CampaignUpdate[]) {
-	if (!canUseStorage()) return;
-	sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updates));
+	writeList(STORAGE_KEY, updates);
 }
 
 export function loadUpdates(campaignSlug: string): CampaignUpdate[] {
@@ -41,7 +32,7 @@ export function addUpdate(input: {
 	body: string;
 }): CampaignUpdate {
 	const entry: CampaignUpdate = {
-		id: `upd_${Math.random().toString(36).slice(2, 10)}`,
+		id: prototypeId('upd'),
 		campaignSlug: input.campaignSlug,
 		title: input.title.trim(),
 		body: input.body.trim(),

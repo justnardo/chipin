@@ -19,7 +19,7 @@
 			imageAlt: RAINBOW_CAMPAIGN.coverAlt,
 			received: 5240,
 			goal: 8000,
-			href: '/c/rainbow'
+			href: resolve('/c/rainbow')
 		},
 		{
 			title: 'A fresh start for the Bain Town reading room',
@@ -67,7 +67,9 @@
 				...campaign,
 				received,
 				goal: campaign.goalCents / 100,
-				href: `/c/${campaign.slug}`
+				// Must go through resolve(): a bare `/c/<slug>` ignores paths.base and
+				// 404s on any subpath-hosted deploy.
+				href: resolve('/c/[slug]', { slug: campaign.slug })
 			};
 		});
 	});
@@ -114,7 +116,7 @@
 				<p>Saved only on this device session until we add real accounts.</p>
 			</div>
 			<div class="grid mine-grid">
-				{#each mine as campaign (campaign.href)}
+				{#each mine as campaign (campaign.slug)}
 					<CampaignCard
 						title={campaign.title}
 						category={campaign.category}
@@ -155,7 +157,7 @@
 			</div>
 		{:else}
 			<div class="grid">
-				{#each filtered as campaign (campaign.href)}
+				{#each filtered as campaign (campaign.title)}
 					<CampaignCard {...campaign} />
 				{/each}
 			</div>

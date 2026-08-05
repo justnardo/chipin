@@ -82,7 +82,7 @@
 
 <div class="prototype-banner">
 	<strong>Donor status link</strong>
-	<span>Prototype only. Anyone with this link can view this report in this browser session.</span>
+	<span>Prototype only. Anyone using this browser can open this link and view the report.</span>
 </div>
 
 <header class="site-header">
@@ -103,7 +103,7 @@
 			<StatusChip label="Link not found" tone="disputed" />
 			<h1>We could not open this status link</h1>
 			<p>
-				It may be from another browser session, or the report was never created here. Run the
+				It may be from another device or browser, or the report was never created here. Run the
 				chip-in prototype again to get a fresh link.
 			</p>
 			<a

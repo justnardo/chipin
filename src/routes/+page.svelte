@@ -13,7 +13,7 @@
 			imageAlt: 'Friends sitting together outdoors',
 			received: 5240,
 			goal: 8000,
-			href: '/c/rainbow' as const
+			href: resolve('/c/rainbow')
 		},
 		{
 			title: 'A fresh start for the Bain Town reading room',

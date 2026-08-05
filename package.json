@@ -16,11 +16,12 @@
 		"test": "npm run test:unit -- --run",
 		"sync:ocr": "node scripts/sync_ocr_assets.mjs",
 		"predev": "node scripts/sync_ocr_assets.mjs",
-		"prebuild": "node scripts/sync_ocr_assets.mjs"
+		"prebuild": "node scripts/sync_ocr_assets.mjs",
+		"postbuild": "node scripts/emit_spa_fallbacks.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
-		"@sveltejs/adapter-auto": "^7.0.1",
+		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tesseract.js-data/eng": "^1.0.0",

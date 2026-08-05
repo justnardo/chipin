@@ -354,7 +354,7 @@
 				<h2>Your page is ready — share it</h2>
 				<p>
 					Same instinct as GoFundMe: get the link into WhatsApp. This prototype link works in this
-					browser session.
+					browser on this device.
 				</p>
 				<code class="share-url">{publishedHref}</code>
 				<div class="row-actions">

@@ -329,7 +329,7 @@
 				{/if}
 				<p class="status-note">
 					Keep your private status link. In a live product this would be emailed or texted; here it
-					stays in this browser session.
+					stays in this browser on this device.
 				</p>
 				<div class="done-actions">
 					{#if statusHref}
