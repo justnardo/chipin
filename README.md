@@ -79,10 +79,24 @@ what a custom domain is.
 
 ## Putting the prototype on a custom domain
 
-Deployed on **Vercel** from the connected GitHub repo. `vercel.json` carries the pieces Vercel
-needs: `outputDirectory` (adapter-static writes to `build/`, not the `.vercel/output` the
-SvelteKit preset expects), a catch-all rewrite so browser-created slugs and tokens resolve, and
-the response headers.
+Deployed on **Vercel** from the connected GitHub repo. `vercel.json` carries three things, and
+since Vercel rejects any key it does not recognise — including a `"//"` comment key — the
+reasoning for them lives here instead of in the file:
+
+- `outputDirectory: build`. Vercel's SvelteKit preset looks for `adapter-vercel` output under
+  `.vercel/output` and falls back to `public/`; adapter-static writes to `build/`. Without this
+  the build succeeds and the deploy fails with "No Output Directory named public".
+- A catch-all rewrite to `/index.html`, because campaign slugs and donor status tokens are
+  created in the browser and cannot be prerendered.
+- The response headers: `private, no-store` on the app shell, `no-referrer` so a slug or status
+  token does not follow the visitor onward, and long caching for fingerprinted assets and the
+  OCR engine.
+
+The `source` patterns use negative lookaheads (`/((?!_app/|ocr/).*)`) rather than relying on
+which matching rule Vercel applies last, so asset paths keep their own caching regardless.
+
+Both `outputDirectory` and the rewrite come out when the dynamic phase swaps in `adapter-vercel`,
+and the headers move into `hooks.server.ts` where they can vary per response.
 
 Vercel ignores `static/_headers` and `static/_redirects` — those are Cloudflare Pages and Netlify
 conventions. They stay in the tree so this build still deploys correctly on either without
