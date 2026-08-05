@@ -9,11 +9,13 @@
 	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
 	import { getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
 	import {
+		applyHostAction,
+		campaignAttestedCents,
 		formatBsd,
 		loadReports,
-		updateReport,
-		type PrototypeReport,
-		type ReportStatus
+		unmatchedCents,
+		type HostAction,
+		type PrototypeReport
 	} from '$lib/prototype/reports';
 
 	let campaign = $state<PrototypeCampaign | null>(null);
@@ -32,35 +34,39 @@
 
 	const baselineReceivedCents = $derived(campaign?.slug === 'rainbow' ? 524_000 : 0);
 
-	const attestedExtra = $derived(
-		reports
-			.filter((r) => r.status === 'marked_received' && r.attestedCents !== null)
-			.reduce((sum, r) => sum + (r.attestedCents ?? 0), 0)
-	);
-
-	const receivedCents = $derived(baselineReceivedCents + attestedExtra);
+	const receivedCents = $derived(baselineReceivedCents + campaignAttestedCents(reports));
 	const pendingCount = $derived(
 		reports.filter((r) => r.status === 'submitted' || r.status === 'clarification_requested').length
 	);
 
-	function handleAttest(
-		id: string,
-		payload: {
-			status: Extract<
-				ReportStatus,
-				'marked_received' | 'marked_not_found' | 'clarification_requested'
-			>;
-			attestedCents?: number;
-			clarificationQuestion?: string;
+	/** Money a donor reported that the host has not accounted for either way. */
+	const unaccountedCents = $derived(
+		reports
+			.filter((r) => r.status !== 'marked_not_found')
+			.reduce((sum, r) => sum + unmatchedCents(r), 0)
+	);
+
+	/** Why the store refused a command, in the host's language. */
+	function refusalMessage(action: HostAction): string {
+		switch (action.kind) {
+			case 'not_found':
+				return 'Withdraw the amounts recorded below first — this report still counts money toward the total.';
+			case 'void':
+			case 'correct':
+				return 'That entry has already been withdrawn.';
+			case 'record':
+				return 'Enter an amount greater than zero.';
+			case 'clarify':
+				return 'Write a short question for the donor.';
 		}
-	) {
-		if (!campaign) return;
-		updateReport(id, {
-			status: payload.status,
-			attestedCents: payload.attestedCents ?? null,
-			clarificationQuestion: payload.clarificationQuestion ?? ''
-		});
+	}
+
+	function handleAction(id: string, action: HostAction): string {
+		if (!campaign) return 'Campaign not found in this browser.';
+		const updated = applyHostAction(id, action);
+		if (!updated) return refusalMessage(action);
 		reports = loadReports(campaign.slug);
+		return '';
 	}
 </script>
 
@@ -111,6 +117,12 @@
 				<strong>{pendingCount}</strong>
 				<span>report{pendingCount === 1 ? '' : 's'} waiting on you</span>
 			</p>
+			{#if unaccountedCents > 0}
+				<p class="pending money">
+					<strong>{formatBsd(unaccountedCents)}</strong>
+					<span>reported but not yet accounted for either way</span>
+				</p>
+			{/if}
 		</section>
 
 		<section aria-labelledby="inbox-heading">
@@ -134,7 +146,7 @@
 								slug: campaign.slug,
 								token: report.statusToken
 							})}
-							onattest={(payload) => handleAttest(report.id, payload)}
+							onattest={(action) => handleAction(report.id, action)}
 						/>
 					{/each}
 				</div>
@@ -260,6 +272,12 @@
 		color: var(--ink);
 		font-family: var(--font-display);
 		font-size: var(--text-xl);
+	}
+
+	/* A currency amount is several words wide; at display size it breaks mid-figure. */
+	.pending.money strong {
+		font-size: var(--text-lg);
+		white-space: nowrap;
 	}
 
 	h2 {

@@ -8,7 +8,7 @@
 		RAINBOW_CAMPAIGN,
 		type PrototypeCampaign
 	} from '$lib/prototype/campaigns';
-	import { loadReports } from '$lib/prototype/reports';
+	import { campaignAttestedCents, loadReports } from '$lib/prototype/reports';
 
 	const featured = [
 		{
@@ -59,10 +59,7 @@
 		if (!browser) return;
 		mine = listSessionCampaigns().map((campaign) => {
 			const reports = loadReports(campaign.slug);
-			const received =
-				reports
-					.filter((r) => r.status === 'marked_received' && r.attestedCents !== null)
-					.reduce((sum, r) => sum + (r.attestedCents ?? 0), 0) / 100;
+			const received = campaignAttestedCents(reports) / 100;
 			return {
 				...campaign,
 				received,

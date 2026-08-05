@@ -10,8 +10,12 @@
 		donorStatusTone,
 		formatBsd,
 		getReportByToken,
+		ledger,
+		matchedCents,
+		matchingMethodLabel,
 		replyToClarification,
 		revokeStatusLink,
+		unmatchedCents,
 		type PrototypeReport
 	} from '$lib/prototype/reports';
 
@@ -158,13 +162,45 @@
 						<dd>{report.bankReference}</dd>
 					</div>
 				{/if}
-				{#if report.attestedCents !== null && report.status === 'marked_received'}
+				{#if matchedCents(report) > 0}
 					<div>
 						<dt>Marked received by host</dt>
-						<dd>{formatBsd(report.attestedCents)}</dd>
+						<dd>{formatBsd(matchedCents(report))}</dd>
 					</div>
+					{#if unmatchedCents(report) > 0}
+						<div>
+							<dt>Not yet matched</dt>
+							<dd>{formatBsd(unmatchedCents(report))}</dd>
+						</div>
+					{/if}
 				{/if}
 			</dl>
+
+			{#if ledger(report).length > 0}
+				<section class="ledger" aria-labelledby="ledger-heading">
+					<h2 id="ledger-heading">What the host recorded</h2>
+					<ul>
+						{#each ledger(report) as row (row.id)}
+							<li class:voided={row.status === 'voided'}>
+								<p class="row-amount">
+									{formatBsd(row.amountCents)}
+									{#if row.status === 'voided'}<span class="tag">withdrawn</span>{/if}
+								</p>
+								<p class="row-meta">
+									{matchingMethodLabel(row.method)} · {row.createdAt.slice(0, 10)}
+								</p>
+								{#if row.status === 'voided' && row.voidReason}
+									<p class="row-meta">Host's reason: {row.voidReason}</p>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+					<p class="row-meta">
+						Withdrawn entries stay visible on purpose. If the host changes an amount, you can still
+						see what you were told before and why it changed.
+					</p>
+				</section>
+			{/if}
 
 			{#if report.status === 'clarification_requested'}
 				<form class="clarify" onsubmit={submitReply}>
@@ -184,6 +220,19 @@
 				<p class="outcome">
 					The host marked this transfer received. That updates ChipIn's public total for the
 					campaign. It does not mean ChipIn verified the bank settlement or how funds are used.
+				</p>
+			{:else if report.status === 'partially_matched'}
+				<p class="outcome">
+					The host has found {formatBsd(matchedCents(report))} of the {formatBsd(
+						report.reportedCents
+					)} you reported. Only that part counts toward the campaign total. The rest is not marked missing
+					— the host has not accounted for it yet, and more may still be recorded.
+				</p>
+			{:else if report.status === 'confirmation_voided'}
+				<p class="outcome">
+					The host withdrew the amount they had recorded against this report, with the reason shown
+					above, so it no longer counts toward the campaign total. This changes ChipIn's record only
+					— it does not reverse a bank transfer either way.
 				</p>
 			{:else if report.status === 'marked_not_found'}
 				<p class="outcome">
@@ -356,6 +405,70 @@
 		font-family: var(--font-display);
 		font-size: var(--text-lg);
 		font-weight: 700;
+	}
+
+	.ledger {
+		margin: 0 0 var(--space-5);
+		padding: 0 0 var(--space-5);
+		border-bottom: 1px solid var(--line);
+	}
+
+	.ledger h2 {
+		margin: 0 0 var(--space-3);
+		font-size: var(--text-sm);
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.ledger ul {
+		display: grid;
+		gap: var(--space-3);
+		margin: 0 0 var(--space-3);
+		padding: 0;
+		list-style: none;
+	}
+
+	.ledger li {
+		padding: var(--space-3);
+		border: 1px solid var(--line);
+		border-left: 4px solid var(--aqua-deep);
+		border-radius: var(--radius-sm);
+		background: var(--paper);
+	}
+
+	.ledger li.voided {
+		border-left-color: var(--ink-60);
+		opacity: 0.72;
+	}
+
+	.row-amount {
+		margin: 0;
+		font-family: var(--font-display);
+		font-weight: 700;
+	}
+
+	.voided .row-amount {
+		text-decoration: line-through;
+	}
+
+	.tag {
+		margin-left: var(--space-2);
+		padding: 0 var(--space-2);
+		border-radius: var(--radius-full);
+		background: var(--line);
+		font-family: var(--font-body);
+		font-size: var(--text-xs);
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-decoration: none;
+		text-transform: uppercase;
+	}
+
+	.row-meta {
+		margin: var(--space-1) 0 0;
+		color: var(--ink-60);
+		font-size: var(--text-xs);
 	}
 
 	.clarify h2 {

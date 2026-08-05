@@ -18,7 +18,11 @@ allocation can carry an amount and append-only correction history. Do not encode
 `pledge_id` on `transfer_reports` as the final model.
 
 **Update:** Drafted in [stage-0/STATE-MACHINES.md](stage-0/STATE-MACHINES.md). Owner approval
-still required before schema freeze.
+still required before schema freeze. The prototype now exercises the allocation shape client-side
+(`src/lib/prototype/reports.ts`): host attestations are append-only rows carrying amount, matching
+method, and void/correction links, public totals sum only the active rows, and `partially_matched`
+and `confirmation_voided` are projections of that ledger rather than fields the UI sets. Pledges
+are not yet a separate record, so one-to-many allocation across pledges is still unproven.
 
 ### High: Bank-detail rendering conflicts with the open threat decision
 
