@@ -12,7 +12,43 @@
  * sync between devices; clearing site data clears everything.
  */
 
-const canUse = () => typeof localStorage !== 'undefined';
+/**
+ * Resolve a usable Storage, or null.
+ *
+ * A `typeof` guard is not enough: in a sandboxed iframe, or with site data blocked,
+ * merely *touching* `localStorage` throws a SecurityError rather than being
+ * undefined. That would escape a caller's try/catch and take the page down — the
+ * opposite of what this module promises. So access happens inside try/catch, and a
+ * probe write confirms the store is actually usable (Safari private mode has
+ * historically exposed a localStorage that throws on every set).
+ *
+ * Memoised: the answer cannot change within a page load, and probing on every read
+ * would mean two extra writes per call.
+ */
+const PROBE_KEY = '__chipin_storage_probe__';
+let resolved: Storage | null | undefined;
+
+function store(): Storage | null {
+	if (resolved !== undefined) return resolved;
+	try {
+		const candidate = localStorage;
+		candidate.setItem(PROBE_KEY, '1');
+		candidate.removeItem(PROBE_KEY);
+		resolved = candidate;
+	} catch {
+		resolved = null;
+	}
+	return resolved;
+}
+
+/** Same hazard as above; sessionStorage is only touched for the one-time carry-over. */
+function legacyStore(): Storage | null {
+	try {
+		return sessionStorage;
+	} catch {
+		return null;
+	}
+}
 
 /**
  * Read a JSON array, migrating anything left in sessionStorage under the same key.
@@ -20,17 +56,19 @@ const canUse = () => typeof localStorage !== 'undefined';
  * lose its campaigns mid-conversation. Safe to remove once no old tabs remain.
  */
 export function readList<T>(key: string): T[] {
-	if (!canUse()) return [];
+	const active = store();
+	if (!active) return [];
 	try {
-		const raw = localStorage.getItem(key);
+		const raw = active.getItem(key);
 		if (raw) return JSON.parse(raw) as T[];
 
-		if (typeof sessionStorage === 'undefined') return [];
-		const carried = sessionStorage.getItem(key);
+		const legacy = legacyStore();
+		if (!legacy) return [];
+		const carried = legacy.getItem(key);
 		if (!carried) return [];
 		const parsed = JSON.parse(carried) as T[];
-		localStorage.setItem(key, carried);
-		sessionStorage.removeItem(key);
+		active.setItem(key, carried);
+		legacy.removeItem(key);
 		return parsed;
 	} catch {
 		// Corrupt or unreadable storage should degrade to "nothing saved yet",
@@ -40,9 +78,10 @@ export function readList<T>(key: string): T[] {
 }
 
 export function writeList<T>(key: string, value: T[]): void {
-	if (!canUse()) return;
+	const active = store();
+	if (!active) return;
 	try {
-		localStorage.setItem(key, JSON.stringify(value));
+		active.setItem(key, JSON.stringify(value));
 	} catch {
 		// Quota or private-mode failures are not worth breaking the flow over.
 	}

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import ProgressCoinBar from './ProgressCoinBar.svelte';
 	import StatusChip from './StatusChip.svelte';
 
@@ -23,7 +22,7 @@
 		href?: string;
 	} = $props();
 
-	const resolvedHref = $derived(href === '/c/rainbow' ? resolve('/c/rainbow') : href);
+	// href arrives already resolved by the caller; see discover/+page.svelte.
 </script>
 
 <article class="card">
@@ -34,9 +33,9 @@
 	<div class="body">
 		<p class="location">{location}</p>
 		<h3>
-			{#if resolvedHref}
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- resolvedHref comes from resolve() above -->
-				<a href={resolvedHref}>{title}</a>
+			{#if href}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- resolved by the caller -->
+				<a {href}>{title}</a>
 			{:else}
 				{title}
 			{/if}

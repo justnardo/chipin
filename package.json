@@ -16,7 +16,8 @@
 		"test": "npm run test:unit -- --run",
 		"sync:ocr": "node scripts/sync_ocr_assets.mjs",
 		"predev": "node scripts/sync_ocr_assets.mjs",
-		"prebuild": "node scripts/sync_ocr_assets.mjs"
+		"prebuild": "node scripts/sync_ocr_assets.mjs",
+		"postbuild": "node scripts/emit_spa_fallbacks.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
