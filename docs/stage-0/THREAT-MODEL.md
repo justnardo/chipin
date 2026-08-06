@@ -96,20 +96,51 @@ decision. Before real details are accepted, the following must still land:
 
 ## Key threats and controls
 
-| ID  | Threat                                         | Impact                            | Proposed controls                                                                      |
-| --- | ---------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------- |
-| T1  | Scraping or caching of receiving accounts      | Targeted fraud / harassment       | Disclosure Option B; private cache; hide control; no bank data in OG images            |
-| T2  | Status-link guessing or forwarding             | Donor PII / report takeover       | High-entropy tokens; expiry; revoke on request; bind minimal contact; rate limit       |
-| T3  | Fake host / misleading campaign                | Donor loss outside platform       | Tiered verification; precise labels; report action; pause controls                     |
-| T4  | Host rubber-stamps fake receipts               | Inflated public totals            | Donor-originated reports only; per-row amount; step-up auth; void events; risk signals |
-| T5  | Malicious upload (malware, active content)     | Reviewer compromise               | MIME/size checks; reject active content; malware scan; metadata strip; private bucket  |
-| T6  | RLS misconfiguration                           | Cross-tenant document or PII leak | Independent RLS tests per table/object before pilot                                    |
-| T7  | Service-role key exposure                      | Full data breach                  | Least privilege; secrets rotation; no service role in client                           |
-| T8  | Referrer leakage to third parties              | Account numbers in logs           | `Referrer-Policy`; no outbound bank deep-links carrying secrets in query               |
-| T9  | Preview bots indexing private paths            | Accidental publication            | Robots rules; auth on private routes; signed URLs only                                 |
-| T10 | Users believe ChipIn holds or verifies funds   | Reputational / regulatory         | Repeated disclosure; label copy tests; no "verified payment" language                  |
-| T11 | Insider misuse of ID/medical docs              | Severe privacy harm               | MFA; access logs; need-to-know roles; emergency revocation                             |
-| T12 | Campaign photo/story re-identifies beneficiary | Privacy harm                      | Redaction guidance; medical defaults; review checklist                                 |
+| ID  | Threat                                              | Impact                               | Proposed controls                                                                                                                                       |
+| --- | --------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T1  | Scraping or caching of receiving accounts           | Targeted fraud / harassment          | Disclosure Option B; private cache; hide control; no bank data in OG images                                                                             |
+| T2  | Status-link guessing or forwarding                  | Donor PII / report takeover          | High-entropy tokens; expiry; revoke on request; bind minimal contact; rate limit                                                                        |
+| T3  | Fake host / misleading campaign                     | Donor loss outside platform          | Tiered verification; precise labels; report action; pause controls                                                                                      |
+| T4  | Host rubber-stamps fake receipts                    | Inflated public totals               | Donor-originated reports only; per-row amount; step-up auth; void events; risk signals                                                                  |
+| T5  | Malicious upload (malware, active content)          | Reviewer compromise                  | MIME/size checks; reject active content; malware scan; metadata strip; private bucket                                                                   |
+| T6  | RLS misconfiguration                                | Cross-tenant document or PII leak    | Independent RLS tests per table/object before pilot                                                                                                     |
+| T7  | Service-role key exposure                           | Full data breach                     | Least privilege; secrets rotation; no service role in client                                                                                            |
+| T8  | Referrer leakage to third parties                   | Account numbers in logs              | `Referrer-Policy`; no outbound bank deep-links carrying secrets in query                                                                                |
+| T9  | Preview bots indexing private paths                 | Accidental publication               | Robots rules; auth on private routes; signed URLs only                                                                                                  |
+| T10 | Users believe ChipIn holds or verifies funds        | Reputational / regulatory            | Repeated disclosure; label copy tests; no "verified payment" language                                                                                   |
+| T11 | Insider misuse of ID/medical docs                   | Severe privacy harm                  | MFA; access logs; need-to-know roles; emergency revocation                                                                                              |
+| T12 | Campaign photo/story re-identifies beneficiary      | Privacy harm                         | Redaction guidance; medical defaults; review checklist                                                                                                  |
+| T13 | Bank mark implies endorsement or affiliation        | Reputational / legal                 | Marks only in pickers, never alone above a payment instruction; disclaimer adjacent; permission on file per institution                                 |
+| T14 | Transfer portal resembles a bank-impersonation page | Donor loss; teaches the wrong reflex | No standalone mark above receiving details; bank named in words; custody disclaimer visible without interaction; no marks in public or preview surfaces |
+
+### T13 / T14: where a bank mark may appear
+
+Added after the shipped build was found contradicting its own policy: the code
+asserted the marks were "deliberately NOT reproductions of any bank's logo"
+while six real trademarks rendered in the picker.
+
+The rule the product follows is about composition, not about logos:
+
+> A bank mark is safe where it labels one option among all its competitors. It
+> is dangerous where it stands alone above an instruction to send money.
+
+A picker showing eleven institutions at equal weight, including direct
+competitors, cannot plausibly read as any one of them endorsing ChipIn, and
+nothing on that screen asks for money. The receiving panel is the opposite: one
+mark, alone, largest on the page, above a host name, an account number, and a
+Copy button. That is structurally what a bank-impersonation page looks like —
+and ChipIn's own defence against T3 is training donors to distrust exactly that
+pattern, in the same population, which a scam-shaped UI would undo.
+
+The mark there also carried no information: the panel already names the
+institution in words on the next line. So the header shows the name and no mark.
+
+Marks must not appear on the public campaign page or in OG/preview images (T1).
+
+Permission is still outstanding for all six marks in `static/banks/`, and the
+current artwork is monochrome autotraces rendered as knockouts — a modification
+of the mark, which is a different ask from reproducing it faithfully. Both
+belong in the Stage 0 bank conversations; see BANK-CHANNEL-MATRIX.md.
 
 ## Status-link lifecycle (draft requirements)
 
@@ -165,11 +196,14 @@ Mandatory before controlled-pilot intake (master §12.10; refine with pilot caps
 - [ ] Incident contact path and log-redaction verified
 - [ ] Accessibility gates from DESIGN.md §9 still pass on pledge → report → attest path
 - [ ] Label-comprehension check: users do not interpret host attestation as ChipIn settlement guarantee
+- [ ] Bank-mark permission status recorded per institution, or the marks removed
+- [ ] Receiving-account surface reviewed for phishing resemblance; custody disclaimer visible without interaction
 
 ## Decision log
 
-| Date | Topic                                | Decision | Owner |
-| ---- | ------------------------------------ | -------- | ----- |
-|      | Receiving-account disclosure (A/B/C) |          |       |
-|      | Status-link TTL / recovery           |          |       |
-|      | Release-checklist amendments         |          |       |
+| Date | Topic                                 | Decision | Owner |
+| ---- | ------------------------------------- | -------- | ----- |
+|      | Receiving-account disclosure (A/B/C)  |          |       |
+|      | Status-link TTL / recovery            |          |       |
+|      | Release-checklist amendments          |          |       |
+|      | Bank marks: picker vs receiving panel |          |       |

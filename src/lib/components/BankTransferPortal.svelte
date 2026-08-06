@@ -1,12 +1,6 @@
 <script lang="ts">
-	import BankMark from '$lib/components/BankMark.svelte';
-	import {
-		BANK_CHANNELS,
-		getBank,
-		resolveRail,
-		settlementWindow,
-		type BankChannel
-	} from '$lib/prototype/banks';
+	import BankPicker from '$lib/components/BankPicker.svelte';
+	import { getBank, UNKNOWN_CHANNEL, resolveRail, settlementWindow } from '$lib/prototype/banks';
 	import type { ReceivingAccount } from '$lib/prototype/campaigns';
 	import { formatBsd } from '$lib/prototype/reports';
 
@@ -24,14 +18,20 @@
 		senderBankId?: string;
 	} = $props();
 
-	const recipientBank = $derived(
-		getBank(receiving.bankId) ?? BANK_CHANNELS[BANK_CHANNELS.length - 1]
-	);
+	/**
+	 * An unknown channel must never borrow a real institution's identity. This
+	 * used to fall back to `BANK_CHANNELS[BANK_CHANNELS.length - 1]`, correct
+	 * only because 'other' happens to sit last and nothing pinned it there —
+	 * append one channel and every stale bankId would have rendered under that
+	 * bank's name, colour and mark, directly beside a live account number.
+	 */
+	const recipientBank = $derived(getBank(receiving.bankId) ?? UNKNOWN_CHANNEL);
 	const senderBank = $derived(senderBankId ? getBank(senderBankId) : null);
 	const rail = $derived(senderBankId ? resolveRail(senderBankId, receiving.bankId) : null);
 	const window_ = $derived(rail ? settlementWindow(rail) : null);
 
 	let copiedField = $state('');
+	let senderOpen = $state(false);
 	let revealed = $state(false);
 	let copyTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -109,21 +109,30 @@
 			copiedField = '';
 		}
 	}
-
-	function pickSender(bank: BankChannel) {
-		senderBankId = senderBankId === bank.id ? '' : bank.id;
-	}
 </script>
 
 <section class="portal" aria-labelledby="portal-heading">
+	<!--
+		No bank mark here, deliberately. A logo standing alone above "Send to", an
+		account number and a Copy button is structurally what a bank-impersonation
+		page looks like — and this product's defence against fake hosts depends on
+		donors distrusting exactly that composition. The mark also identified
+		nothing: `recipientBank.name` already names the institution in words on the
+		next line. Marks live in the pickers, where they label one option among all
+		its competitors. See THREAT-MODEL T14.
+	-->
 	<header class="head">
-		<BankMark bank={recipientBank} />
 		<div>
 			<p class="kicker">Send to</p>
 			<h2 id="portal-heading">{hostName}</h2>
 			<p class="bank-name">{recipientBank.name}</p>
 		</div>
 	</header>
+
+	<p class="custody-note">
+		<strong>ChipIn does not move, hold, or receive this money.</strong> You send it with your own bank,
+		straight to the host.
+	</p>
 
 	<p class="gate-note">
 		These details are shown because you started a contribution. They are not on the public campaign
@@ -164,20 +173,18 @@
 			This only sets your expectations for how long the transfer takes. ChipIn never connects to
 			your bank.
 		</p>
-		<div class="bank-grid" role="group" aria-labelledby="sender-label">
-			{#each BANK_CHANNELS as bank (bank.id)}
-				<button
-					type="button"
-					class="bank-option"
-					class:selected={senderBankId === bank.id}
-					aria-pressed={senderBankId === bank.id}
-					onclick={() => pickSender(bank)}
-				>
-					<BankMark {bank} size="sm" />
-					<span>{bank.shortName}</span>
-				</button>
-			{/each}
-		</div>
+		<details class="sender-disclosure" bind:open={senderOpen}>
+			<summary>
+				<span class="summary-label">{senderBank ? senderBank.name : 'Choose your bank'}</span>
+				<span class="summary-action">{senderOpen ? 'Close' : 'Change'}</span>
+			</summary>
+			<BankPicker
+				bind:value={senderBankId}
+				labelledBy="sender-label"
+				allowNone
+				noneLabel="I'd rather not say"
+			/>
+		</details>
 	</div>
 
 	{#if window_ && senderBank}
@@ -196,7 +203,6 @@
 	<details class="accordion">
 		<summary>What ChipIn does and does not do here</summary>
 		<ul>
-			<li>ChipIn does not move, hold, or receive this money. You send it with your own bank.</li>
 			<li>ChipIn cannot see your bank account or confirm that a transfer settled.</li>
 			<li>The host checks their own statement and marks what actually arrived.</li>
 			<li>If these details look wrong, stop and report the campaign instead of sending.</li>
@@ -236,6 +242,21 @@
 	.bank-name {
 		margin: 0;
 		color: var(--ink-60);
+		font-size: var(--text-sm);
+	}
+
+	/*
+	 * Visible without interaction, deliberately. This was only inside the
+	 * collapsed accordion at the bottom of the panel — below a bank mark, an
+	 * account number and a Copy button, and below the fold on a phone. The one
+	 * sentence that distinguishes this page from a scam should not need a tap.
+	 */
+	.custody-note {
+		margin: 0 0 var(--space-4);
+		padding: var(--space-3) var(--space-4);
+		border-left: 3px solid var(--aqua-deep);
+		border-radius: var(--radius-sm);
+		background: var(--aqua-tint);
 		font-size: var(--text-sm);
 	}
 
@@ -320,6 +341,51 @@
 		cursor: pointer;
 	}
 
+	.sender-disclosure {
+		border: 1px solid var(--line);
+		border-radius: var(--radius-md);
+		background: var(--surface);
+	}
+
+	.sender-disclosure summary {
+		display: flex;
+		min-height: var(--control-lg);
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-4);
+		cursor: pointer;
+		font-size: var(--text-sm);
+		font-weight: 700;
+		list-style: none;
+	}
+
+	.sender-disclosure summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.summary-label {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.summary-action {
+		flex-shrink: 0;
+		color: var(--aqua-deep);
+		font-weight: 700;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.sender-disclosure[open] summary {
+		border-bottom: 1px solid var(--line);
+	}
+
+	.sender-disclosure :global(.picker) {
+		padding: var(--space-3);
+	}
+
 	.sender {
 		margin-top: var(--space-6);
 		padding-top: var(--space-5);
@@ -335,37 +401,6 @@
 		margin: 0 0 var(--space-4);
 		color: var(--ink-60);
 		font-size: var(--text-sm);
-	}
-
-	.bank-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-		gap: var(--space-2);
-	}
-
-	.bank-option {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		min-height: 52px;
-		padding: var(--space-2);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		background: var(--paper);
-		color: var(--ink);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		text-align: left;
-		cursor: pointer;
-	}
-
-	.bank-option.selected {
-		border-color: var(--ink);
-		box-shadow: inset 0 0 0 1px var(--ink);
-	}
-
-	.bank-option span {
-		overflow-wrap: anywhere;
 	}
 
 	.window {

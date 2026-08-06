@@ -106,6 +106,42 @@ transcripts; paste redacted summaries back here if useful).
 | Reviewer                                      |                                                               |
 | Notes                                         |                                                               |
 
+## Mark permission (ask alongside the channel tests)
+
+Both READMEs point at these conversations as the moment to ask about logos, and
+until now there was nowhere to write the answer down. Ask per surface — a bank
+is far likelier to agree to "you appear in our customers' bank picker" than to
+"your logo sits above an account number on a page soliciting transfers", and
+splitting the ask is what makes it answerable.
+
+Per institution, record:
+
+- Permission to display the mark **to identify the institution in a
+  bank-selection list**, in an app that never handles funds.
+- Their **official vector artwork and brand guidelines** — specifically a square
+  icon variant in colour. The files in `static/banks/` are monochrome bitmap
+  traces of horizontal lockups, which cannot render legibly at 32px.
+- Whether they object to the mark appearing **near receiving-account details at
+  all**. Ask before deciding, not after; their answer may settle it.
+- A **named contact and takedown path**, so a complaint is a fifteen-minute fix
+  rather than an incident.
+
+| Institution              | Mark permission | Artwork supplied | Objects near account details | Contact | Date |
+| ------------------------ | --------------- | ---------------- | ---------------------------- | ------- | ---- |
+| RBC Royal Bank           | not asked       | no               | unknown                      |         |      |
+| CIBC Caribbean           | not asked       | no               | unknown                      |         |      |
+| Scotiabank               | not asked       | no               | unknown                      |         |      |
+| Fidelity Bank            | not asked       | no               | unknown                      |         |      |
+| Bank of The Bahamas      | not asked       | no               | unknown                      |         |      |
+| Commonwealth Bank        | not asked       | no               | unknown                      |         |      |
+| Teachers & Salaried WCCU | not asked       | n/a — monogram   | unknown                      |         |      |
+| SandDollar               | not asked       | n/a — monogram   | unknown                      |         |      |
+| Kanoo                    | not asked       | n/a — monogram   | unknown                      |         |      |
+| Omni Financial           | not asked       | n/a — monogram   | unknown                      |         |      |
+
+Status vocabulary: `permission_written` / `no_objection_verbal` / `declined` /
+`not_asked`.
+
 ## Decision log
 
 Record product-level conclusions here after evidence review. Leave rows empty until real tests

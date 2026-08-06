@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import BankMark from '$lib/components/BankMark.svelte';
+	import BankPicker from '$lib/components/BankPicker.svelte';
 	import Field from '$lib/components/Field.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
-	import { BANK_CHANNELS, getBank } from '$lib/prototype/banks';
+	import { getBank } from '$lib/prototype/banks';
 	import {
 		COVER_PRESETS,
 		dollarsToGoalCents,
@@ -45,7 +46,11 @@
 	// interbank wait into a same-day transfer. The form below edits one candidate
 	// account; `accounts` is the list already saved.
 	let accounts = $state<ReceivingAccount[]>([]);
-	let receivingBankId = $state('bob');
+	// Deliberately empty. This was defaulted to 'bob', so a host who scrolled
+	// past the picker published Bank of The Bahamas as the account strangers
+	// wire money to — the single most consequential field in the product,
+	// pre-answered and wearing the same selected ring as a real choice.
+	let receivingBankId = $state('');
 	let accountName = $state('');
 	let accountNumber = $state('');
 	let branch = $state('');
@@ -54,11 +59,18 @@
 	const receivingBank = $derived(getBank(receivingBankId));
 	const isWallet = $derived(receivingBank?.kind === 'wallet');
 	const formEmpty = $derived(
-		!accountName.trim() && !accountNumber.trim() && !handle.trim() && !branch.trim()
+		!receivingBankId &&
+			!accountName.trim() &&
+			!accountNumber.trim() &&
+			!handle.trim() &&
+			!branch.trim()
 	);
 
 	/** Validate the in-progress form; returns the account or an error message. */
 	function readAccountForm(): ReceivingAccount | string {
+		if (!receivingBankId) {
+			return 'Choose the bank or wallet this account is held at.';
+		}
 		if (accountName.trim().length < 2) {
 			return 'Add the account name exactly as your bank shows it.';
 		}
@@ -79,6 +91,7 @@
 	}
 
 	function clearAccountForm() {
+		receivingBankId = '';
 		accountName = '';
 		accountNumber = '';
 		branch = '';
@@ -344,21 +357,12 @@
 				{/if}
 
 				<fieldset>
-					<legend>Your bank or wallet</legend>
-					<div class="bank-grid">
-						{#each BANK_CHANNELS as bank (bank.id)}
-							<label class="bank-option" class:selected={receivingBankId === bank.id}>
-								<input
-									type="radio"
-									name="receiving-bank"
-									value={bank.id}
-									bind:group={receivingBankId}
-								/>
-								<BankMark {bank} size="sm" />
-								<span>{bank.shortName}</span>
-							</label>
-						{/each}
-					</div>
+					<legend id="receiving-bank-label">Your bank or wallet</legend>
+					<BankPicker
+						bind:value={receivingBankId}
+						variant="list"
+						labelledBy="receiving-bank-label"
+					/>
 				</fieldset>
 
 				<Field label="Account name">
@@ -611,47 +615,6 @@
 		margin: 0 0 var(--space-4);
 		color: var(--ink-60);
 		font-size: var(--text-sm);
-	}
-
-	.bank-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-		gap: var(--space-2);
-	}
-
-	.bank-option {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		min-height: 52px;
-		padding: var(--space-2);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		background: var(--paper);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.bank-option.selected {
-		border-color: var(--ink);
-		box-shadow: inset 0 0 0 1px var(--ink);
-	}
-
-	.bank-option input {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		opacity: 0;
-	}
-
-	.bank-option:focus-within {
-		outline: 2px solid var(--aqua-deep);
-		outline-offset: 2px;
-	}
-
-	.bank-option span {
-		overflow-wrap: anywhere;
 	}
 
 	.account-list {

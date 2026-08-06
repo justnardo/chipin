@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	BANK_CHANNELS,
+	UNKNOWN_CHANNEL,
 	businessDaysBetween,
 	getBank,
 	isOverdue,
@@ -88,5 +89,16 @@ describe('isOverdue', () => {
 
 	it('flags a same-bank transfer much sooner', () => {
 		expect(isOverdue('internal', new Date('2026-08-03'), new Date('2026-08-05'))).toBe(true);
+	});
+});
+
+describe('UNKNOWN_CHANNEL', () => {
+	it('resolves by id, not array position', () => {
+		// BankTransferPortal used to reach for BANK_CHANNELS[length - 1]. That was
+		// only correct while 'other' sat last: appending a channel would have made
+		// every unrecognised account render under a real bank's name and colours,
+		// beside a live account number, with nothing to catch it.
+		expect(UNKNOWN_CHANNEL.id).toBe('other');
+		expect(getBank('a-bank-that-does-not-exist')).toBeNull();
 	});
 });
