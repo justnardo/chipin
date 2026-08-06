@@ -205,6 +205,89 @@ button:disabled {
 	cursor: not-allowed;
 }
 
+/*
+ * Buttons, defined once.
+ *
+ * `.primary` was declared in seven files and `.ghost` in nine, at four different
+ * heights (44/48/52/54) and three box models — some full-width grids, some
+ * shrink-wrapped inline-grids, several of them links dressed as buttons. The
+ * same action looked like a different control depending on the page.
+ *
+ * The markup already agreed on the class names, so the fix is to define them
+ * here and delete the local copies; Svelte's scoped styles would otherwise win
+ * on specificity. Button.svelte carries the same spec for new markup.
+ */
+.primary,
+.ghost,
+.danger {
+	display: inline-grid;
+	min-height: var(--control-lg);
+	place-items: center;
+	padding: 0 var(--space-5);
+	border: 1px solid transparent;
+	border-radius: var(--radius-md);
+	font-family: var(--font-body);
+	font-size: var(--text-base);
+	font-weight: 700;
+	line-height: 1;
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+	transition:
+		background-color var(--dur-fast) var(--ease),
+		border-color var(--dur-fast) var(--ease),
+		box-shadow var(--dur-fast) var(--ease),
+		transform var(--dur-fast) var(--ease);
+}
+
+.primary {
+	color: white;
+	background: var(--aqua-deep);
+}
+
+.primary:hover:not(:disabled) {
+	background: #036b66;
+	box-shadow: var(--shadow-sm);
+}
+
+.ghost {
+	border-color: var(--border-strong);
+	color: var(--ink);
+	background: var(--surface);
+}
+
+.ghost:hover:not(:disabled) {
+	border-color: var(--ink-60);
+	background: var(--paper-2);
+}
+
+.danger {
+	border-color: #e8c4bd;
+	color: var(--status-dispute);
+	background: var(--dispute-tint);
+}
+
+.danger:hover:not(:disabled) {
+	background: #f4d8d3;
+}
+
+.primary:active:not(:disabled),
+.ghost:active:not(:disabled),
+.danger:active:not(:disabled) {
+	transform: translateY(1px);
+	box-shadow: none;
+}
+
+.primary:disabled,
+.ghost:disabled,
+.danger:disabled {
+	border-color: transparent;
+	color: var(--ink-40);
+	background: var(--paper-2);
+	box-shadow: none;
+	cursor: not-allowed;
+}
+
 a {
 	color: var(--aqua-deep);
 	text-underline-offset: 0.2em;

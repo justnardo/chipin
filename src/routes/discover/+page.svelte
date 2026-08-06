@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
-	import BrandMark from '$lib/components/BrandMark.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import CampaignCard from '$lib/components/CampaignCard.svelte';
 	import {
 		listSessionCampaigns,
@@ -80,14 +80,7 @@
 	/>
 </svelte:head>
 
-<header class="site-header">
-	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
-	<nav aria-label="Primary navigation">
-		<a href={resolve('/discover')} aria-current="page">Discover</a>
-		<a href={resolve('/start')}>Start a campaign</a>
-	</nav>
-	<a class="header-action" href={resolve('/start')}>Start</a>
-</header>
+<SiteHeader />
 
 <main>
 	<section class="hero">
@@ -163,45 +156,6 @@
 </main>
 
 <style>
-	.site-header {
-		display: grid;
-		max-width: 1240px;
-		min-height: 84px;
-		align-items: center;
-		margin: 0 auto;
-		padding: var(--space-4);
-		grid-template-columns: 1fr auto;
-		border-bottom: 1px solid var(--line);
-	}
-
-	.brand-link {
-		width: fit-content;
-		color: inherit;
-		text-decoration: none;
-	}
-
-	nav {
-		display: none;
-		gap: var(--space-6);
-	}
-
-	nav a,
-	.header-action {
-		min-height: 48px;
-		align-content: center;
-		color: var(--ink);
-		font-size: var(--text-sm);
-		font-weight: 600;
-		text-decoration: none;
-	}
-
-	.header-action {
-		justify-self: end;
-		padding: 0 var(--space-4);
-		border: 1px solid var(--ink);
-		border-radius: var(--radius-full);
-	}
-
 	main {
 		max-width: 1240px;
 		margin: 0 auto;
@@ -239,28 +193,6 @@
 		flex-wrap: wrap;
 		gap: var(--space-3);
 		margin-top: var(--space-6);
-	}
-
-	.primary,
-	.ghost {
-		display: inline-grid;
-		min-height: 52px;
-		min-width: 160px;
-		place-items: center;
-		padding: 0 var(--space-5);
-		border-radius: var(--radius-md);
-		font-weight: 700;
-		text-decoration: none;
-	}
-
-	.primary {
-		color: white;
-		background: var(--aqua-deep);
-	}
-
-	.ghost {
-		border: 1px solid var(--line);
-		color: var(--ink);
 	}
 
 	.block + .block {
@@ -329,14 +261,6 @@
 	}
 
 	@media (min-width: 720px) {
-		.site-header {
-			grid-template-columns: 1fr auto 1fr;
-		}
-
-		nav {
-			display: flex;
-		}
-
 		.grid {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}

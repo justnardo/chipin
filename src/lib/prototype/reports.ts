@@ -524,6 +524,23 @@ export function dollarsToCents(value: string): number | null {
 	return Math.round(num * 100);
 }
 
+/**
+ * Dates for people. Raw ISO strings were being shown to end users in four
+ * places, including as a 20px bold headline value on the donor status page —
+ * nobody reads a date as "2026-08-01".
+ */
+export function formatDay(iso: string): string {
+	if (!iso) return '';
+	const d = new Date(`${iso.slice(0, 10)}T00:00:00`);
+	if (Number.isNaN(d.getTime())) return iso;
+	return new Intl.DateTimeFormat('en-BS', {
+		weekday: 'short',
+		day: 'numeric',
+		month: 'short',
+		year: 'numeric'
+	}).format(d);
+}
+
 export function matchingMethodLabel(method: MatchingMethod): string {
 	switch (method) {
 		case 'bank_reference':

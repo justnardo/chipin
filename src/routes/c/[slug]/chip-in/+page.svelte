@@ -681,30 +681,6 @@
 		background: var(--paper);
 	}
 
-	.primary,
-	.ghost {
-		display: grid;
-		width: 100%;
-		min-height: 52px;
-		place-items: center;
-		border-radius: var(--radius-md);
-		font-weight: 700;
-		text-decoration: none;
-		cursor: pointer;
-	}
-
-	.primary {
-		border: 0;
-		color: white;
-		background: var(--aqua-deep);
-	}
-
-	.ghost {
-		border: 1px solid var(--line);
-		color: var(--ink);
-		background: transparent;
-	}
-
 	.error {
 		margin: 0 0 var(--space-4);
 		color: var(--status-dispute);

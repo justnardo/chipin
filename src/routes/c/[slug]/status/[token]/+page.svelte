@@ -2,13 +2,14 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import BrandMark from '$lib/components/BrandMark.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import { getCampaign } from '$lib/prototype/campaigns';
 	import {
 		donorStatusLabel,
 		donorStatusTone,
 		formatBsd,
+		formatDay,
 		getReportByToken,
 		ledger,
 		matchedCents,
@@ -27,6 +28,7 @@
 	let error = $state('');
 	let notice = $state('');
 	let copied = $state(false);
+	let confirmingRevoke = $state(false);
 
 	const token = $derived(page.params.token ?? '');
 
@@ -71,6 +73,7 @@
 		if (!token) return;
 		const updated = revokeStatusLink(token);
 		report = updated;
+		confirmingRevoke = false;
 		notice = 'This status link no longer opens the report.';
 	}
 </script>
@@ -89,15 +92,7 @@
 	<span>Prototype only. Anyone using this browser can open this link and view the report.</span>
 </div>
 
-<header class="site-header">
-	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
-	<a
-		class="back"
-		href={campaignMeta ? resolve('/c/[slug]', { slug: campaignMeta.slug }) : resolve('/')}
-	>
-		Campaign
-	</a>
-</header>
+<SiteHeader showStartAction={false} />
 
 <main>
 	{#if !loaded}
@@ -154,7 +149,7 @@
 				</div>
 				<div>
 					<dt>Date sent</dt>
-					<dd>{report.transferDate}</dd>
+					<dd>{formatDay(report.transferDate)}</dd>
 				</div>
 				{#if report.bankReference}
 					<div>
@@ -187,7 +182,7 @@
 									{#if row.status === 'voided'}<span class="tag">withdrawn</span>{/if}
 								</p>
 								<p class="row-meta">
-									{matchingMethodLabel(row.method)} · {row.createdAt.slice(0, 10)}
+									{matchingMethodLabel(row.method)} · {formatDay(row.createdAt)}
 								</p>
 								{#if row.status === 'voided' && row.voidReason}
 									<p class="row-meta">Host's reason: {row.voidReason}</p>
@@ -255,20 +250,36 @@
 
 			<div class="footer-actions">
 				<a
-					class="ghost"
+					class="primary"
 					href={campaignMeta ? resolve('/c/[slug]', { slug: campaignMeta.slug }) : resolve('/')}
 				>
 					View campaign
 				</a>
-				<a
-					class="ghost"
-					href={campaignMeta
-						? resolve('/c/[slug]/host', { slug: campaignMeta.slug })
-						: resolve('/')}
-				>
-					Open host view
-				</a>
-				<button type="button" class="danger" onclick={revoke}>Revoke this link</button>
+			</div>
+
+			<!--
+				Revoking destroys the donor's only record of what they sent, and it used
+				to sit as a same-weight pink button beside two navigation links — the
+				loudest control on the page, where the primary action belongs. Demoted
+				to a text-weight link behind a confirm, below a rule.
+			-->
+			<div class="danger-zone">
+				{#if confirmingRevoke}
+					<p class="confirm-copy">
+						Turn this link off? You will not be able to open this report again from this link, and
+						this is the only record you have of what you sent.
+					</p>
+					<div class="confirm-actions">
+						<button type="button" class="danger" onclick={revoke}>Yes, turn it off</button>
+						<button type="button" class="ghost" onclick={() => (confirmingRevoke = false)}>
+							Keep the link
+						</button>
+					</div>
+				{:else}
+					<button type="button" class="revoke-link" onclick={() => (confirmingRevoke = true)}>
+						Revoke this link
+					</button>
+				{/if}
 			</div>
 
 			<p class="warn">
@@ -295,30 +306,6 @@
 
 	.prototype-banner strong {
 		font-family: var(--font-display);
-	}
-
-	.site-header {
-		display: flex;
-		max-width: 720px;
-		min-height: 76px;
-		align-items: center;
-		justify-content: space-between;
-		margin: 0 auto;
-		padding: var(--space-4);
-		border-bottom: 1px solid var(--line);
-	}
-
-	.brand-link,
-	.back {
-		color: inherit;
-		font-weight: 600;
-		text-decoration: none;
-	}
-
-	.back {
-		min-height: 48px;
-		align-content: center;
-		font-size: var(--text-sm);
 	}
 
 	main {
@@ -500,41 +487,40 @@
 		resize: vertical;
 	}
 
-	.primary,
-	.ghost,
-	.danger {
-		display: grid;
-		width: 100%;
-		min-height: 52px;
-		place-items: center;
-		border-radius: var(--radius-md);
-		font-weight: 700;
-		text-decoration: none;
-		cursor: pointer;
-	}
-
-	.primary {
-		border: 0;
-		color: white;
-		background: var(--aqua-deep);
-	}
-
-	.ghost {
-		border: 1px solid var(--line);
-		color: var(--ink);
-		background: transparent;
-	}
-
-	.danger {
-		border: 1px solid #e2b4ad;
-		color: var(--status-dispute);
-		background: #f9e6e2;
-	}
-
 	.footer-actions {
 		display: grid;
 		gap: var(--space-3);
 		margin-top: var(--space-5);
+	}
+
+	.danger-zone {
+		margin-top: var(--space-6);
+		padding-top: var(--space-5);
+		border-top: 1px solid var(--line);
+	}
+
+	.revoke-link {
+		min-height: var(--control-md);
+		padding: 0;
+		border: 0;
+		color: var(--status-dispute);
+		background: transparent;
+		font-size: var(--text-sm);
+		font-weight: 600;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+		cursor: pointer;
+	}
+
+	.confirm-copy {
+		margin: 0 0 var(--space-4);
+		color: var(--ink-60);
+		font-size: var(--text-sm);
+	}
+
+	.confirm-actions {
+		display: grid;
+		gap: var(--space-3);
 	}
 
 	.error {

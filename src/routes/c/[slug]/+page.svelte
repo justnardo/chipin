@@ -309,35 +309,11 @@
 		font-size: var(--text-xs);
 	}
 
-	.primary,
-	.ghost {
-		display: grid;
-		width: 100%;
-		min-height: 52px;
-		place-items: center;
-		border-radius: var(--radius-md);
-		font-weight: 700;
-		text-decoration: none;
-		cursor: pointer;
-	}
-
-	.primary {
-		border: 0;
-		color: white;
-		background: var(--aqua-deep);
-	}
-
 	.share-row {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: var(--space-3);
 		margin-top: var(--space-3);
-	}
-
-	.ghost {
-		border: 1px solid var(--line);
-		color: var(--ink);
-		background: transparent;
 	}
 
 	.note {
