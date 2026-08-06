@@ -8,7 +8,12 @@
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
 	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
-	import { formatGoal, getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
+	import {
+		coverBand,
+		formatGoal,
+		getCampaign,
+		type PrototypeCampaign
+	} from '$lib/prototype/campaigns';
 	import { campaignAttestedCents, loadReports } from '$lib/prototype/reports';
 
 	let campaign = $state<PrototypeCampaign | null>(null);
@@ -90,7 +95,7 @@
 		</section>
 	{:else}
 		<figure class="cover">
-			<img src={campaign.coverImage} alt={campaign.coverAlt} width="1600" height="760" />
+			<img src={coverBand(campaign)} alt={campaign.coverAlt} width="1600" height="760" />
 		</figure>
 
 		<section class="hero">

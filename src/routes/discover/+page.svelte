@@ -9,6 +9,7 @@
 		type PrototypeCampaign
 	} from '$lib/prototype/campaigns';
 	import { campaignAttestedCents, loadReports } from '$lib/prototype/reports';
+	import { photoAlt, photoSrc } from '$lib/prototype/photos';
 
 	const featured = [
 		{
@@ -25,9 +26,8 @@
 			title: 'A fresh start for the Bain Town reading room',
 			category: 'Education',
 			location: 'New Providence',
-			image:
-				'https://images.unsplash.com/photo-1504159506876-f8338247a14a?auto=format&fit=crop&w=900&q=82',
-			imageAlt: 'Child reading a book in a bright room',
+			image: photoSrc('reading'),
+			imageAlt: photoAlt('reading'),
 			received: 3180,
 			goal: 6000
 		},
@@ -35,9 +35,8 @@
 			title: 'Restock the neighbourhood food cupboard',
 			category: 'Emergency',
 			location: 'Grand Bahama',
-			image:
-				'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=900&q=82',
-			imageAlt: 'Volunteers preparing boxes of food',
+			image: photoSrc('food'),
+			imageAlt: photoAlt('food'),
 			received: 7325,
 			goal: 10000
 		}

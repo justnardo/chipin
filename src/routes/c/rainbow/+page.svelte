@@ -8,6 +8,7 @@
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
 	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
+	import { photoAlt, photoSrc } from '$lib/prototype/photos';
 
 	const campaign = {
 		title: 'Reopen the Rainbow Community Centre',
@@ -81,13 +82,13 @@
 <main>
 	<figure class="campaign-cover">
 		<img
-			src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=85"
-			alt="Friends gathered together outdoors"
+			src={photoSrc('friends', 'wide')}
+			alt={photoAlt('friends')}
 			width="1600"
 			height="760"
 			fetchpriority="high"
 		/>
-		<figcaption>Prototype campaign photography</figcaption>
+		<figcaption>Placeholder illustration, not a photograph of this campaign</figcaption>
 	</figure>
 	<section class="campaign-hero" aria-labelledby="campaign-title">
 		<div class="campaign-intro">

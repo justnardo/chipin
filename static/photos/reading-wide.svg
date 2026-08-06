@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 760" width="1600" height="760" role="presentation">
+	<defs>
+		<linearGradient id="sky-reading-wide" x1="0" y1="0" x2="0.2" y2="1">
+			<stop offset="0" stop-color="#d8f0ed" />
+			<stop offset="1" stop-color="#7fd6cf" />
+		</linearGradient>
+	</defs>
+	<rect width="1600" height="760" fill="#fbf7ee" />
+	<rect width="1600" height="760" fill="url(#sky-reading-wide)" />
+	<circle cx="1248" cy="167.2" r="114" fill="#fbf7ee" opacity="0.35" />
+	<path d="M 0 516.8000000000001 Q 480 446.80000000000007 880.0000000000001 506.80000000000007
+	         T 1600 476.80000000000007 L 1600 760 L 0 760 Z" fill="#047c76" opacity="0.18" />
+	
+	
+		<g fill="#047c76">
+			<circle cx="800.0" cy="283.2" r="49.0" />
+			<path d="M 728.8 528.4
+			         a 71.3 135.7 0 0 1 142.5 0 Z" />
+		</g>
+	<g fill="#f2b01e">
+			<path d="M 800 501.6 L 528 467.4 L 528 547.1999999999999 L 800 573.8 Z" />
+			<path d="M 800 501.6 L 1072 467.4 L 1072 547.1999999999999 L 800 573.8 Z" />
+		</g>
+		<path d="M 800 501.6 L 800 573.8" stroke="#0c1b1a" stroke-opacity="0.25" stroke-width="4" />
+	<path d="M 0 684 Q 800 623.1999999999999 1600 684 L 1600 760 L 0 760 Z" fill="#0c1b1a" opacity="0.08" />
+</svg>

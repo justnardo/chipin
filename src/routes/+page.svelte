@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import CampaignCard from '$lib/components/CampaignCard.svelte';
+	import { photoAlt, photoSrc } from '$lib/prototype/photos';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 
 	const featuredCampaigns = [
@@ -9,9 +10,8 @@
 			title: 'Reopen the Rainbow Community Centre',
 			category: 'Community',
 			location: 'Nassau',
-			image:
-				'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=82',
-			imageAlt: 'Friends sitting together outdoors',
+			image: photoSrc('friends'),
+			imageAlt: photoAlt('friends'),
 			received: 5240,
 			goal: 8000,
 			href: resolve('/c/rainbow')
@@ -20,9 +20,8 @@
 			title: 'A fresh start for the Bain Town reading room',
 			category: 'Education',
 			location: 'New Providence',
-			image:
-				'https://images.unsplash.com/photo-1504159506876-f8338247a14a?auto=format&fit=crop&w=900&q=82',
-			imageAlt: 'Child reading a book in a bright room',
+			image: photoSrc('reading'),
+			imageAlt: photoAlt('reading'),
 			received: 3180,
 			goal: 6000
 		},
@@ -30,9 +29,8 @@
 			title: 'Restock the neighbourhood food cupboard',
 			category: 'Emergency',
 			location: 'Grand Bahama',
-			image:
-				'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=900&q=82',
-			imageAlt: 'Volunteers preparing boxes of food',
+			image: photoSrc('food'),
+			imageAlt: photoAlt('food'),
 			received: 7325,
 			goal: 10000
 		}
@@ -73,24 +71,19 @@
 
 		<div
 			class="photo-story"
-			aria-label="Bahamian community moments shown with prototype photography"
+			aria-label="Prototype illustrations standing in for campaign photography"
 		>
 			<figure class="photo photo-one">
 				<img
-					src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=85"
-					alt="Friends laughing together outdoors"
+					src={photoSrc('friends')}
+					alt={photoAlt('friends')}
 					width="900"
 					height="1100"
 					fetchpriority="high"
 				/>
 			</figure>
 			<figure class="photo photo-two">
-				<img
-					src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1000&q=85"
-					alt="Children smiling together"
-					width="700"
-					height="900"
-				/>
+				<img src={photoSrc('children')} alt={photoAlt('children')} width="700" height="900" />
 			</figure>
 			<div class="photo-caption">
 				<span class="caption-number">242</span>
@@ -124,8 +117,8 @@
 	<section class="how" id="how-it-works" aria-labelledby="how-heading">
 		<div class="how-image">
 			<img
-				src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=1400&q=84"
-				alt="Community volunteers standing together"
+				src={photoSrc('gathering')}
+				alt={photoAlt('gathering')}
 				loading="lazy"
 				width="1000"
 				height="1200"
@@ -183,8 +176,8 @@
 		</div>
 		<div class="trust-image">
 			<img
-				src="https://images.unsplash.com/photo-1559024094-4a1e4495c3c1?auto=format&fit=crop&w=1200&q=84"
-				alt="Neighbours working together at a community table"
+				src={photoSrc('table')}
+				alt={photoAlt('table')}
 				loading="lazy"
 				width="900"
 				height="700"
@@ -212,7 +205,10 @@
 		<a href="#trust">Trust & safety</a>
 		<a href="mailto:hello@chipin242.com">Contact</a>
 	</div>
-	<small>Prototype photography from Unsplash. Final imagery will be locally commissioned.</small>
+	<small
+		>Illustrations are placeholders served from this site. Final imagery will be locally
+		commissioned.</small
+	>
 </footer>
 
 <style>

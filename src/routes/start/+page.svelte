@@ -164,6 +164,7 @@
 			story: story.trim(),
 			goalCents,
 			coverImage: cover.image,
+			coverImageWide: cover.imageWide,
 			coverAlt: cover.alt,
 			receivingAccounts: accounts
 		});
