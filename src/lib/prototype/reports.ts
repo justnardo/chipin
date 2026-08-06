@@ -73,6 +73,13 @@ export type PrototypeReport = {
 	transferDate: string;
 	bankReference: string;
 	note: string;
+	/**
+	 * How the host can reach the donor if a transfer needs sorting out. Optional,
+	 * and shown to the host only. The field existed on the report form long
+	 * before this, bound to an input and then dropped on submit — someone typed
+	 * their phone number believing it had been recorded and it went nowhere.
+	 */
+	contact: string;
 	status: ReportStatus;
 	clarificationQuestion: string;
 	clarificationReply: string;
@@ -157,6 +164,7 @@ function normalize(report: LegacyReport): PrototypeReport {
 		transferDate: report.transferDate ?? '',
 		bankReference: report.bankReference ?? '',
 		note: report.note ?? '',
+		contact: report.contact ?? '',
 		status: report.status ?? 'submitted',
 		clarificationQuestion: report.clarificationQuestion ?? '',
 		clarificationReply: report.clarificationReply ?? '',
@@ -234,6 +242,7 @@ export function addReport(
 		| 'createdAt'
 		| 'updatedAt'
 		| 'note'
+		| 'contact'
 		| 'senderBankId'
 		| 'recipientBankId'
 		| 'recipientTail'
@@ -241,6 +250,7 @@ export function addReport(
 		| 'editedFields'
 	> & {
 		note?: string;
+		contact?: string;
 		senderBankId?: string;
 		recipientBankId?: string;
 		recipientTail?: string;
@@ -252,6 +262,7 @@ export function addReport(
 	const report = normalize({
 		...input,
 		note: input.note ?? '',
+		contact: input.contact ?? '',
 		senderBankId: input.senderBankId ?? '',
 		recipientBankId: input.recipientBankId ?? '',
 		recipientTail: input.recipientTail ?? '',

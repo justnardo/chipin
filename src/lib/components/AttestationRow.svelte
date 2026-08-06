@@ -426,6 +426,9 @@
 			{#if report.clarificationReply}
 				<li>Donor reply: {report.clarificationReply}</li>
 			{/if}
+			{#if report.contact}
+				<li>Donor contact: {report.contact}</li>
+			{/if}
 			<li>
 				{active.length} active
 				{active.length === 1 ? 'entry' : 'entries'} totalling {formatBsd(matched)}

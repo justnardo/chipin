@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import BrandMark from '$lib/components/BrandMark.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
@@ -77,10 +77,7 @@
 	>
 </div>
 
-<header class="site-header">
-	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
-	<a class="header-action" href={resolve('/start')}>Start another</a>
-</header>
+<SiteHeader />
 
 <main>
 	{#if !loaded}
@@ -179,33 +176,6 @@
 
 	.prototype-banner strong {
 		font-family: var(--font-display);
-	}
-
-	.site-header {
-		display: flex;
-		max-width: 1100px;
-		min-height: 76px;
-		align-items: center;
-		justify-content: space-between;
-		margin: 0 auto;
-		padding: var(--space-4);
-		border-bottom: 1px solid var(--line);
-	}
-
-	.brand-link,
-	.header-action {
-		color: inherit;
-		font-weight: 600;
-		text-decoration: none;
-	}
-
-	.header-action {
-		min-height: 48px;
-		padding: 0 var(--space-4);
-		border: 1px solid var(--ink);
-		border-radius: var(--radius-full);
-		align-content: center;
-		font-size: var(--text-sm);
 	}
 
 	main {
