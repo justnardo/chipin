@@ -104,18 +104,23 @@ edits; the two files and `vercel.json` say the same thing in three dialects. Git
 neither and cannot set response headers at all, which is why it is the wrong host for anything
 past this prototype.
 
-To attach the domain: Vercel project → Settings → Domains → add it, then create the record it
-shows you in the Cloudflare dashboard (Cloudflare stays the registrar and DNS; Vercel serves).
-Set the DNS record to **DNS only**, not proxied — Vercel issues its own certificate, and
-Cloudflare's orange-cloud proxy in front of it causes redirect loops.
+The domain is `chipin242.com`, registered at Cloudflare. To attach it: Vercel project → Settings
+→ Domains → add `chipin242.com`, then create the record Vercel shows you in the Cloudflare
+dashboard (Cloudflare stays registrar and DNS; Vercel serves). Set that record to **DNS only**,
+not proxied — Vercel issues its own certificate, and Cloudflare's orange-cloud proxy in front of
+it causes redirect loops.
 
-Verify after the first deploy — a deep link is the thing that breaks on a misconfigured static
-host, and headers are easy to get wrong silently:
+Deployment protection is `ssoProtection: all_except_custom_domains`, so every `*.vercel.app` URL
+needs a Vercel login while `chipin242.com` serves publicly. Preview URLs are therefore not
+shareable outside the team, which is the right default for a prototype.
+
+Verify after the domain resolves — a deep link is what breaks on a misconfigured static host, and
+headers are easy to get wrong silently:
 
 ```sh
-curl -sI https://<your-domain>/discover | head -1              # expect HTTP/2 200, not 404
-curl -sI https://<your-domain>/ | grep -i cache-control        # expect private, no-store
-curl -s  https://<your-domain>/robots.txt                      # expect Disallow: /
+curl -sI https://chipin242.com/discover | head -1           # expect HTTP/2 200, not 404
+curl -sI https://chipin242.com/ | grep -i cache-control     # expect private, no-store
+curl -s  https://chipin242.com/robots.txt                   # expect Disallow: /
 ```
 
 The prototype is `Disallow: /` in `robots.txt` on purpose: the campaigns and receiving accounts
