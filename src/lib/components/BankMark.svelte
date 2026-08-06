@@ -56,15 +56,33 @@
 	// would stick to the next bank rendered by the same instance.
 	let failedSrc = $state('');
 	const logoSrc = $derived(`${base}/banks/${bank.id}.svg`);
-	const useEmblem = $derived(Boolean(win) && failedSrc !== logoSrc);
+	const hasFile = $derived(failedSrc !== logoSrc);
+
+	/**
+	 * Three renderings, in order of preference:
+	 *
+	 *   direct  — a file with no `emblem` window. The artwork is already square
+	 *             and in its own colours, so show it as supplied. This is the
+	 *             target state: static/banks/README.md tells maintainers to drop
+	 *             in an official square icon and delete the emblem window, and
+	 *             displaying a mark unaltered is a stronger position than a
+	 *             knockout, not a weaker one.
+	 *   emblem  — a file with a window. The interim treatment for the monochrome
+	 *             lockup traces currently in the repo.
+	 *   mono    — no file. The original monogram tile.
+	 */
+	const useEmblem = $derived(hasFile && Boolean(win));
+	const useDirect = $derived(hasFile && !win);
 </script>
 
 <!--
 	A mask cannot report a 404, so a probe <img> confirms the file is really
-	there and flips to the monogram if it is not. Zero-sized and aria-hidden;
-	it never paints.
+	there and flips to the monogram if it is not. Rendered for every channel, so
+	dropping artwork in for any of them works without touching code — which is
+	the drop-in behaviour static/banks/README.md promises. Zero-sized and
+	aria-hidden; it never paints.
 -->
-{#if win}
+{#if !useDirect}
 	<img
 		class="probe"
 		src={logoSrc}
@@ -74,16 +92,26 @@
 	/>
 {/if}
 
-<span
-	class="chip {size}"
-	class:emblem={useEmblem}
-	style="--tint: {bank.tint}; --ink: {bank.ink};{useEmblem
-		? ` --mask: url('${logoSrc}'); --mask-size: ${maskSize}; --mask-pos: ${maskPos};`
-		: ''}"
-	aria-hidden="true"
->
-	{#if !useEmblem}{bank.monogram}{/if}
-</span>
+{#if useDirect}
+	<img
+		class="chip direct {size}"
+		src={logoSrc}
+		alt=""
+		aria-hidden="true"
+		onerror={() => (failedSrc = logoSrc)}
+	/>
+{:else}
+	<span
+		class="chip {size}"
+		class:emblem={useEmblem}
+		style="--tint: {bank.tint}; --ink: {bank.ink};{useEmblem
+			? ` --mask: url('${logoSrc}'); --mask-size: ${maskSize}; --mask-pos: ${maskPos};`
+			: ''}"
+		aria-hidden="true"
+	>
+		{#if !useEmblem}{bank.monogram}{/if}
+	</span>
+{/if}
 
 <style>
 	.probe {
@@ -137,6 +165,18 @@
 		width: 56px;
 		height: 56px;
 		font-size: 15px;
+	}
+
+	/*
+	 * Supplied artwork keeps its own colours, so it gets a neutral ground rather
+	 * than the brand tint — a coloured icon on a coloured chip would fight.
+	 */
+	.chip.direct {
+		border: 1px solid var(--line);
+		background: var(--surface);
+		object-fit: contain;
+		padding: 2px;
+		box-sizing: border-box;
 	}
 
 	/* The emblem needs clear space the letterforms do not. */

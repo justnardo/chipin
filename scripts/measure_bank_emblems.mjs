@@ -20,11 +20,15 @@
  * artwork does, which is the point.
  *
  * Run with `npm run measure:banks`, then paste the windows into banks.ts.
+ *
+ * Needs a Chromium build. `npx playwright install chromium` fetches one; where
+ * that download is blocked but a build already exists, point at it instead:
+ * `CHROMIUM_PATH=/path/to/chrome npm run measure:banks`.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import pw from '/opt/node22/lib/node_modules/playwright/index.js';
+import { chromium } from 'playwright';
 
 const BANKS = resolve(dirname(fileURLToPath(import.meta.url)), '../static/banks');
 
@@ -51,7 +55,10 @@ const EMBLEM_PATHS = {
 	scotia: [0, 4, 5, 7, 14, 15, 16, 18, 19, 20, 21, 22, 23, 24]
 };
 
-const browser = await pw.chromium.launch();
+// Honour an existing build rather than hardcoding a path — this script used
+// to import Playwright from an absolute /opt path, which only ran on one
+// machine. Unset, Playwright resolves its own download as normal.
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
 const page = await browser.newPage();
 
 for (const [id, indices] of Object.entries(EMBLEM_PATHS)) {
