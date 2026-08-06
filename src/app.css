@@ -340,6 +340,16 @@ button:disabled {
 	border-top: 6px solid var(--gold);
 }
 
+/*
+ * A card whose contents run to its own edge — a campaign tile, where the cover
+ * image is flush to the border radius and the text below carries the padding.
+ * Named rather than left to each component to undo, because `.card` had two
+ * meanings in this codebase and the padded one is now the default.
+ */
+.card.flush {
+	padding: 0;
+}
+
 a {
 	color: var(--aqua-deep);
 	text-underline-offset: 0.2em;

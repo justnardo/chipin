@@ -361,30 +361,26 @@
 					</div>
 				</fieldset>
 
-				<label>
-					<span>Account name</span>
+				<Field label="Account name">
 					<input
 						type="text"
 						bind:value={accountName}
 						placeholder="Exactly as your bank shows it"
 						required
 					/>
-				</label>
+				</Field>
 
 				{#if isWallet}
-					<label>
-						<span>Wallet handle or number</span>
+					<Field label="Wallet handle or number">
 						<input type="text" bind:value={handle} placeholder="What donors send to" required />
-					</label>
+					</Field>
 				{:else}
-					<label>
-						<span>Account number</span>
+					<Field label="Account number">
 						<input type="text" inputmode="numeric" bind:value={accountNumber} required />
-					</label>
-					<label>
-						<span>Branch (optional)</span>
+					</Field>
+					<Field label="Branch (optional)">
 						<input type="text" bind:value={branch} placeholder="Where the account is held" />
-					</label>
+					</Field>
 				{/if}
 
 				<button type="button" class="add-account" onclick={addAccount}>

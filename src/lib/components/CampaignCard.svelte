@@ -25,7 +25,7 @@
 	// href arrives already resolved by the caller; see discover/+page.svelte.
 </script>
 
-<article class="card">
+<article class="card flush">
 	<div class="image-wrap">
 		<img src={image} alt={imageAlt} loading="lazy" width="720" height="480" />
 		<StatusChip label={category} tone="active" />
