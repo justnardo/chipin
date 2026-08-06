@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import BankMark from '$lib/components/BankMark.svelte';
+	import Field from '$lib/components/Field.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import { getBank, isOverdue, resolveRail, settlementWindow } from '$lib/prototype/banks';
 	import {
@@ -296,19 +297,16 @@
 							{#if editing?.allocationId === row.id}
 								<div class="edit">
 									{#if editing.mode === 'correct'}
-										<label>
-											<span>Corrected amount</span>
+										<Field label="Corrected amount">
 											<input type="text" inputmode="decimal" bind:value={editAmount} />
-										</label>
-										<label>
-											<span>How did you match it?</span>
+										</Field>
+										<Field label="How did you match it?">
 											<select bind:value={editMethod}>
 												{@render methodOptions()}
 											</select>
-										</label>
+										</Field>
 									{/if}
-									<label>
-										<span>Reason (shown to the donor)</span>
+									<Field label="Reason (shown to the donor)">
 										<input
 											type="text"
 											bind:value={editReason}
@@ -316,7 +314,7 @@
 												? 'Why is this amount no longer counted?'
 												: 'Why is the amount changing?'}
 										/>
-									</label>
+									</Field>
 									{#if editError}
 										<p class="error" role="alert">{editError}</p>
 									{/if}
@@ -354,16 +352,14 @@
 
 	{#if !editing}
 		<div class="actions">
-			<label>
-				<span>{matched > 0 ? 'Record another amount' : 'Actual amount received'}</span>
+			<Field label={matched > 0 ? 'Record another amount' : 'Actual amount received'}>
 				<input type="text" inputmode="decimal" bind:value={amountInput} />
-			</label>
-			<label>
-				<span>How did you match it?</span>
+			</Field>
+			<Field label="How did you match it?">
 				<select bind:value={method}>
 					{@render methodOptions()}
 				</select>
-			</label>
+			</Field>
 			<div class="action-cluster">
 				<button type="button" class="primary" onclick={recordMatch}>
 					{matched > 0 ? 'Add to record' : 'Mark received'}
@@ -378,14 +374,13 @@
 			</p>
 
 			{#if canDeclare}
-				<label>
-					<span>Ask for clarification</span>
+				<Field label="Ask for clarification">
 					<input
 						type="text"
 						bind:value={questionInput}
 						placeholder="What should the donor check?"
 					/>
-				</label>
+				</Field>
 				<button type="button" class="ghost" onclick={askClarification}>Send question</button>
 			{/if}
 
@@ -445,7 +440,7 @@
 		padding: var(--space-5);
 		border: 1px solid var(--line);
 		border-radius: var(--radius-md);
-		background: #fffdf8;
+		background: var(--surface);
 	}
 
 	.row-head {
@@ -607,23 +602,6 @@
 		margin-top: var(--space-5);
 		padding-top: var(--space-5);
 		border-top: 1px solid var(--line);
-	}
-
-	label {
-		display: grid;
-		gap: var(--space-2);
-		font-size: var(--text-sm);
-		font-weight: 600;
-	}
-
-	input,
-	select {
-		min-height: 48px;
-		padding: 0 var(--space-3);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		background: var(--paper);
-		font-size: var(--text-base);
 	}
 
 	.action-cluster {

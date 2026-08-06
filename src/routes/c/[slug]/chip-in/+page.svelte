@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import BankTransferPortal from '$lib/components/BankTransferPortal.svelte';
 	import DateSentField from '$lib/components/DateSentField.svelte';
+	import Field from '$lib/components/Field.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ReceiptScanner from '$lib/components/ReceiptScanner.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
@@ -246,8 +247,7 @@
 						Other
 					</button>
 				</div>
-				<label>
-					<span>Amount (BSD)</span>
+				<Field label="Amount (BSD)">
 					<input
 						type="text"
 						inputmode="decimal"
@@ -255,7 +255,7 @@
 						oninput={() => (selectedSuggestion = 'custom')}
 						required
 					/>
-				</label>
+				</Field>
 				{#if error}
 					<p class="error" role="alert">{error}</p>
 				{/if}
@@ -363,21 +363,22 @@
 						</p>
 					{/if}
 
-					<label>
-						<span>Amount sent (BSD)</span>
+					<Field label="Amount sent (BSD)">
 						<input type="text" inputmode="decimal" bind:value={reportInput} required />
-					</label>
+					</Field>
 					<DateSentField bind:value={transferDate} />
-					<label>
-						<span>Reference number your bank showed you (optional)</span>
+					<Field
+						label="Reference number your bank showed you (optional)"
+						hint="Helps the host find your transfer on their statement."
+					>
 						<input type="text" bind:value={bankReference} placeholder="If your bank showed one" />
-						<small>Helps the host find your transfer on their statement.</small>
-					</label>
-					<label>
-						<span>Contact for follow-up (optional)</span>
+					</Field>
+					<Field
+						label="Contact for follow-up (optional)"
+						hint="Only the host sees this, and only if they need to ask you something."
+					>
 						<input type="text" bind:value={contact} placeholder="Email or mobile" />
-						<small>Only the host sees this, and only if they need to ask you something.</small>
-					</label>
+					</Field>
 					{#if error}
 						<p class="error" role="alert">{error}</p>
 					{/if}
@@ -616,12 +617,11 @@
 		font-size: var(--text-sm);
 	}
 
-	.card {
-		padding: var(--space-6);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-md);
-		background: #fffdf8;
-		box-shadow: var(--shadow-raise);
+	/* Both cards here are forms, so the card spaces its own fields. */
+	form.card {
+		display: grid;
+		gap: var(--space-4);
+		align-content: start;
 	}
 
 	.card h2 {
@@ -663,22 +663,6 @@
 		color: var(--aqua-deep);
 		background: var(--aqua-tint);
 		box-shadow: inset 0 0 0 1px var(--aqua-deep);
-	}
-
-	label {
-		display: grid;
-		gap: var(--space-2);
-		margin-bottom: var(--space-4);
-		font-size: var(--text-sm);
-		font-weight: 600;
-	}
-
-	input {
-		min-height: 48px;
-		padding: 0 var(--space-3);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		background: var(--paper);
 	}
 
 	.error {

@@ -52,7 +52,7 @@
 		flex-direction: column;
 		border: 1px solid var(--line);
 		border-radius: var(--radius-md);
-		background: #fffdf8;
+		background: var(--surface);
 		overflow: hidden;
 		transition:
 			transform var(--dur-fast) var(--ease),

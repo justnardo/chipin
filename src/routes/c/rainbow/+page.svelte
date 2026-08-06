@@ -386,7 +386,7 @@
 		border: 1px solid var(--line);
 		border-top: 6px solid var(--gold);
 		border-radius: var(--radius-md);
-		background: #fffdf8;
+		background: var(--surface);
 		box-shadow: var(--shadow-raise);
 	}
 	.amount-label {

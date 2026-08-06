@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import Field from '$lib/components/Field.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import { getCampaign } from '$lib/prototype/campaigns';
@@ -201,11 +202,10 @@
 				<form class="clarify" onsubmit={submitReply}>
 					<h2>The host asked a question</h2>
 					<blockquote>{report.clarificationQuestion}</blockquote>
-					<label>
-						<span>Your reply</span>
+					<Field label="Your reply">
 						<textarea bind:value={reply} rows="4" placeholder="Add the detail the host needs"
 						></textarea>
-					</label>
+					</Field>
 					{#if error}
 						<p class="error" role="alert">{error}</p>
 					{/if}
@@ -339,14 +339,6 @@
 		font-size: var(--text-sm);
 	}
 
-	.card {
-		padding: var(--space-6);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-md);
-		background: #fffdf8;
-		box-shadow: var(--shadow-raise);
-	}
-
 	.status-row {
 		display: flex;
 		flex-wrap: wrap;
@@ -458,32 +450,25 @@
 		font-size: var(--text-xs);
 	}
 
+	.clarify {
+		display: grid;
+		gap: var(--space-4);
+	}
+
 	.clarify h2 {
-		margin: 0 0 var(--space-3);
+		margin: 0;
 		font-size: var(--text-xl);
 	}
 
 	blockquote {
-		margin: 0 0 var(--space-4);
+		margin: 0;
 		padding: var(--space-4);
 		border-left: 4px solid var(--gold);
 		background: var(--gold-tint);
 		color: var(--ink);
 	}
 
-	label {
-		display: grid;
-		gap: var(--space-2);
-		margin-bottom: var(--space-4);
-		font-size: var(--text-sm);
-		font-weight: 600;
-	}
-
 	textarea {
-		padding: var(--space-3);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		background: var(--paper);
 		resize: vertical;
 	}
 

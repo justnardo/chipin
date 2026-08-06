@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import Field from '$lib/components/Field.svelte';
 	import {
 		addUpdate,
 		formatUpdateDate,
@@ -62,14 +63,12 @@
 	{#if isHost}
 		{#if formOpen}
 			<form class="compose" onsubmit={submit}>
-				<label>
-					<span>Update title</span>
+				<Field label="Update title">
 					<input type="text" bind:value={title} placeholder="Chairs arrived" required />
-				</label>
-				<label>
-					<span>What happened?</span>
+				</Field>
+				<Field label="What happened?">
 					<textarea bind:value={body} rows="4" required></textarea>
-				</label>
+				</Field>
 				{#if error}
 					<p class="error" role="alert">{error}</p>
 				{/if}
@@ -172,25 +171,7 @@
 		padding: var(--space-5);
 		border: 1px solid var(--line);
 		border-radius: var(--radius-md);
-		background: #fffdf8;
-	}
-
-	label {
-		display: grid;
-		gap: var(--space-2);
-		font-size: var(--text-sm);
-		font-weight: 600;
-	}
-
-	input,
-	textarea {
-		min-height: 48px;
-		padding: var(--space-3);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		background: var(--paper);
-		font: inherit;
-		font-weight: 400;
+		background: var(--surface);
 	}
 
 	textarea {

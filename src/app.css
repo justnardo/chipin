@@ -288,6 +288,58 @@ button:disabled {
 	cursor: not-allowed;
 }
 
+/*
+ * Fields, defined once.
+ *
+ * Same story as the buttons. Six files each re-declared `label` and the control
+ * inside it, and because a Svelte scoped rule carries an extra class its
+ * specificity beats the baseline above — so every one of those local copies
+ * silently reverted its form to --radius-sm corners, a --line border and a
+ * --paper fill, undoing the control styling for exactly the screens where a
+ * donor types an amount. They also drifted apart: `padding: var(--space-3)`
+ * against `padding: 0 var(--space-3)`, and two of them omitted the
+ * `font-weight: 400` reset, so the input text inherited the label's 600 and
+ * came out bold.
+ *
+ * The hint is a <small> so it reads as fine print without a class, and it sits
+ * inside the <label> so a screen reader announces it with the control.
+ */
+.field {
+	display: grid;
+	gap: var(--space-2);
+	font-size: var(--text-sm);
+	font-weight: 600;
+}
+
+.field > input,
+.field > textarea,
+.field > select {
+	font-weight: 400;
+}
+
+.field > small {
+	color: var(--ink-60);
+	font-size: var(--text-xs);
+	font-weight: 400;
+}
+
+/*
+ * Cards, defined once. Four files carried the same five declarations, all of
+ * them still filling with the literal --surface was introduced to replace.
+ */
+.card {
+	padding: var(--space-6);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	background: var(--surface);
+	box-shadow: var(--shadow-raise);
+}
+
+/* The one card that leads a page: a gold rule marks the primary action panel. */
+.card.accent {
+	border-top: 6px solid var(--gold);
+}
+
 a {
 	color: var(--aqua-deep);
 	text-underline-offset: 0.2em;

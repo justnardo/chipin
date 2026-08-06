@@ -209,7 +209,7 @@
 		padding: var(--space-6);
 		border: 1px solid var(--line);
 		border-radius: var(--radius-md);
-		background: #fffdf8;
+		background: var(--surface);
 		box-shadow: var(--shadow-raise);
 	}
 
