@@ -74,11 +74,62 @@ has no server side. Host it anywhere:
   `npm run build` with a publish directory of `build`.
 
 A project site served from a subpath needs `BASE_PATH` set at build time (the Pages workflow
-does this): `BASE_PATH=/chipin npm run build`. Leave it unset for root-hosted deploys.
+does this): `BASE_PATH=/chipin npm run build`. Leave it unset for root-hosted deploys, which is
+what a custom domain is.
 
-Swap `@sveltejs/adapter-static` for a server adapter when real routes arrive — closing the
-disclosure decision requires `Cache-Control: private, no-store` on the response carrying
-receiving details, which static hosting cannot set.
+## Putting the prototype on a custom domain
+
+Deployed on **Vercel** from the connected GitHub repo. `vercel.json` carries three things, and
+since Vercel rejects any key it does not recognise — including a `"//"` comment key — the
+reasoning for them lives here instead of in the file:
+
+- `outputDirectory: build`. Vercel's SvelteKit preset looks for `adapter-vercel` output under
+  `.vercel/output` and falls back to `public/`; adapter-static writes to `build/`. Without this
+  the build succeeds and the deploy fails with "No Output Directory named public".
+- A catch-all rewrite to `/index.html`, because campaign slugs and donor status tokens are
+  created in the browser and cannot be prerendered.
+- The response headers: `private, no-store` on the app shell, `no-referrer` so a slug or status
+  token does not follow the visitor onward, and long caching for fingerprinted assets and the
+  OCR engine.
+
+The `source` patterns use negative lookaheads (`/((?!_app/|ocr/).*)`) rather than relying on
+which matching rule Vercel applies last, so asset paths keep their own caching regardless.
+
+Both `outputDirectory` and the rewrite come out when the dynamic phase swaps in `adapter-vercel`,
+and the headers move into `hooks.server.ts` where they can vary per response.
+
+Vercel ignores `static/_headers` and `static/_redirects` — those are Cloudflare Pages and Netlify
+conventions. They stay in the tree so this build still deploys correctly on either without
+edits; the two files and `vercel.json` say the same thing in three dialects. GitHub Pages reads
+neither and cannot set response headers at all, which is why it is the wrong host for anything
+past this prototype.
+
+The domain is `chipin242.com`, registered at Cloudflare. To attach it: Vercel project → Settings
+→ Domains → add `chipin242.com`, then create the record Vercel shows you in the Cloudflare
+dashboard (Cloudflare stays registrar and DNS; Vercel serves). Set that record to **DNS only**,
+not proxied — Vercel issues its own certificate, and Cloudflare's orange-cloud proxy in front of
+it causes redirect loops.
+
+Deployment protection is `ssoProtection: all_except_custom_domains`, so every `*.vercel.app` URL
+needs a Vercel login while `chipin242.com` serves publicly. Preview URLs are therefore not
+shareable outside the team, which is the right default for a prototype.
+
+Verify after the domain resolves — a deep link is what breaks on a misconfigured static host, and
+headers are easy to get wrong silently:
+
+```sh
+curl -sI https://chipin242.com/discover | head -1           # expect HTTP/2 200, not 404
+curl -sI https://chipin242.com/ | grep -i cache-control     # expect private, no-store
+curl -s  https://chipin242.com/robots.txt                   # expect Disallow: /
+```
+
+The prototype is `Disallow: /` in `robots.txt` on purpose: the campaigns and receiving accounts
+on it are invented, and an indexed fake campaign soliciting bank transfers is indistinguishable
+from a real one to anyone arriving from a search. Open it up at launch, not before.
+
+Swap `@sveltejs/adapter-static` for a server adapter when real routes arrive. `_headers` covers
+the static case, but per-response control over what carries receiving details — and the reveal-step
+rate limiting in the threat model — needs a server.
 
 ## Where prototype data lives
 

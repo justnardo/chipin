@@ -1,0 +1,29 @@
+# Response headers for the static prototype.
+#
+# Read by Cloudflare Pages and Netlify from the output root. GitHub Pages ignores
+# this file entirely — it cannot set response headers at all, which is why it is
+# the wrong host for anything past this prototype (see README build gates).
+#
+# Later rules override earlier ones for the same header, so the long-cache rules
+# for fingerprinted assets come after the catch-all.
+
+/*
+  # Receiving details must not sit in a shared cache. The disclosure decision in
+  # docs/stage-0/THREAT-MODEL.md is still open, and today's values are fictional,
+  # but the header belongs here before any real account detail ever does.
+  Cache-Control: private, no-store
+  # A campaign URL can carry a slug, and a donor status URL carries a token.
+  # Neither should leak to whatever a visitor clicks through to next.
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+
+# Fingerprinted by the build — the filename changes when the content does, so a
+# year-long cache is safe and keeps repeat visits off the network.
+/_app/immutable/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The OCR engine is ~15MB and versioned with the dependency. Cache it hard;
+# re-downloading it on every receipt scan would be painful on mobile data.
+/ocr/*
+  Cache-Control: public, max-age=604800
