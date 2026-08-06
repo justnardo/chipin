@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import BankMark from '$lib/components/BankMark.svelte';
-	import BrandMark from '$lib/components/BrandMark.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import { BANK_CHANNELS, getBank } from '$lib/prototype/banks';
@@ -212,10 +212,7 @@
 	<span>Prototype pages stay in this browser. No review queue or real money yet.</span>
 </div>
 
-<header class="site-header">
-	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
-	<a class="back" href={resolve('/')}>Back home</a>
-</header>
+<SiteHeader />
 
 <main>
 	<p class="kicker">New fundraiser</p>
@@ -488,30 +485,6 @@
 
 	.prototype-banner strong {
 		font-family: var(--font-display);
-	}
-
-	.site-header {
-		display: flex;
-		max-width: 1100px;
-		min-height: 76px;
-		align-items: center;
-		justify-content: space-between;
-		margin: 0 auto;
-		padding: var(--space-4);
-		border-bottom: 1px solid var(--line);
-	}
-
-	.brand-link,
-	.back {
-		color: inherit;
-		font-weight: 600;
-		text-decoration: none;
-	}
-
-	.back {
-		min-height: 48px;
-		align-content: center;
-		font-size: var(--text-sm);
 	}
 
 	main {
@@ -799,33 +772,6 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: var(--space-3);
-	}
-
-	.primary,
-	.ghost {
-		display: grid;
-		min-height: 52px;
-		place-items: center;
-		border-radius: var(--radius-md);
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.primary {
-		border: 0;
-		color: white;
-		background: var(--aqua-deep);
-	}
-
-	.primary:disabled {
-		opacity: 0.7;
-		cursor: wait;
-	}
-
-	.ghost {
-		border: 1px solid var(--line);
-		color: var(--ink);
-		background: transparent;
 	}
 
 	.error {

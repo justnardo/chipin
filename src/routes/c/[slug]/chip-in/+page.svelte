@@ -3,7 +3,8 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import BankTransferPortal from '$lib/components/BankTransferPortal.svelte';
-	import BrandMark from '$lib/components/BrandMark.svelte';
+	import DateSentField from '$lib/components/DateSentField.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ReceiptScanner from '$lib/components/ReceiptScanner.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import BankMark from '$lib/components/BankMark.svelte';
@@ -163,6 +164,7 @@
 			reportedCents: cents,
 			transferDate,
 			bankReference: bankReference.trim(),
+			contact: contact.trim(),
 			senderBankId,
 			recipientBankId: selectedAccount?.bankId ?? '',
 			recipientTail: selectedAccount ? accountTail(selectedAccount) : '',
@@ -191,10 +193,7 @@
 	<span>Fictional flow only. No money can be sent through ChipIn.</span>
 </div>
 
-<header class="site-header">
-	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
-	<a class="back" href={campaignHref}>Back to campaign</a>
-</header>
+<SiteHeader links={[{ label: 'Back to campaign', href: campaignHref }]} showStartAction={false} />
 
 <main>
 	{#if !campaign}
@@ -368,17 +367,16 @@
 						<span>Amount sent (BSD)</span>
 						<input type="text" inputmode="decimal" bind:value={reportInput} required />
 					</label>
+					<DateSentField bind:value={transferDate} />
 					<label>
-						<span>Date sent</span>
-						<input type="date" bind:value={transferDate} required />
-					</label>
-					<label>
-						<span>Bank-generated reference (optional)</span>
+						<span>Reference number your bank showed you (optional)</span>
 						<input type="text" bind:value={bankReference} placeholder="If your bank showed one" />
+						<small>Helps the host find your transfer on their statement.</small>
 					</label>
 					<label>
-						<span>Contact for follow-up (optional in prototype)</span>
+						<span>Contact for follow-up (optional)</span>
 						<input type="text" bind:value={contact} placeholder="Email or mobile" />
+						<small>Only the host sees this, and only if they need to ask you something.</small>
 					</label>
 					{#if error}
 						<p class="error" role="alert">{error}</p>
@@ -439,30 +437,6 @@
 		font-family: var(--font-display);
 	}
 
-	.site-header {
-		display: flex;
-		max-width: 720px;
-		min-height: 76px;
-		align-items: center;
-		justify-content: space-between;
-		margin: 0 auto;
-		padding: var(--space-4);
-		border-bottom: 1px solid var(--line);
-	}
-
-	.brand-link,
-	.back {
-		color: inherit;
-		text-decoration: none;
-		font-weight: 600;
-	}
-
-	.back {
-		min-height: 48px;
-		align-content: center;
-		font-size: var(--text-sm);
-	}
-
 	main {
 		max-width: 720px;
 		margin: 0 auto;
@@ -490,33 +464,78 @@
 		font-size: var(--text-lg);
 	}
 
+	/*
+	 * A rail, not four filled boxes. The boxes gave no sense of sequence, wrapped
+	 * to a 2x2 grid on phones (two rows of chrome before the actual task), and
+	 * set their labels in --ink-40 on --paper-2 at 2.44:1, which is unreadable.
+	 */
 	.steps {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: var(--space-2);
+		display: flex;
 		padding: 0;
 		margin: 0 0 var(--space-6);
 		list-style: none;
 		font-size: var(--text-xs);
-		font-weight: 700;
+		font-weight: 600;
+		counter-reset: step;
 	}
 
 	.steps li {
-		padding: var(--space-2);
-		border-radius: var(--radius-sm);
-		color: var(--ink-40);
-		background: var(--paper-2);
+		position: relative;
+		display: flex;
+		flex: 1;
+		min-width: 0;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-2);
+		padding-top: 26px;
+		color: var(--ink-60);
 		text-align: center;
+	}
+
+	/* The dot */
+	.steps li::before {
+		position: absolute;
+		z-index: 1;
+		top: 0;
+		width: 18px;
+		height: 18px;
+		border: 2px solid var(--border);
+		border-radius: var(--radius-full);
+		background: var(--surface);
+		content: '';
+	}
+
+	/* The connecting rule, drawn from each step back toward the previous one */
+	.steps li + li::after {
+		position: absolute;
+		top: 8px;
+		right: 50%;
+		left: -50%;
+		height: 2px;
+		background: var(--border);
+		content: '';
 	}
 
 	.steps li.current {
 		color: var(--ink);
-		background: var(--gold-tint);
+		font-weight: 700;
 	}
 
-	.steps li.done {
-		color: var(--status-received);
-		background: #e4f1e9;
+	.steps li.current::before {
+		border-color: var(--gold);
+		background: var(--gold);
+		box-shadow: 0 0 0 3px var(--paper);
+	}
+
+	.steps li.done::before {
+		border-color: var(--aqua-deep);
+		background: var(--aqua-deep);
+	}
+
+	/* Only segments behind a completed step fill in. Colouring the one after the
+	   current step would claim progress the donor has not made yet. */
+	.steps li.done + li::after {
+		background: var(--aqua-deep);
 	}
 
 	.stack {
@@ -662,30 +681,6 @@
 		background: var(--paper);
 	}
 
-	.primary,
-	.ghost {
-		display: grid;
-		width: 100%;
-		min-height: 52px;
-		place-items: center;
-		border-radius: var(--radius-md);
-		font-weight: 700;
-		text-decoration: none;
-		cursor: pointer;
-	}
-
-	.primary {
-		border: 0;
-		color: white;
-		background: var(--aqua-deep);
-	}
-
-	.ghost {
-		border: 1px solid var(--line);
-		color: var(--ink);
-		background: transparent;
-	}
-
 	.error {
 		margin: 0 0 var(--space-4);
 		color: var(--status-dispute);
@@ -710,8 +705,10 @@
 	}
 
 	@media (max-width: 520px) {
-		.steps {
-			grid-template-columns: 1fr 1fr;
+		/* The rail stays one row at every width — it never wraps now, so the old
+		   2x2 fallback would only reintroduce the two-rows-of-chrome problem. */
+		.steps li {
+			font-size: 11px;
 		}
 	}
 </style>

@@ -329,18 +329,6 @@
 		margin-top: var(--space-4);
 	}
 
-	.ghost {
-		min-height: 44px;
-		padding: 0 var(--space-4);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		background: transparent;
-		color: var(--ink);
-		font-size: var(--text-sm);
-		font-weight: 700;
-		cursor: pointer;
-	}
-
 	.lines {
 		margin: var(--space-3) 0 0;
 		padding: var(--space-3);

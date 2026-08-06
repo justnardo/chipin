@@ -6,6 +6,7 @@
 	import {
 		activeAllocations,
 		formatBsd,
+		formatDay,
 		ledger,
 		matchedCents,
 		matchingMethodLabel,
@@ -209,7 +210,7 @@
 		<div>
 			<p class="amount">{formatBsd(report.reportedCents)} reported</p>
 			<p class="meta">
-				Transfer date {report.transferDate}
+				Transfer date {formatDay(report.transferDate)}
 				{#if report.bankReference}
 					· Bank ref {report.bankReference}
 				{/if}
@@ -280,7 +281,7 @@
 								{#if row.status === 'voided'}<span class="tag">withdrawn</span>{/if}
 							</p>
 							<p class="ledger-meta">
-								{matchingMethodLabel(row.method)} · {row.createdAt.slice(0, 10)}
+								{matchingMethodLabel(row.method)} · {formatDay(row.createdAt)}
 							</p>
 						</div>
 						{#if row.correctionOf}
@@ -418,13 +419,16 @@
 	<details class="history">
 		<summary>Show report history</summary>
 		<ul>
-			<li>Reported {formatBsd(report.reportedCents)} · {report.createdAt.slice(0, 10)}</li>
+			<li>Reported {formatBsd(report.reportedCents)} · {formatDay(report.createdAt)}</li>
 			<li>Status: {report.status} · updated {report.updatedAt.slice(0, 10)}</li>
 			{#if report.clarificationQuestion}
 				<li>Question: {report.clarificationQuestion}</li>
 			{/if}
 			{#if report.clarificationReply}
 				<li>Donor reply: {report.clarificationReply}</li>
+			{/if}
+			{#if report.contact}
+				<li>Donor contact: {report.contact}</li>
 			{/if}
 			<li>
 				{active.length} active
@@ -633,18 +637,6 @@
 		border-radius: var(--radius-md);
 		font-weight: 700;
 		cursor: pointer;
-	}
-
-	.primary {
-		border: 0;
-		color: white;
-		background: var(--aqua-deep);
-	}
-
-	.ghost {
-		border: 1px solid var(--line);
-		color: var(--ink);
-		background: transparent;
 	}
 
 	.linkish {

@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import AttestationRow from '$lib/components/AttestationRow.svelte';
-	import BrandMark from '$lib/components/BrandMark.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
 	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
@@ -83,15 +83,15 @@
 	<span>Reports live in this browser on this device. Nothing is saved to a server.</span>
 </div>
 
-<header class="site-header">
-	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
-	{#if campaign}
-		<nav>
-			<a href={resolve('/c/[slug]', { slug: campaign.slug })}>Campaign</a>
-			<a href={resolve('/c/[slug]/chip-in', { slug: campaign.slug })}>Chip-in flow</a>
-		</nav>
-	{/if}
-</header>
+<SiteHeader
+	links={campaign
+		? [
+				{ label: 'Campaign', href: resolve('/c/[slug]', { slug: campaign.slug }) },
+				{ label: 'Chip-in flow', href: resolve('/c/[slug]/chip-in', { slug: campaign.slug }) }
+			]
+		: []}
+	showStartAction={false}
+/>
 
 <main>
 	{#if !campaign}
@@ -174,37 +174,6 @@
 
 	.prototype-banner strong {
 		font-family: var(--font-display);
-	}
-
-	.site-header {
-		display: flex;
-		max-width: 800px;
-		min-height: 76px;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-4);
-		margin: 0 auto;
-		padding: var(--space-4);
-		border-bottom: 1px solid var(--line);
-	}
-
-	.brand-link {
-		color: inherit;
-		text-decoration: none;
-	}
-
-	nav {
-		display: flex;
-		gap: var(--space-4);
-	}
-
-	nav a {
-		min-height: 48px;
-		align-content: center;
-		color: var(--ink);
-		font-size: var(--text-sm);
-		font-weight: 600;
-		text-decoration: none;
 	}
 
 	main {
@@ -300,17 +269,5 @@
 	.empty p {
 		margin: 0 0 var(--space-4);
 		color: var(--ink-60);
-	}
-
-	.primary {
-		display: inline-grid;
-		min-height: 52px;
-		place-items: center;
-		padding: 0 var(--space-5);
-		border-radius: var(--radius-md);
-		color: white;
-		background: var(--aqua-deep);
-		font-weight: 700;
-		text-decoration: none;
 	}
 </style>
