@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import CampaignCard from '$lib/components/CampaignCard.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 
 	const featuredCampaigns = [
 		{
@@ -46,17 +47,12 @@
 	/>
 </svelte:head>
 
-<header class="site-header">
-	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
-	<nav aria-label="Primary navigation">
-		<a href={resolve('/discover')}>Discover</a>
-		<a href="#how-it-works">How it works</a>
-		<a href="#trust">Trust & safety</a>
-	</nav>
-	<a class="header-action" href={resolve('/start')}>
-		<span class="wide-label">Start a campaign</span><span class="narrow-label">Start</span>
-	</a>
-</header>
+<SiteHeader
+	links={[
+		{ label: 'How it works', href: '#how-it-works' },
+		{ label: 'Trust & safety', href: '#trust' }
+	]}
+/>
 
 <main>
 	<section class="hero" aria-labelledby="hero-heading">
@@ -220,43 +216,6 @@
 </footer>
 
 <style>
-	.site-header {
-		position: relative;
-		z-index: 10;
-		display: grid;
-		max-width: 1240px;
-		min-height: 88px;
-		align-items: center;
-		margin: 0 auto;
-		padding: var(--space-4);
-		grid-template-columns: 1fr auto;
-	}
-	.brand-link {
-		width: fit-content;
-		color: inherit;
-		text-decoration: none;
-	}
-	.narrow-label {
-		display: none;
-	}
-	nav {
-		display: none;
-		gap: var(--space-6);
-	}
-	nav a,
-	.header-action {
-		min-height: 48px;
-		align-content: center;
-		color: var(--ink);
-		font-size: var(--text-sm);
-		font-weight: 600;
-		text-decoration: none;
-	}
-	.header-action {
-		padding-inline: var(--space-4);
-		border: 1px solid var(--ink);
-		border-radius: var(--radius-full);
-	}
 	.hero {
 		display: grid;
 		max-width: 1240px;
@@ -579,16 +538,6 @@
 		color: var(--ink-40);
 	}
 	@media (min-width: 760px) {
-		.site-header {
-			grid-template-columns: 1fr auto 1fr;
-			padding-inline: var(--space-6);
-		}
-		nav {
-			display: flex;
-		}
-		.header-action {
-			justify-self: end;
-		}
 		.hero {
 			padding-inline: var(--space-6);
 			grid-template-columns: minmax(0, 1fr) minmax(420px, 0.9fr);
@@ -645,17 +594,6 @@
 		}
 	}
 	@media (max-width: 420px) {
-		.header-action {
-			min-width: 64px;
-			padding-inline: var(--space-3);
-			text-align: center;
-		}
-		.wide-label {
-			display: none;
-		}
-		.narrow-label {
-			display: inline;
-		}
 		h1 {
 			font-size: 3.25rem;
 		}

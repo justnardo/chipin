@@ -280,7 +280,7 @@
 	}
 
 	.reply-toggle {
-		min-height: 40px;
+		min-height: var(--control-md);
 		padding: 0;
 		border: 0;
 		background: transparent;
