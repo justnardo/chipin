@@ -65,7 +65,12 @@
 			: -1
 	);
 	const sameBankSuggestion = $derived(
-		sameBankIndex >= 0 && sameBankIndex !== accountIndex ? accounts[sameBankIndex] : null
+		// Compare BANKS, not list positions. findIndex returns the first account
+		// at the donor's bank, so a host with chequing + savings there made this
+		// fire while the donor was already on a same-bank account — promising a
+		// speed-up that resolveRail returns 'internal' for either way, next to a
+		// row already badged "Same bank as you".
+		sameBankIndex >= 0 && selectedAccount?.bankId !== senderBankId ? accounts[sameBankIndex] : null
 	);
 
 	/** Fields the donor edited after the scanner filled them in. */
@@ -294,7 +299,15 @@
 											<BankMark {bank} size="sm" />
 										{/if}
 										<span class="account-option-text">
-											<strong>{bank?.shortName ?? account.bankId}</strong>
+											<strong>{bank?.shortName ?? 'Unrecognised channel'}</strong>
+											{#if accounts.filter((a) => a.bankId === account.bankId).length > 1}
+												<!-- Two accounts at one institution are a real case (chequing +
+												     savings). Without the tail they were two identical buttons
+												     wired to different account numbers. -->
+												<em class="account-discriminator"
+													>{account.accountName} · ••{accountTail(account)}</em
+												>
+											{/if}
 											{#if senderBankId && account.bankId === senderBankId}
 												<em>Same bank as you — usually same day</em>
 											{/if}
@@ -335,17 +348,34 @@
 				{/if}
 
 				<div class="card">
-					<h2>When you have sent it</h2>
-					<ul>
-						<li>Save the confirmation screen — you can upload it on the next step.</li>
-						<li>Save any bank-generated reference you see after sending.</li>
-						{#if window_}
-							<li>{window_.donorGuidance}</li>
-						{/if}
-					</ul>
-					<button type="button" class="primary" onclick={goReport}
-						>I have sent it — report now</button
-					>
+					<h2>{accounts.length > 0 ? 'When you have sent it' : 'Already sent it another way?'}</h2>
+					{#if accounts.length > 0}
+						<ul>
+							<li>Save the confirmation screen — you can upload it on the next step.</li>
+							<li>Save any bank-generated reference you see after sending.</li>
+							{#if window_}
+								<li>{window_.donorGuidance}</li>
+							{/if}
+						</ul>
+					{:else}
+						<!--
+							With no receiving details on the campaign there is nothing here for
+							the donor to have paid, so the standard CTA read as an invitation to
+							report a transfer they could not have made. The path stays open —
+							people do send money after arranging it privately — but it is named
+							for what it is, and the host is told the report cannot be matched.
+						-->
+						<p>
+							If you already sent this host money some other way, you can still record it. Without
+							receiving details on the campaign, the host will not be able to match your report to
+							an account — they will have to recognise it themselves.
+						</p>
+					{/if}
+					<button type="button" class="primary" onclick={goReport}>
+						{accounts.length > 0
+							? 'I have sent it — report now'
+							: 'Record a transfer I already sent'}
+					</button>
 				</div>
 			</section>
 		{:else if step === 'report'}
@@ -568,6 +598,14 @@
 	.account-option.selected {
 		border-color: var(--ink);
 		box-shadow: inset 0 0 0 1px var(--ink);
+	}
+
+	.account-discriminator {
+		display: block;
+		color: var(--ink-60);
+		font-size: var(--text-xs);
+		font-style: normal;
+		font-weight: 400;
 	}
 
 	.account-option-text {

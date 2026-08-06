@@ -1,10 +1,33 @@
 /**
  * Bahamian banking channels for the transfer portal.
  *
- * Marks are ORIGINAL monogram tiles in each institution's recognisable brand colour.
- * They are deliberately NOT reproductions of any bank's logo: ChipIn has no relationship
- * with these institutions, and showing a real logo beside receiving-account details
- * implies an endorsement that does not exist. See docs/stage-0/THREAT-MODEL.md T10.
+ * MARKS. Six channels have real trademarked artwork in static/banks/; the rest
+ * fall back to an original monogram. Both render the same way — the mark
+ * knocked out in white on a chip of the institution's colour — so a row of
+ * eleven reads as one system instead of six washed-out logo plates beside five
+ * saturated tiles.
+ *
+ * This file used to claim the marks were "deliberately NOT reproductions of any
+ * bank's logo". That stopped being true when the artwork landed, and a comment
+ * asserting a control that is not operating is worse than no comment. The real
+ * policy, and the reasoning, is in docs/stage-0/THREAT-MODEL.md T13/T14:
+ *
+ *   Marks appear where they label one option among all its competitors — the
+ *   bank pickers. They do NOT appear standing alone above an instruction to
+ *   send money, because a real bank logo above an account number and a Copy
+ *   button is structurally what a bank-impersonation page looks like, and this
+ *   product's own defence against fake hosts depends on donors distrusting
+ *   exactly that pattern. The receiving panel names the bank in words instead.
+ *
+ * Written permission is still outstanding for all six. See static/banks/README.md.
+ *
+ * TINTS are unverified approximations of each institution's brand colour, not
+ * values checked against a brand book — nobody has confirmed them, and Stage 0
+ * is where to ask. They were spread apart in CIELAB after measurement showed
+ * the originals were perceptually duplicates: RBC and BOB sat at dE 8.9 and
+ * Commonwealth and Omni at dE 9.7, with nine of eleven inside a 14-point
+ * lightness band, which is why the picker read as one colour. Every pair is now
+ * at least dE 23, and Commonwealth has moved off ChipIn's own aqua.
  */
 
 export type SettlementRail = 'internal' | 'ach' | 'wire' | 'wallet';
@@ -14,9 +37,17 @@ export type BankChannel = {
 	name: string;
 	shortName: string;
 	monogram: string;
-	/** Recognisable brand colour, used for the tile only. */
+	/** Approximate brand colour. Unverified — see the note at the top of this file. */
 	tint: string;
 	ink: string;
+	/**
+	 * Window on to the emblem inside this channel's lockup in static/banks/, as
+	 * percentages of the source canvas. The files are autotraces of bitmaps —
+	 * 4:1 wordmarks that render at a 3.6px cap height in a 32px tile — so the
+	 * mark shown is the emblem alone, which is near-square and survives.
+	 * Measured by scripts/measure_bank_emblems.mjs. Absent = monogram fallback.
+	 */
+	emblem?: { x: number; y: number; w: number; h: number };
 	kind: 'bank' | 'wallet' | 'credit-union';
 	/** Field label this channel actually shows the sender, if any. */
 	memoFieldLabel: string | null;
@@ -29,8 +60,9 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'RBC Royal Bank (Bahamas)',
 		shortName: 'RBC',
 		monogram: 'RBC',
-		tint: '#00539B',
+		tint: '#0051A5',
 		ink: '#FFFFFF',
+		emblem: { x: 0.0, y: 18.82, w: 37.14, h: 55.71 },
 		kind: 'bank',
 		memoFieldLabel: 'Reason / memo',
 		notes: 'Online banking transfers to other local banks clear through the local ACH.'
@@ -40,8 +72,9 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'CIBC Caribbean',
 		shortName: 'CIBC',
 		monogram: 'CIBC',
-		tint: '#8B1A1A',
+		tint: '#A11C2C',
 		ink: '#FFFFFF',
+		emblem: { x: 67.64, y: 28.19, w: 26.14, h: 39.21 },
 		kind: 'bank',
 		memoFieldLabel: 'Payment details',
 		notes: 'Formerly CIBC FirstCaribbean. Memo length varies by channel.'
@@ -51,8 +84,9 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'Scotiabank (Bahamas)',
 		shortName: 'Scotiabank',
 		monogram: 'SB',
-		tint: '#C8102E',
+		tint: '#E11B31',
 		ink: '#FFFFFF',
+		emblem: { x: 11.51, y: 36.05, w: 14.36, h: 21.55 },
 		kind: 'bank',
 		memoFieldLabel: 'Description',
 		notes: 'Description field is commonly truncated on the recipient statement.'
@@ -62,8 +96,9 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'Fidelity Bank (Bahamas)',
 		shortName: 'Fidelity',
 		monogram: 'FB',
-		tint: '#00693E',
+		tint: '#1D7A3A',
 		ink: '#FFFFFF',
+		emblem: { x: 8.28, y: 30.18, w: 21.74, h: 32.61 },
 		kind: 'bank',
 		memoFieldLabel: 'Narrative',
 		notes: 'Local institution. Confirm memo visibility during Stage 0 testing.'
@@ -73,8 +108,9 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'Bank of The Bahamas',
 		shortName: 'BOB',
 		monogram: 'BOB',
-		tint: '#0B4EA2',
+		tint: '#0A2C5E',
 		ink: '#FFFFFF',
+		emblem: { x: 13.72, y: 29.27, w: 14.5, h: 14.5 },
 		kind: 'bank',
 		memoFieldLabel: 'Reference',
 		notes: 'Majority government-owned. Widely used for local salary accounts.'
@@ -84,8 +120,9 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'Commonwealth Bank',
 		shortName: 'Commonwealth',
 		monogram: 'CB',
-		tint: '#00707F',
+		tint: '#00565E',
 		ink: '#FFFFFF',
+		emblem: { x: 24.84, y: 2.03, w: 48.59, h: 72.88 },
 		kind: 'bank',
 		memoFieldLabel: 'Memo',
 		notes: 'Bahamian-owned retail bank.'
@@ -95,7 +132,7 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'Teachers & Salaried Workers Co-op Credit Union',
 		shortName: 'TSWCCU',
 		monogram: 'CU',
-		tint: '#4A3B8C',
+		tint: '#6B4FC0',
 		ink: '#FFFFFF',
 		kind: 'credit-union',
 		memoFieldLabel: 'Memo',
@@ -106,7 +143,7 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'SandDollar',
 		shortName: 'SandDollar',
 		monogram: 'SD',
-		tint: '#C8892A',
+		tint: '#D99A22',
 		ink: '#FFFFFF',
 		kind: 'wallet',
 		memoFieldLabel: 'Note',
@@ -117,7 +154,7 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'Kanoo',
 		shortName: 'Kanoo',
 		monogram: 'KN',
-		tint: '#E04E39',
+		tint: '#E8613C',
 		ink: '#FFFFFF',
 		kind: 'wallet',
 		memoFieldLabel: 'Note',
@@ -128,7 +165,7 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'Omni Financial',
 		shortName: 'Omni',
 		monogram: 'OM',
-		tint: '#1F6F8B',
+		tint: '#3E8FA8',
 		ink: '#FFFFFF',
 		kind: 'wallet',
 		memoFieldLabel: 'Note',
@@ -139,13 +176,19 @@ export const BANK_CHANNELS: BankChannel[] = [
 		name: 'Another bank or wallet',
 		shortName: 'Other',
 		monogram: '••',
-		tint: '#5A6B68',
+		tint: '#6E7D7A',
 		ink: '#FFFFFF',
 		kind: 'bank',
 		memoFieldLabel: 'Memo',
 		notes: 'Use whatever memo or description field your channel provides.'
 	}
 ];
+
+/**
+ * Where an unrecognised bank id lands. Resolved by id so callers never depend
+ * on array order — see the fallback note in BankTransferPortal.
+ */
+export const UNKNOWN_CHANNEL: BankChannel = BANK_CHANNELS.find((b) => b.id === 'other')!;
 
 export function getBank(id: string): BankChannel | null {
 	return BANK_CHANNELS.find((b) => b.id === id) ?? null;

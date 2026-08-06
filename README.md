@@ -19,11 +19,15 @@ campaign-host receipt attestations; it does not collect, hold, move, settle, or 
 - Stage 0 bank/channel test protocol and product review
 - No backend, real receiving-account data, or transfer-reference assumptions yet
 
-Bank marks render `<id>.svg` files from `static/banks/` (see the README there), falling back to
-original monogram tiles for any channel without a file. The commercial-bank logos currently in
-that folder are the institutions' trademarks, shown beside receiving-account details — written
-permission from each bank should be in hand before any public deploy, and the Stage 0
-bank-testing conversations are the natural moment to ask.
+Bank marks render as the institution's emblem knocked out on a chip of its colour — cropped from
+the lockups in `static/banks/` by a CSS mask, falling back to an original monogram for any channel
+without a file. See the README there for why, and for what to ask each bank for instead.
+
+Those logos are the institutions' trademarks and **no permission has been asked for or granted**.
+The marks appear only in the bank pickers, never standing alone above receiving-account details:
+a real bank logo above an account number and a Copy button is structurally what a
+bank-impersonation page looks like, and this product's defence against fake hosts depends on
+donors distrusting exactly that. See [THREAT-MODEL](docs/stage-0/THREAT-MODEL.md) T13/T14.
 
 ## Source documents
 
@@ -161,6 +165,10 @@ everything.
 - Replace the temporary CSS wordmark when the locked SVG/PWA brand asset package is supplied.
 - Do not reintroduce third-party image, font, or script hosts. Every asset the browser fetches
   comes from this origin, so no one outside ChipIn learns which campaign a visitor is reading.
+- Do not put a bank mark alone above receiving-account details, or on the public campaign page or
+  in link previews. Marks belong in the pickers, where they label one option among competitors.
+- Do not seek bank-mark permission without asking per surface. A bank is far likelier to agree to
+  "you are in our customers' bank picker" than to "your logo sits above an account number".
 
 See [docs/PRODUCT-REVIEW.md](docs/PRODUCT-REVIEW.md) and
 [docs/stage-0/BANK-CHANNEL-MATRIX.md](docs/stage-0/BANK-CHANNEL-MATRIX.md).
