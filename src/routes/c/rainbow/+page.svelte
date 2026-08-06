@@ -3,10 +3,12 @@
 	import BrandMark from '$lib/components/BrandMark.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import ReviewLabel from '$lib/components/ReviewLabel.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
 	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
+	import { photoAlt, photoSrc } from '$lib/prototype/photos';
 
 	const campaign = {
 		title: 'Reopen the Rainbow Community Centre',
@@ -70,28 +72,23 @@
 	<span>This is a fictional campaign. No money can be sent.</span>
 </div>
 
-<header class="site-header">
-	<a class="brand-link" href={resolve('/')} aria-label="ChipIn home"><BrandMark /></a>
-	<nav aria-label="Primary navigation">
-		<a href={resolve('/discover')}>Discover</a>
-		<a href="#how-it-works">How it works</a>
-		<a href="#trust">Trust & safety</a>
-	</nav>
-	<a class="host-link" href={resolve('/start')}>
-		<span class="wide-label">Start a campaign</span><span class="narrow-label">Start</span>
-	</a>
-</header>
+<SiteHeader
+	links={[
+		{ label: 'How it works', href: '#how-it-works' },
+		{ label: 'Trust & safety', href: '#trust' }
+	]}
+/>
 
 <main>
 	<figure class="campaign-cover">
 		<img
-			src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=85"
-			alt="Friends gathered together outdoors"
+			src={photoSrc('friends', 'wide')}
+			alt={photoAlt('friends')}
 			width="1600"
 			height="760"
 			fetchpriority="high"
 		/>
-		<figcaption>Prototype campaign photography</figcaption>
+		<figcaption>Placeholder illustration, not a photograph of this campaign</figcaption>
 	</figure>
 	<section class="campaign-hero" aria-labelledby="campaign-title">
 		<div class="campaign-intro">
@@ -305,42 +302,6 @@
 	.prototype-banner strong {
 		font-family: var(--font-display);
 	}
-	.site-header {
-		display: grid;
-		max-width: 1200px;
-		min-height: 84px;
-		align-items: center;
-		margin: 0 auto;
-		padding: var(--space-4);
-		grid-template-columns: 1fr auto;
-		border-bottom: 1px solid var(--line);
-	}
-	.brand-link {
-		width: fit-content;
-		color: inherit;
-		text-decoration: none;
-	}
-	.narrow-label {
-		display: none;
-	}
-	nav {
-		display: none;
-		gap: var(--space-6);
-	}
-	nav a,
-	.host-link {
-		min-height: 48px;
-		align-content: center;
-		color: var(--ink);
-		font-size: var(--text-sm);
-		font-weight: 600;
-		text-decoration: none;
-	}
-	.host-link {
-		padding-inline: var(--space-4);
-		border: 1px solid var(--ink);
-		border-radius: var(--radius-full);
-	}
 	main {
 		overflow: hidden;
 	}
@@ -426,7 +387,7 @@
 		border: 1px solid var(--line);
 		border-top: 6px solid var(--gold);
 		border-radius: var(--radius-md);
-		background: #fffdf8;
+		background: var(--surface);
 		box-shadow: var(--shadow-raise);
 	}
 	.amount-label {
@@ -496,8 +457,12 @@
 		cursor: pointer;
 	}
 	.host-proto {
-		display: block;
-		margin-top: var(--space-4);
+		/* A standalone link, not one inside a sentence, so it owes a full tap
+		   target even though its label is set at the smallest size. */
+		display: grid;
+		min-height: var(--control-md);
+		margin-top: var(--space-2);
+		place-items: center;
 		color: var(--ink-60);
 		font-size: var(--text-xs);
 		font-weight: 600;
@@ -613,8 +578,11 @@
 		font-size: var(--text-sm);
 	}
 	.trust-panel a {
-		min-height: 48px;
-		align-content: center;
+		/* An inline box ignores min-height, so this read 48px in the stylesheet
+		   and measured 16px in the browser. */
+		display: inline-flex;
+		min-height: var(--control-md);
+		align-items: center;
 		font-size: var(--text-sm);
 		font-weight: 700;
 	}
@@ -727,17 +695,13 @@
 		margin: 0;
 		color: var(--ink-60);
 	}
+	footer a {
+		display: inline-flex;
+		min-height: var(--control-md);
+		align-items: center;
+		width: fit-content;
+	}
 	@media (min-width: 760px) {
-		.site-header {
-			grid-template-columns: 1fr auto 1fr;
-			padding-inline: var(--space-6);
-		}
-		nav {
-			display: flex;
-		}
-		.host-link {
-			justify-self: end;
-		}
 		.campaign-hero {
 			padding: var(--space-9) var(--space-6) var(--space-8);
 			grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.75fr);
@@ -759,20 +723,6 @@
 			align-items: flex-start;
 			flex-direction: column;
 			gap: 0;
-		}
-		.site-header {
-			min-height: 76px;
-		}
-		.host-link {
-			min-width: 64px;
-			padding-inline: var(--space-3);
-			text-align: center;
-		}
-		.wide-label {
-			display: none;
-		}
-		.narrow-label {
-			display: inline;
 		}
 		.campaign-hero {
 			padding-top: var(--space-6);

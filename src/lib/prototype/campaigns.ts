@@ -1,5 +1,6 @@
 /** Client-only campaign drafts for the Stage 0 / GoFundMe-style prototype. */
 
+import { photoAlt, photoSrc } from './photos';
 import { readList, writeList } from './storage';
 
 export type CampaignCategory =
@@ -33,6 +34,12 @@ export type PrototypeCampaign = {
 	location: string;
 	hostName: string;
 	coverImage: string;
+	/**
+	 * The same scene composed for the 1600x760 campaign band. Cards crop the
+	 * square happily; the band does not. Optional because drafts saved before
+	 * this existed have only `coverImage` — callers fall back to it.
+	 */
+	coverImageWide?: string;
 	coverAlt: string;
 	createdAt: string;
 	source: 'builtin' | 'session';
@@ -67,32 +74,17 @@ export function usableAccounts(campaign: PrototypeCampaign): ReceivingAccount[] 
 
 const STORAGE_KEY = 'chipin.prototype.campaigns.v1';
 
-export const COVER_PRESETS = [
-	{
-		id: 'friends',
-		image:
-			'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=85',
-		alt: 'Friends gathered together outdoors'
-	},
-	{
-		id: 'reading',
-		image:
-			'https://images.unsplash.com/photo-1504159506876-f8338247a14a?auto=format&fit=crop&w=1600&q=85',
-		alt: 'Child reading a book in a bright room'
-	},
-	{
-		id: 'food',
-		image:
-			'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1600&q=85',
-		alt: 'Volunteers preparing boxes of food'
-	},
-	{
-		id: 'table',
-		image:
-			'https://images.unsplash.com/photo-1559024094-4a1e4495c3c1?auto=format&fit=crop&w=1600&q=85',
-		alt: 'Neighbours working together at a community table'
-	}
-] as const;
+export const COVER_PRESETS = (['friends', 'reading', 'food', 'table'] as const).map((id) => ({
+	id,
+	image: photoSrc(id),
+	imageWide: photoSrc(id, 'wide'),
+	alt: photoAlt(id)
+}));
+
+/** The band image for a campaign, falling back to the square for older drafts. */
+export function coverBand(campaign: PrototypeCampaign): string {
+	return campaign.coverImageWide ?? campaign.coverImage;
+}
 
 export const RAINBOW_CAMPAIGN: PrototypeCampaign = {
 	slug: 'rainbow',
@@ -104,6 +96,7 @@ export const RAINBOW_CAMPAIGN: PrototypeCampaign = {
 	location: 'Nassau, The Bahamas',
 	hostName: 'Rainbow Community Centre',
 	coverImage: COVER_PRESETS[0].image,
+	coverImageWide: COVER_PRESETS[0].imageWide,
 	coverAlt: COVER_PRESETS[0].alt,
 	createdAt: '2026-07-22T12:00:00.000Z',
 	source: 'builtin',

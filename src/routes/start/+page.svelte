@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import BankMark from '$lib/components/BankMark.svelte';
+	import Field from '$lib/components/Field.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
@@ -163,6 +164,7 @@
 			story: story.trim(),
 			goalCents,
 			coverImage: cover.image,
+			coverImageWide: cover.imageWide,
 			coverAlt: cover.alt,
 			receivingAccounts: accounts
 		});
@@ -241,36 +243,32 @@
 		{#if step === 'basics'}
 			<form class="card" onsubmit={goStory}>
 				<h2>Who is this for?</h2>
-				<label>
-					<span>Campaign title</span>
+				<Field label="Campaign title">
 					<input
 						type="text"
 						bind:value={title}
 						placeholder="Help reopen the youth centre"
 						required
 					/>
-				</label>
-				<label>
-					<span>Host / organiser name</span>
+				</Field>
+				<Field label="Host / organiser name">
 					<input
 						type="text"
 						bind:value={hostName}
 						placeholder="Your name or organisation"
 						required
 					/>
-				</label>
-				<label>
-					<span>Location</span>
+				</Field>
+				<Field label="Location">
 					<input type="text" bind:value={location} placeholder="Nassau, The Bahamas" />
-				</label>
-				<label>
-					<span>Category</span>
+				</Field>
+				<Field label="Category">
 					<select bind:value={category}>
 						{#each categories as item (item)}
 							<option value={item}>{item}</option>
 						{/each}
 					</select>
-				</label>
+				</Field>
 				{#if error}
 					<p class="error" role="alert">{error}</p>
 				{/if}
@@ -279,18 +277,16 @@
 		{:else if step === 'story'}
 			<form class="card" onsubmit={goPreview}>
 				<h2>Tell the story</h2>
-				<label>
-					<span>Why are you raising money?</span>
+				<Field label="Why are you raising money?">
 					<textarea
 						bind:value={story}
 						rows="7"
 						placeholder="Share what happened, what the money is for, and how people can help."
 						required></textarea>
-				</label>
-				<label>
-					<span>Goal (BSD)</span>
+				</Field>
+				<Field label="Goal (BSD)">
 					<input type="text" inputmode="decimal" bind:value={goalInput} required />
-				</label>
+				</Field>
 				<fieldset>
 					<legend>Cover photo</legend>
 					<div class="covers">
@@ -365,30 +361,26 @@
 					</div>
 				</fieldset>
 
-				<label>
-					<span>Account name</span>
+				<Field label="Account name">
 					<input
 						type="text"
 						bind:value={accountName}
 						placeholder="Exactly as your bank shows it"
 						required
 					/>
-				</label>
+				</Field>
 
 				{#if isWallet}
-					<label>
-						<span>Wallet handle or number</span>
+					<Field label="Wallet handle or number">
 						<input type="text" bind:value={handle} placeholder="What donors send to" required />
-					</label>
+					</Field>
 				{:else}
-					<label>
-						<span>Account number</span>
+					<Field label="Account number">
 						<input type="text" inputmode="numeric" bind:value={accountNumber} required />
-					</label>
-					<label>
-						<span>Branch (optional)</span>
+					</Field>
+					<Field label="Branch (optional)">
 						<input type="text" bind:value={branch} placeholder="Where the account is held" />
-					</label>
+					</Field>
 				{/if}
 
 				<button type="button" class="add-account" onclick={addAccount}>
@@ -582,44 +574,32 @@
 		gap: var(--space-6);
 	}
 
-	.card,
 	.preview-card {
 		border: 1px solid var(--line);
 		border-radius: var(--radius-md);
-		background: #fffdf8;
+		background: var(--surface);
 		box-shadow: var(--shadow-raise);
 	}
 
-	.card {
-		padding: var(--space-6);
+	/* Each step is a form, so the card spaces its own fields rather than every
+	   field carrying a trailing margin. */
+	form.card {
+		display: grid;
+		gap: var(--space-4);
+		align-content: start;
 	}
 
 	.card h2 {
-		margin: 0 0 var(--space-4);
-		font-size: var(--text-xl);
+		margin: 0;
 	}
 
-	label,
 	fieldset {
 		display: grid;
 		gap: var(--space-2);
-		margin-bottom: var(--space-4);
 		border: 0;
 		padding: 0;
 		font-size: var(--text-sm);
 		font-weight: 600;
-	}
-
-	input,
-	select,
-	textarea {
-		min-height: 48px;
-		padding: var(--space-3);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		background: var(--paper);
-		font: inherit;
-		font-weight: 400;
 	}
 
 	textarea {

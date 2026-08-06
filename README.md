@@ -62,6 +62,12 @@ The OCR engine is copied out of `node_modules` into `static/ocr/` (gitignored) b
 `npm run sync:ocr`, which `predev` and `prebuild` run automatically. It is served from ChipIn's
 own origin rather than a public CDN so no third party sees that a donor is scanning a receipt.
 
+Campaign imagery follows the same rule and for the same reason. It lives in `static/photos/`
+(see the README there), not on an image CDN: a hotlinked cover tells whoever serves it the IP
+of everyone reading that campaign. The files are generated illustrations rather than stock
+photographs — `npm run make:photos` writes them, and the output is committed, so a normal build
+never runs the generator.
+
 ## Putting the prototype on a phone
 
 `npm run build` writes a static site to `build/` — plain files, no server, because the prototype
@@ -153,6 +159,8 @@ everything.
 - Do not generate ChipIn transfer references until the bank/channel evidence matrix supports them.
 - Do not freeze the Supabase schema until lifecycle, timer, matching, and retention decisions close.
 - Replace the temporary CSS wordmark when the locked SVG/PWA brand asset package is supplied.
+- Do not reintroduce third-party image, font, or script hosts. Every asset the browser fetches
+  comes from this origin, so no one outside ChipIn learns which campaign a visitor is reading.
 
 See [docs/PRODUCT-REVIEW.md](docs/PRODUCT-REVIEW.md) and
 [docs/stage-0/BANK-CHANNEL-MATRIX.md](docs/stage-0/BANK-CHANNEL-MATRIX.md).

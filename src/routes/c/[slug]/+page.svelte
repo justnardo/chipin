@@ -8,7 +8,12 @@
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
 	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
-	import { formatGoal, getCampaign, type PrototypeCampaign } from '$lib/prototype/campaigns';
+	import {
+		coverBand,
+		formatGoal,
+		getCampaign,
+		type PrototypeCampaign
+	} from '$lib/prototype/campaigns';
 	import { campaignAttestedCents, loadReports } from '$lib/prototype/reports';
 
 	let campaign = $state<PrototypeCampaign | null>(null);
@@ -90,7 +95,7 @@
 		</section>
 	{:else}
 		<figure class="cover">
-			<img src={campaign.coverImage} alt={campaign.coverAlt} width="1600" height="760" />
+			<img src={coverBand(campaign)} alt={campaign.coverAlt} width="1600" height="760" />
 		</figure>
 
 		<section class="hero">
@@ -115,7 +120,7 @@
 				<SupportWall campaignSlug={campaign.slug} />
 			</div>
 
-			<aside class="card">
+			<aside class="card accent">
 				<p class="amount-label">Marked received</p>
 				<p class="amount">{formatGoal(receivedCents)}</p>
 				<ProgressCoinBar received={receivedCents / 100} goal={campaign.goalCents / 100} />
@@ -262,15 +267,6 @@
 		max-width: 60ch;
 		color: var(--ink-60);
 		font-size: var(--text-lg);
-	}
-
-	.card {
-		padding: var(--space-6);
-		border: 1px solid var(--line);
-		border-top: 6px solid var(--gold);
-		border-radius: var(--radius-md);
-		background: #fffdf8;
-		box-shadow: var(--shadow-raise);
 	}
 
 	.amount-label {

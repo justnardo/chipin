@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 760" width="1600" height="760" role="presentation">
+	<defs>
+		<linearGradient id="sky-food-wide" x1="0" y1="0" x2="0.2" y2="1">
+			<stop offset="0" stop-color="#fbeecd" />
+			<stop offset="1" stop-color="#f0c995" />
+		</linearGradient>
+	</defs>
+	<rect width="1600" height="760" fill="#fbf7ee" />
+	<rect width="1600" height="760" fill="url(#sky-food-wide)" />
+	<circle cx="1248" cy="167.2" r="114" fill="#fbf7ee" opacity="0.35" />
+	<path d="M 0 516.8000000000001 Q 480 446.80000000000007 880.0000000000001 506.80000000000007
+	         T 1600 476.80000000000007 L 1600 760 L 0 760 Z" fill="#d9971a" opacity="0.18" />
+	<rect x="640" y="516.8000000000001" width="152" height="76" rx="10" fill="#047c76" />
+			<rect x="640" y="547.1999999999999" width="152" height="9" fill="#fbf7ee" opacity="0.55" /><rect x="816" y="516.8000000000001" width="152" height="76" rx="10" fill="#047c76" />
+			<rect x="816" y="547.1999999999999" width="152" height="9" fill="#fbf7ee" opacity="0.55" /><rect x="640" y="433.20000000000005" width="152" height="76" rx="10" fill="#047c76" />
+			<rect x="640" y="463.59999999999997" width="152" height="9" fill="#fbf7ee" opacity="0.55" /><rect x="816" y="433.20000000000005" width="152" height="76" rx="10" fill="#047c76" />
+			<rect x="816" y="463.59999999999997" width="152" height="9" fill="#fbf7ee" opacity="0.55" />
+	
+		<g fill="#d9971a">
+			<circle cx="480.0" cy="340.4" r="35.9" />
+			<path d="M 427.8 520.2
+			         a 52.3 99.5 0 0 1 104.5 0 Z" />
+		</g>
+		<g fill="#047c76">
+			<circle cx="1120.0" cy="340.4" r="35.9" />
+			<path d="M 1067.8 520.2
+			         a 52.3 99.5 0 0 1 104.5 0 Z" />
+		</g>
+	
+	<path d="M 0 684 Q 800 623.1999999999999 1600 684 L 1600 760 L 0 760 Z" fill="#0c1b1a" opacity="0.08" />
+</svg>

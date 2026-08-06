@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 760" width="1600" height="760" role="presentation">
+	<defs>
+		<linearGradient id="sky-children-wide" x1="0" y1="0" x2="0.2" y2="1">
+			<stop offset="0" stop-color="#7fd6cf" />
+			<stop offset="1" stop-color="#047c76" />
+		</linearGradient>
+	</defs>
+	<rect width="1600" height="760" fill="#fbf7ee" />
+	<rect width="1600" height="760" fill="url(#sky-children-wide)" />
+	<circle cx="1248" cy="167.2" r="114" fill="#fbf7ee" opacity="0.35" />
+	<path d="M 0 516.8000000000001 Q 480 446.80000000000007 880.0000000000001 506.80000000000007
+	         T 1600 476.80000000000007 L 1600 760 L 0 760 Z" fill="#f2b01e" opacity="0.18" />
+	
+	
+		<g fill="#f2b01e">
+			<circle cx="480.0" cy="434.9" r="25.5" />
+			<path d="M 442.9 562.3
+			         a 37.1 70.6 0 0 1 74.1 0 Z" />
+		</g>
+		<g fill="#fbf7ee">
+			<circle cx="800.0" cy="396.0" r="28.1" />
+			<path d="M 759.1 536.6
+			         a 40.9 77.8 0 0 1 81.7 0 Z" />
+		</g>
+		<g fill="#f2b01e">
+			<circle cx="1120.0" cy="434.9" r="25.5" />
+			<path d="M 1083.0 562.3
+			         a 37.1 70.6 0 0 1 74.1 0 Z" />
+		</g>
+	
+	<path d="M 0 684 Q 800 623.1999999999999 1600 684 L 1600 760 L 0 760 Z" fill="#0c1b1a" opacity="0.08" />
+</svg>

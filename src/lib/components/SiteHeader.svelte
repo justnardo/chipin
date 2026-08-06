@@ -64,7 +64,7 @@
 <header class="site-header" data-scrolled={scrolled}>
 	<div class="bar">
 		<a class="brand-link" href={resolve('/')} aria-label="ChipIn home" onclick={close}>
-			<BrandMark />
+			<span class="brand-scale"><BrandMark /></span>
 		</a>
 
 		<nav class="desktop-nav" aria-label="Primary">
@@ -167,13 +167,22 @@
 
 	.brand-link {
 		display: inline-flex;
+		min-height: var(--control-md);
+		align-items: center;
 		color: inherit;
 		text-decoration: none;
+	}
+
+	/* The condense scales the wordmark, not the link: a transform shrinks the
+	   hit box too, and scaling a 30px mark took the only route home on mobile
+	   down to 26px of tappable area. */
+	.brand-scale {
+		display: inline-flex;
 		transform-origin: left center;
 		transition: transform var(--dur-slow) var(--ease);
 	}
 
-	.site-header[data-scrolled='true'] .brand-link {
+	.site-header[data-scrolled='true'] .brand-scale {
 		transform: scale(0.85);
 	}
 
@@ -183,6 +192,11 @@
 	}
 
 	.desktop-nav a {
+		/* WCAG 2.5.8 floor. At --text-sm the line box alone is 21px, which is
+		   under it even for a mouse. */
+		display: inline-flex;
+		min-height: var(--control-sm);
+		align-items: center;
 		color: var(--ink);
 		font-size: var(--text-sm);
 		font-weight: 600;
