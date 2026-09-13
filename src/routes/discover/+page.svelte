@@ -7,7 +7,7 @@
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import {
-		PROTOTYPE_CATALOGUE,
+		catalogueCards,
 		listSessionCampaigns,
 		type PrototypeCampaign
 	} from '$lib/prototype/campaigns';
@@ -21,15 +21,17 @@
 	 * card that only this page knew about would still be advertised in the
 	 * footer's island column.
 	 */
-	const featured = PROTOTYPE_CATALOGUE.map((entry) => ({
+	const featured = catalogueCards().map((entry) => ({
 		slug: entry.slug,
 		title: entry.title,
 		category: entry.category,
 		location: entry.location,
 		image: entry.coverImage,
 		imageAlt: entry.coverAlt,
-		received: entry.attestedCents / 100,
-		goal: entry.goalCents / 100,
+		// Already in currency units — `catalogueCards` is where cents are divided,
+		// shared with the home grid so the two cannot disagree.
+		received: entry.received,
+		goal: entry.goal,
 		// Only Rainbow resolves to a route; the rest are preview cards, so they
 		// deliberately get no link rather than a link to nowhere.
 		href: entry.hasPage ? resolve('/c/[slug]', { slug: entry.slug }) : undefined

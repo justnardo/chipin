@@ -31,6 +31,7 @@
 			left: 0;
 			z-index: 40;
 			display: block;
+			min-height: var(--sticky-bar-height);
 			padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
 			border-top: 1px solid var(--line);
 			background: rgb(251 247 238 / 94%);

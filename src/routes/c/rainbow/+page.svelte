@@ -291,7 +291,7 @@
 	</div>
 </section>
 
-<SiteFooter />
+<SiteFooter stickyBarClearance />
 
 <StickyChipInBar
 	href={resolve('/c/[slug]/chip-in', { slug: 'rainbow' })}

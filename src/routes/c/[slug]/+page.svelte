@@ -174,7 +174,7 @@
 	{/if}
 </main>
 
-<SiteFooter />
+<SiteFooter stickyBarClearance={loaded && Boolean(campaign)} />
 
 <style>
 	.prototype-banner {
