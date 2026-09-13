@@ -57,7 +57,7 @@
 </script>
 
 <section class="updates" aria-labelledby="updates-heading">
-	<p class="kicker">Updates</p>
+	<p class="eyebrow">Updates</p>
 	<h2 id="updates-heading">From the organiser</h2>
 
 	{#if isHost}
@@ -108,15 +108,6 @@
 		margin-top: var(--space-8);
 		padding-top: var(--space-7);
 		border-top: 1px solid var(--line);
-	}
-
-	.kicker {
-		margin: 0 0 var(--space-2);
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
 	}
 
 	h2 {

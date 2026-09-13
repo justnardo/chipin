@@ -3,6 +3,7 @@
 	import BankMark from '$lib/components/BankMark.svelte';
 	import BankPicker from '$lib/components/BankPicker.svelte';
 	import Field from '$lib/components/Field.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
@@ -229,8 +230,8 @@
 
 <SiteHeader />
 
-<main>
-	<p class="kicker">New fundraiser</p>
+<main class="shell">
+	<p class="eyebrow">New fundraiser</p>
 	<h1>Put your campaign on ChipIn</h1>
 	<p class="lede">
 		Build the page people will share on WhatsApp. Contributors send money to you directly — ChipIn
@@ -465,6 +466,8 @@
 	</div>
 </main>
 
+<SiteFooter />
+
 <style>
 	.prototype-banner {
 		display: flex;
@@ -483,24 +486,16 @@
 		font-family: var(--font-display);
 	}
 
+	/* .shell supplies the gutters; the cap keeps the two-column flow from
+	   stretching into a wall of form on a wide monitor. */
 	main {
 		max-width: 1100px;
-		margin: 0 auto;
-		padding: var(--space-7) var(--space-4) var(--space-9);
-	}
-
-	.kicker {
-		margin: 0 0 var(--space-2);
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		margin-inline: auto;
+		padding-block: var(--space-7) var(--space-9);
 	}
 
 	h1 {
 		margin: 0 0 var(--space-4);
-		font-size: var(--text-2xl);
 	}
 
 	.lede {
@@ -558,7 +553,7 @@
 	.steps li {
 		padding: var(--space-2);
 		border-radius: var(--radius-sm);
-		color: var(--ink-40);
+		color: var(--ink-60);
 		background: var(--paper-2);
 		text-align: center;
 	}
@@ -774,7 +769,7 @@
 		font-weight: 700;
 	}
 
-	@media (min-width: 900px) {
+	@media (min-width: 1000px) {
 		.layout {
 			grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
 			align-items: start;

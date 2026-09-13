@@ -23,7 +23,16 @@
 	--ink-60: #5a6b69;
 	--ink-40: #8c9997;
 	--gold-deep: #d9971a;
-	--aqua-deep: #047c76;
+	/* Three steps deeper than the mockup's #047c76, which measured 4.39:1 as
+	   eyebrow text on --gold-tint and 4.46:1 as the pressed filter pill on
+	   --aqua-tint — both under 4.5:1, and the mockup used it against both. This
+	   clears every light surface in the set: 5.14 on --paper-2, 5.38 on
+	   --gold-tint, 5.46 on --aqua-tint, 6.11 on --surface. */
+	--aqua-deep: #036d67;
+	/* The primary button's hover/press step. Named because it was hardcoded as
+	   #036b66 in two files, which was tuned against the old --aqua-deep and is
+	   now indistinguishable from the button at rest. White on this is 7.9:1. */
+	--aqua-press: #025c57;
 	--aqua-tint: #e3f4f2;
 	--gold-tint: #fbeecd;
 	/* Darkened from #1e7a4a and #6f7978, which came in at 4.59:1 and 3.72:1 on
@@ -54,6 +63,19 @@
 	--text-2xl: 1.875rem;
 	--text-3xl: clamp(2.25rem, 4vw, 3rem);
 	--text-4xl: clamp(3.25rem, 8vw, 6rem);
+	/*
+	 * The home hero only. --text-4xl tops out at 96px, which on a 12ch measure
+	 * turned the headline into a block of type wide enough to cover the
+	 * photograph behind it. A hero headline that has to be read has a
+	 * different job from a poster, so it gets its own, smaller ceiling.
+	 */
+	--text-hero: clamp(2.4rem, 4.6vw, 4.1rem);
+	/*
+	 * Secondary copy on the dark panels. #c8d0cf is 11.3:1 on --ink — softer to
+	 * read than full --paper at 16.6:1, and still far above AA, so a trust panel
+	 * can carry a paragraph without every line shouting.
+	 */
+	--on-ink-soft: #c8d0cf;
 	--space-1: 4px;
 	--space-2: 8px;
 	--space-3: 12px;
@@ -128,6 +150,7 @@
 
 html {
 	max-width: 100%;
+	scroll-padding-top: var(--nav-height);
 	color: var(--ink);
 	background: var(--paper);
 	font-family: var(--font-body);
@@ -217,6 +240,13 @@ button:disabled {
  * here and delete the local copies; Svelte's scoped styles would otherwise win
  * on specificity. Button.svelte carries the same spec for new markup.
  */
+/*
+ * The bare form-control button classes, kept for the long flows where the
+ * control is a <button> wrapped in form markup. They are the same tokens as
+ * Button.svelte, with one naming trap worth stating: `.ghost` here is the
+ * bordered surface button (Button's `secondary`), not Button's borderless
+ * `ghost`. New UI should reach for <Button> rather than these.
+ */
 .primary,
 .ghost,
 .danger {
@@ -246,7 +276,7 @@ button:disabled {
 }
 
 .primary:hover:not(:disabled) {
-	background: #036b66;
+	background: var(--aqua-press);
 	box-shadow: var(--shadow-sm);
 }
 
@@ -348,6 +378,125 @@ button:disabled {
  */
 .card.flush {
 	padding: 0;
+}
+
+/*
+ * Layout, defined once.
+ *
+ * The mockup this redesign follows sets every section to the same 1240px bar
+ * and the same rhythm of rules, tinted bands, and dark panels. Before this it
+ * was re-typed per route — six max-widths between 960 and 1280, four different
+ * section paddings — so "the app" only existed on the route you happened to be
+ * reading. These are the sheet's four moves, so a route composes them instead
+ * of inventing spacings.
+ *
+ * Two breakpoints, matching the mockup: 720px (cards go two-up) and 1000px
+ * (cards go three-up). The routes had accumulated 719/899/900/960 alongside the
+ * mockup's 700/900, which is why no two pages reflowed at the same width.
+ */
+.shell {
+	width: 100%;
+	max-width: 1240px;
+	margin-inline: auto;
+	padding-inline: var(--space-4);
+}
+
+.section {
+	padding-block: var(--space-8);
+}
+
+.section-tight {
+	padding-block: var(--space-7);
+}
+
+.section-loose {
+	padding-block: var(--space-9);
+}
+
+/* The tinted band that separates a run of sections, e.g. the film strip. */
+.band {
+	border-block: 1px solid var(--line);
+	background: var(--paper-2);
+}
+
+/* The ink panels: trust, footer. Carries `.on-dark` so the focus ring flips. */
+.band-dark {
+	color: var(--paper);
+	background: var(--ink);
+}
+
+/*
+ * On ink, --aqua-deep is 2.7:1 and unusable, and --ink-60 body copy would be
+ * invisible. The dark bands get their own pair rather than each page reaching
+ * for one-off hexes.
+ */
+.band-dark :is(p, li) {
+	color: var(--on-ink-soft);
+}
+
+.band-dark :is(.eyebrow, a):not(.btn) {
+	color: var(--aqua-bright);
+}
+
+.section-head {
+	display: grid;
+	gap: var(--space-4);
+	margin-bottom: var(--space-6);
+}
+
+.section-head h2 {
+	max-width: 18ch;
+	font-size: var(--text-2xl);
+}
+
+.section-head p {
+	max-width: 56ch;
+	margin-bottom: 0;
+	color: var(--ink-60);
+}
+
+@media (min-width: 1000px) {
+	.section-head {
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+		align-items: end;
+	}
+
+	.section-head > :last-child {
+		justify-self: end;
+	}
+}
+
+.card-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--space-4);
+}
+
+@media (min-width: 720px) {
+	.card-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 1000px) {
+	.card-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+/*
+ * The photography disclosure. Deliberately not a tooltip, not behind a
+ * summary, and not only in the footer: it sits beside the pictures it is about.
+ */
+.disclosure {
+	margin: 0;
+	color: var(--ink-60);
+	font-size: var(--text-xs);
+	line-height: 1.45;
+}
+
+.band-dark .disclosure {
+	color: var(--ink-40);
 }
 
 a {

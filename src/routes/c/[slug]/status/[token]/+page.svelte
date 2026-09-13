@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import Field from '$lib/components/Field.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import { getCampaign } from '$lib/prototype/campaigns';
@@ -95,7 +96,7 @@
 
 <SiteHeader showStartAction={false} />
 
-<main>
+<main class="shell">
 	{#if !loaded}
 		<p class="lede">Loading report…</p>
 	{:else if !report}
@@ -128,7 +129,7 @@
 			</a>
 		</section>
 	{:else}
-		<p class="kicker">Your transfer report</p>
+		<p class="eyebrow">Your transfer report</p>
 		<h1>{campaignMeta?.title ?? 'Your campaign'}</h1>
 		<p class="lede">
 			Hosted by {campaignMeta?.hostName ?? 'the campaign host'}. ChipIn records reports and host
@@ -290,6 +291,8 @@
 	{/if}
 </main>
 
+<SiteFooter />
+
 <style>
 	.prototype-banner {
 		display: flex;
@@ -310,22 +313,12 @@
 
 	main {
 		max-width: 720px;
-		margin: 0 auto;
-		padding: var(--space-7) var(--space-4) var(--space-9);
-	}
-
-	.kicker {
-		margin: 0 0 var(--space-2);
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		margin-inline: auto;
+		padding-block: var(--space-7) var(--space-9);
 	}
 
 	h1 {
 		margin: 0 0 var(--space-4);
-		font-size: var(--text-2xl);
 	}
 
 	.lede,
@@ -411,13 +404,11 @@
 	.ledger li {
 		padding: var(--space-3);
 		border: 1px solid var(--line);
-		border-left: 4px solid var(--aqua-deep);
 		border-radius: var(--radius-sm);
 		background: var(--paper);
 	}
 
 	.ledger li.voided {
-		border-left-color: var(--ink-60);
 		opacity: 0.72;
 	}
 
@@ -463,7 +454,8 @@
 	blockquote {
 		margin: 0;
 		padding: var(--space-4);
-		border-left: 4px solid var(--gold);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
 		background: var(--gold-tint);
 		color: var(--ink);
 	}

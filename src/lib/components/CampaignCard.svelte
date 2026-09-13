@@ -27,7 +27,13 @@
 
 <article class="card flush">
 	<div class="image-wrap">
-		<img src={image} alt={imageAlt} loading="lazy" width="720" height="480" />
+		<!--
+			The square source keeps the whole height of the original scene; the 4:3
+			window trims a quarter of it, and `object-position` decides which quarter.
+			These two attributes are the source's nominal dimensions — the wrapper's
+			aspect-ratio is what actually reserves the space, so there is no shift.
+		-->
+		<img src={image} alt={imageAlt} loading="lazy" width="935" height="935" />
 		<StatusChip label={category} tone="active" />
 	</div>
 	<div class="body">
@@ -66,7 +72,13 @@
 
 	.image-wrap {
 		position: relative;
-		aspect-ratio: 3 / 2;
+		/*
+		 * 4:3 rather than the mockup's 3:2. The supplied sources are 3:2, and a 3:2
+		 * window on the square crop would throw away a third of the scene height —
+		 * exactly where the faces are. 4:3 keeps three quarters of it and still
+		 * reads as a wide card.
+		 */
+		aspect-ratio: 4 / 3;
 		background: var(--paper-2);
 		overflow: hidden;
 	}
@@ -75,6 +87,9 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		/* Biased above centre: people sit in the upper two-thirds of these scenes
+		   and tables and pavement fill the bottom of the frame. */
+		object-position: center 42%;
 		transition: transform 320ms var(--ease);
 	}
 
@@ -84,7 +99,7 @@
 
 	.image-wrap :global(.chip) {
 		position: absolute;
-		bottom: var(--space-3);
+		top: var(--space-3);
 		left: var(--space-3);
 		border: 1px solid rgb(255 255 255 / 65%);
 		box-shadow: 0 1px 4px rgb(12 27 26 / 14%);

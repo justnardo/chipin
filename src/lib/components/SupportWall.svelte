@@ -70,7 +70,7 @@
 </script>
 
 <section class="wall" aria-labelledby="support-heading">
-	<p class="kicker">Words of support</p>
+	<p class="eyebrow">Words of support</p>
 	<h2 id="support-heading">Encourage the host</h2>
 	<p class="lede">
 		Leave a public note — like a GoFundMe comment — without ChipIn taking any money.
@@ -144,15 +144,6 @@
 		margin-top: var(--space-8);
 		padding-top: var(--space-7);
 		border-top: 1px solid var(--line);
-	}
-
-	.kicker {
-		margin: 0 0 var(--space-2);
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
 	}
 
 	h2 {

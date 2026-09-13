@@ -15,7 +15,6 @@
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run",
 		"sync:ocr": "node scripts/sync_ocr_assets.mjs",
-		"make:photos": "node scripts/make_prototype_photos.mjs",
 		"measure:banks": "node scripts/measure_bank_emblems.mjs",
 		"predev": "node scripts/sync_ocr_assets.mjs",
 		"prebuild": "node scripts/sync_ocr_assets.mjs",

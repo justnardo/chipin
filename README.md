@@ -68,9 +68,10 @@ own origin rather than a public CDN so no third party sees that a donor is scann
 
 Campaign imagery follows the same rule and for the same reason. It lives in `static/photos/`
 (see the README there), not on an image CDN: a hotlinked cover tells whoever serves it the IP
-of everyone reading that campaign. The files are generated illustrations rather than stock
-photographs — `npm run make:photos` writes them, and the output is committed, so a normal build
-never runs the generator.
+of everyone reading that campaign. The files are prototype photography now rather than the
+generated illustrations they started as — the reasoning for that swap, and the disclosure it
+requires, are in `static/photos/README.md`. The crops are committed, so a normal build never
+generates them.
 
 ## Putting the prototype on a phone
 
@@ -165,6 +166,10 @@ everything.
 - Replace the temporary CSS wordmark when the locked SVG/PWA brand asset package is supplied.
 - Do not reintroduce third-party image, font, or script hosts. Every asset the browser fetches
   comes from this origin, so no one outside ChipIn learns which campaign a visitor is reading.
+- Do not show a prototype photograph without the disclosure beside it. The campaigns are
+  fictional and the photography is illustrative of the cause rather than evidence of it; alt text
+  describes the picture plainly, so the disclosure is what stops a donor reading it as proof.
+  Keep the attribution line in the footer. See `static/photos/README.md`.
 - Do not put a bank mark alone above receiving-account details, or on the public campaign page or
   in link previews. Marks belong in the pickers, where they label one option among competitors.
 - Do not seek bank-mark permission without asking per surface. A bank is far likelier to agree to

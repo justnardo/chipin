@@ -4,11 +4,18 @@
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import ReviewLabel from '$lib/components/ReviewLabel.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
 	import StickyChipInBar from '$lib/components/StickyChipInBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
 	import UpdateFeed from '$lib/components/UpdateFeed.svelte';
-	import { photoAlt, photoSrc } from '$lib/prototype/photos';
+	import {
+		PHOTO_BAND,
+		PROTOTYPE_PHOTO_DISCLOSURE,
+		photoAlt,
+		photoSrc
+	} from '$lib/prototype/photos';
 
 	const campaign = {
 		title: 'Reopen the Rainbow Community Centre',
@@ -80,19 +87,19 @@
 />
 
 <main>
-	<figure class="campaign-cover">
+	<figure class="campaign-cover shell">
 		<img
 			src={photoSrc('friends', 'wide')}
 			alt={photoAlt('friends')}
-			width="1600"
-			height="760"
+			width={PHOTO_BAND.width}
+			height={PHOTO_BAND.height}
 			fetchpriority="high"
 		/>
-		<figcaption>Placeholder illustration, not a photograph of this campaign</figcaption>
+		<figcaption class="disclosure">{PROTOTYPE_PHOTO_DISCLOSURE}</figcaption>
 	</figure>
-	<section class="campaign-hero" aria-labelledby="campaign-title">
+	<section class="campaign-hero shell" aria-labelledby="campaign-title">
 		<div class="campaign-intro">
-			<div class="eyebrow">
+			<div class="meta">
 				<StatusChip label="Active campaign" tone="active" />
 				<span>Community</span>
 			</div>
@@ -148,10 +155,10 @@
 		</aside>
 	</section>
 
-	<div class="content-grid">
+	<div class="content-grid shell">
 		<article class="campaign-story">
 			<section aria-labelledby="story-heading">
-				<p class="section-kicker">Their story</p>
+				<p class="eyebrow">Their story</p>
 				<h2 id="story-heading">A room that keeps the neighbourhood moving</h2>
 				<p>
 					For more than a decade, the fictional Rainbow Community Centre has offered homework help,
@@ -166,7 +173,7 @@
 			</section>
 
 			<section class="use-of-funds" aria-labelledby="funds-heading">
-				<p class="section-kicker">The goal</p>
+				<p class="eyebrow">The goal</p>
 				<h2 id="funds-heading">What the BSD $8,000 will cover</h2>
 				<ul>
 					<li><span>Replacement tables and chairs</span><strong>$3,200</strong></li>
@@ -178,7 +185,7 @@
 			<UpdateFeed campaignSlug="rainbow" />
 
 			<section class="activity" aria-labelledby="activity-heading">
-				<p class="section-kicker">Recent chips</p>
+				<p class="eyebrow">Recent chips</p>
 				<h2 id="activity-heading">People are already helping</h2>
 				<ul class="activity-list">
 					{#each recentChips as chip (chip.name + chip.when)}
@@ -200,7 +207,7 @@
 			<SupportWall campaignSlug="rainbow" />
 
 			<section class="process" id="how-it-works" aria-labelledby="process-heading">
-				<p class="section-kicker">How it works</p>
+				<p class="eyebrow">How it works</p>
 				<h2 id="process-heading">Familiar fundraising. Local bank transfers.</h2>
 				<ol>
 					<li>
@@ -230,7 +237,7 @@
 
 		<aside class="side-stack">
 			<section class="trust-panel" id="trust" aria-labelledby="trust-heading">
-				<p class="section-kicker">Checked by ChipIn</p>
+				<p class="eyebrow">Checked by ChipIn</p>
 				<h2 id="trust-heading">What we reviewed</h2>
 				<div class="review-list">
 					<ReviewLabel label="Host identity reviewed" date="July 28, 2026" />
@@ -245,7 +252,7 @@
 			</section>
 
 			<section class="words-panel" aria-labelledby="words-heading">
-				<p class="section-kicker">Words matter</p>
+				<p class="eyebrow">Words matter</p>
 				<h2 id="words-heading">Not “donate to ChipIn”</h2>
 				<p>
 					You chip in for the campaign. The host receives the transfer. ChipIn keeps the shared page
@@ -256,30 +263,35 @@
 		</aside>
 	</div>
 
-	<section class="next-steps" id="next-steps" aria-labelledby="next-heading">
-		<BrandMark compact />
-		<p class="section-kicker">Start your own</p>
-		<h2 id="next-heading">Ready to put a fundraiser online?</h2>
-		<p>
-			ChipIn is building the GoFundMe-style page Bahamians already need — shareable, mobile-first,
-			with progress the host can stand behind. Campaign creation opens after pilot review gates.
-		</p>
-		<div class="next-actions">
-			<a class="next-primary" href={resolve('/c/[slug]/chip-in', { slug: 'rainbow' })}
-				>Chip in to this one</a
-			>
-			<a class="next-secondary" href={resolve('/start')}>Start your campaign</a>
+	<section class="next-steps band-dark on-dark" id="next-steps" aria-labelledby="next-heading">
+		<div class="shell">
+			<BrandMark tone="onDark" />
+			<p class="eyebrow">Start your own</p>
+			<h2 id="next-heading">Ready to put a fundraiser online?</h2>
+			<p>
+				ChipIn is building the GoFundMe-style page Bahamians already need — shareable, mobile-first,
+				with progress the host can stand behind. Campaign creation opens after pilot review gates.
+			</p>
+			<div class="next-actions">
+				<Button href={resolve('/c/[slug]/chip-in', { slug: 'rainbow' })}>Chip in to this one</Button
+				>
+				<Button variant="secondary" href={resolve('/start')}>Start your campaign</Button>
+			</div>
 		</div>
 	</section>
 </main>
 
-<footer id="report">
-	<BrandMark compact />
-	<p>
-		ChipIn records donor reports and host attestations. It does not collect, hold, or move funds.
-	</p>
-	<a href="mailto:support@chipin242.com?subject=Campaign%20report">Report this campaign</a>
-</footer>
+<section class="report band" id="report">
+	<div class="shell report-inner">
+		<BrandMark compact />
+		<p>
+			ChipIn records donor reports and host attestations. It does not collect, hold, or move funds.
+		</p>
+		<a href="mailto:support@chipin242.com?subject=Campaign%20report">Report this campaign</a>
+	</div>
+</section>
+
+<SiteFooter />
 
 <StickyChipInBar
 	href={resolve('/c/[slug]/chip-in', { slug: 'rainbow' })}
@@ -306,39 +318,30 @@
 		overflow: hidden;
 	}
 	.campaign-cover {
-		position: relative;
-		max-width: 1200px;
-		aspect-ratio: 16 / 7;
-		margin: var(--space-5) auto 0;
-		padding-inline: var(--space-4);
+		margin-block: var(--space-5) 0;
 	}
 	.campaign-cover img {
 		width: 100%;
-		height: 100%;
+		/* The band crop's own ratio. It was 16/7 against a 1400x665 file, which
+		   quietly shaved 8% off the scene. */
+		aspect-ratio: 1400 / 665;
 		border-radius: var(--radius-lg);
 		object-fit: cover;
 	}
 	.campaign-cover figcaption {
-		position: absolute;
-		right: var(--space-6);
-		bottom: var(--space-3);
-		padding: var(--space-1) var(--space-2);
-		border-radius: var(--radius-sm);
-		color: var(--paper);
-		background: rgb(12 27 26 / 72%);
-		font-size: var(--text-xs);
+		max-width: 92ch;
+		margin-top: var(--space-2);
 	}
 	.campaign-hero {
 		display: grid;
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: var(--space-7) var(--space-4);
+		padding-block: var(--space-7);
 		gap: var(--space-7);
 	}
 	.campaign-intro {
 		max-width: 750px;
 	}
-	.eyebrow {
+	/* A chip and a place name, not an eyebrow: keeps sentence case for the chip. */
+	.meta {
 		display: flex;
 		align-items: center;
 		gap: var(--space-3);
@@ -349,7 +352,6 @@
 	h1 {
 		max-width: 12ch;
 		margin: var(--space-5) 0;
-		font-size: var(--text-3xl);
 	}
 	.standfirst {
 		max-width: 59ch;
@@ -385,7 +387,6 @@
 		align-self: end;
 		padding: var(--space-6);
 		border: 1px solid var(--line);
-		border-top: 6px solid var(--gold);
 		border-radius: var(--radius-md);
 		background: var(--surface);
 		box-shadow: var(--shadow-raise);
@@ -476,32 +477,18 @@
 	}
 	.content-grid {
 		display: grid;
-		max-width: 1200px;
-		margin: 0 auto;
 		padding: 0 var(--space-4) var(--space-9);
 		gap: var(--space-8);
 	}
 	.campaign-story {
-		max-width: 720px;
+		max-width: 72ch;
 	}
 	.campaign-story section + section {
 		margin-top: var(--space-8);
 		padding-top: var(--space-7);
 		border-top: 1px solid var(--line);
 	}
-	.section-kicker {
-		margin-bottom: var(--space-3);
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-	}
-	h2 {
-		margin-bottom: var(--space-5);
-		font-size: var(--text-2xl);
-	}
-	.campaign-story section > p:not(.section-kicker) {
+	.campaign-story section > p:not(.eyebrow) {
 		font-size: var(--text-lg);
 	}
 	.use-of-funds ul,
@@ -561,7 +548,7 @@
 	.words-panel h2 {
 		font-size: var(--text-xl);
 	}
-	.words-panel p:not(.section-kicker) {
+	.words-panel p:not(.eyebrow) {
 		margin: 0;
 		color: var(--ink-60);
 		font-size: var(--text-sm);
@@ -618,7 +605,7 @@
 		font-size: var(--text-sm);
 	}
 	.activity-list time {
-		color: var(--ink-40);
+		color: var(--ink-60);
 		font-size: var(--text-xs);
 		white-space: nowrap;
 	}
@@ -628,27 +615,20 @@
 		font-size: var(--text-sm);
 	}
 	.next-steps {
-		padding: var(--space-8) var(--space-4);
-		color: var(--paper);
-		background: var(--ink);
+		padding-block: var(--space-8);
 		text-align: center;
 	}
 	.next-steps :global(.brand) {
 		margin-bottom: var(--space-7);
-		filter: grayscale(1) brightness(0) invert(1);
-	}
-	.next-steps .section-kicker {
-		color: var(--aqua-bright);
 	}
 	.next-steps h2 {
 		max-width: 16ch;
 		margin-inline: auto;
 		font-size: var(--text-3xl);
 	}
-	.next-steps > p {
+	.next-steps p {
 		max-width: 60ch;
-		margin: 0 auto;
-		color: #c8d0cf;
+		margin-inline: auto;
 	}
 	.next-actions {
 		display: flex;
@@ -657,64 +637,35 @@
 		gap: var(--space-3);
 		margin-top: var(--space-6);
 	}
-	.next-primary,
-	.next-secondary {
-		display: inline-grid;
-		min-height: 52px;
-		min-width: 180px;
-		place-items: center;
-		padding: 0 var(--space-5);
-		border-radius: var(--radius-md);
-		font-weight: 700;
-		text-decoration: none;
+	.report {
+		padding-block: var(--space-6);
 	}
-	.next-primary {
-		color: var(--ink);
-		background: var(--gold);
-	}
-	.next-secondary {
-		border: 1px solid #5a6b69;
-		color: var(--paper);
-	}
-	footer {
+	.report-inner {
 		display: grid;
-		max-width: 1200px;
 		align-items: center;
-		margin: 0 auto;
-		padding: var(--space-7) var(--space-4);
-		gap: var(--space-4);
-		font-size: var(--text-sm);
+		gap: var(--space-3);
 	}
-	@media (max-width: 760px) {
-		footer {
-			padding-bottom: calc(var(--space-9) + env(safe-area-inset-bottom));
-		}
-	}
-	footer p {
+	.report-inner p {
 		max-width: 65ch;
 		margin: 0;
 		color: var(--ink-60);
+		font-size: var(--text-sm);
 	}
-	footer a {
+	.report-inner a {
 		display: inline-flex;
 		min-height: var(--control-md);
 		align-items: center;
 		width: fit-content;
 	}
-	@media (min-width: 760px) {
+	@media (min-width: 720px) {
 		.campaign-hero {
-			padding: var(--space-9) var(--space-6) var(--space-8);
+			padding-block: var(--space-9) var(--space-8);
 			grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.75fr);
 		}
-		.campaign-cover {
-			padding-inline: var(--space-6);
-		}
 		.content-grid {
-			padding-inline: var(--space-6);
 			grid-template-columns: minmax(0, 2fr) minmax(280px, 0.8fr);
 		}
-		footer {
-			padding-inline: var(--space-6);
+		.report-inner {
 			grid-template-columns: auto 1fr auto;
 		}
 	}
@@ -726,10 +677,6 @@
 		}
 		.campaign-hero {
 			padding-top: var(--space-6);
-		}
-		.campaign-cover {
-			aspect-ratio: 4 / 3;
-			margin-top: var(--space-3);
 		}
 		.use-of-funds li {
 			align-items: flex-start;
