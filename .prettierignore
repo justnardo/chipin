@@ -8,3 +8,6 @@ bun.lockb
 # Miscellaneous
 /static/
 static/ocr/
+
+# Local design-hook cache, regenerated per machine
+/.impeccable/hook.cache.json

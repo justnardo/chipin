@@ -98,7 +98,7 @@
 	}
 
 	.primary:hover:not(:disabled) {
-		background: #036b66;
+		background: var(--aqua-press);
 		box-shadow: var(--shadow-sm);
 	}
 

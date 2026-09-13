@@ -25,5 +25,8 @@ vite.config.ts.timestamp-*
 # OCR engine assets, synced from node_modules by scripts/sync_ocr_assets.mjs
 static/ocr/
 
+# Local design-hook cache, regenerated per machine
+/.impeccable/hook.cache.json
+
 # Static build output from adapter-static
 build/

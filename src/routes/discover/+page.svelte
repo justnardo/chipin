@@ -1,48 +1,49 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
-	import SiteHeader from '$lib/components/SiteHeader.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import CampaignCard from '$lib/components/CampaignCard.svelte';
+	import FilterPills from '$lib/components/FilterPills.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import {
+		PROTOTYPE_CATALOGUE,
 		listSessionCampaigns,
-		RAINBOW_CAMPAIGN,
 		type PrototypeCampaign
 	} from '$lib/prototype/campaigns';
+	import { PROTOTYPE_PHOTO_DISCLOSURE } from '$lib/prototype/photos';
 	import { campaignAttestedCents, loadReports } from '$lib/prototype/reports';
-	import { photoAlt, photoSrc } from '$lib/prototype/photos';
 
-	const featured = [
-		{
-			title: RAINBOW_CAMPAIGN.title,
-			category: RAINBOW_CAMPAIGN.category,
-			location: 'Nassau',
-			image: RAINBOW_CAMPAIGN.coverImage,
-			imageAlt: RAINBOW_CAMPAIGN.coverAlt,
-			received: 5240,
-			goal: 8000,
-			href: resolve('/c/rainbow')
-		},
-		{
-			title: 'A fresh start for the Bain Town reading room',
-			category: 'Education',
-			location: 'New Providence',
-			image: photoSrc('reading'),
-			imageAlt: photoAlt('reading'),
-			received: 3180,
-			goal: 6000
-		},
-		{
-			title: 'Restock the neighbourhood food cupboard',
-			category: 'Emergency',
-			location: 'Grand Bahama',
-			image: photoSrc('food'),
-			imageAlt: photoAlt('food'),
-			received: 7325,
-			goal: 10000
-		}
+	/**
+	 * The grid is the catalogue, not a second copy of it. This page used to
+	 * declare three cards of its own, which meant the same fictional fundraiser
+	 * had one title and one total here and another set on the home page — and a
+	 * card that only this page knew about would still be advertised in the
+	 * footer's island column.
+	 */
+	const featured = PROTOTYPE_CATALOGUE.map((entry) => ({
+		slug: entry.slug,
+		title: entry.title,
+		category: entry.category,
+		location: entry.location,
+		image: entry.coverImage,
+		imageAlt: entry.coverAlt,
+		received: entry.attestedCents / 100,
+		goal: entry.goalCents / 100,
+		// Only Rainbow resolves to a route; the rest are preview cards, so they
+		// deliberately get no link rather than a link to nowhere.
+		href: entry.hasPage ? resolve('/c/[slug]', { slug: entry.slug }) : undefined
+	}));
+
+	const categoryNames = [...new Set(featured.map((c) => c.category))].sort();
+	const categoryOptions = [
+		{ value: 'All', label: 'All campaigns', count: featured.length },
+		...categoryNames.map((category) => ({
+			value: category,
+			label: category,
+			count: featured.filter((c) => c.category === category).length
+		}))
 	];
-
-	const categories = ['All', ...new Set(featured.map((c) => c.category))];
 
 	let activeCategory = $state('All');
 
@@ -82,29 +83,37 @@
 <SiteHeader />
 
 <main>
-	<section class="hero">
-		<p class="kicker">Discover</p>
-		<h1>Find a reason to chip in</h1>
-		<p class="lede">
-			Browse open campaigns like you would on a familiar fundraising site — then send money directly
-			to the host.
-		</p>
-		<div class="actions">
-			<a class="primary" href={resolve('/start')}>Start a campaign</a>
-			<a class="ghost" href="#featured">See featured</a>
+	<section class="page-head">
+		<div class="shell">
+			<p class="eyebrow">Discover</p>
+			<h1>Find a reason to chip in</h1>
+			<p class="lede">
+				Browse open campaigns like you would on a familiar fundraising site — then send money
+				directly to the host.
+			</p>
+			<div class="actions">
+				<Button href={resolve('/start')}>Start a campaign</Button>
+				<Button variant="secondary" href="#featured">See featured</Button>
+			</div>
+			<!--
+				Above the cards on purpose. Every card below carries a photograph, and
+				the disclosure is what stops a picture of a preschool being read as
+				evidence for the fundraiser printed under it.
+			-->
+			<p class="disclosure">{PROTOTYPE_PHOTO_DISCLOSURE}</p>
 		</div>
 	</section>
 
 	{#if mine.length > 0}
-		<section class="block" aria-labelledby="mine-heading">
-			<div class="heading">
+		<section class="shell section section-tight" aria-labelledby="mine-heading">
+			<div class="section-head">
 				<div>
-					<p class="kicker">In this browser</p>
+					<p class="eyebrow">In this browser</p>
 					<h2 id="mine-heading">Your prototype campaigns</h2>
 				</div>
 				<p>Saved only on this device session until we add real accounts.</p>
 			</div>
-			<div class="grid mine-grid">
+			<div class="card-grid">
 				{#each mine as campaign (campaign.slug)}
 					<CampaignCard
 						title={campaign.title}
@@ -121,32 +130,34 @@
 		</section>
 	{/if}
 
-	<section class="block" id="featured" aria-labelledby="featured-heading">
-		<div class="heading">
+	<section class="shell section" id="featured" aria-labelledby="featured-heading">
+		<div class="section-head">
 			<div>
-				<p class="kicker">Featured</p>
+				<p class="eyebrow">Featured</p>
 				<h2 id="featured-heading">Campaigns to explore</h2>
 			</div>
-			<p>Rainbow is the full interactive demo. Other cards preview discovery layout.</p>
+			<p>Rainbow is the full interactive demo. The rest preview the discovery layout.</p>
 		</div>
-		<div class="filters" role="tablist" aria-label="Filter by category">
-			{#each categories as category (category)}
-				<button
-					type="button"
-					class:active={activeCategory === category}
-					onclick={() => (activeCategory = category)}
-				>
-					{category}
-				</button>
-			{/each}
+
+		<div class="filter-row">
+			<FilterPills
+				options={categoryOptions}
+				value={activeCategory}
+				label="Filter campaigns by category"
+				onchange={(next) => (activeCategory = next)}
+			/>
+			<p class="showing" role="status">
+				Showing {filtered.length} of {featured.length}
+			</p>
 		</div>
+
 		{#if filtered.length === 0}
 			<div class="empty">
-				<p>No featured campaigns in this category yet.</p>
+				<p>No campaigns in this category yet.</p>
 			</div>
 		{:else}
-			<div class="grid">
-				{#each filtered as campaign (campaign.title)}
+			<div class="card-grid">
+				{#each filtered as campaign (campaign.slug)}
 					<CampaignCard {...campaign} />
 				{/each}
 			</div>
@@ -154,34 +165,23 @@
 	</section>
 </main>
 
+<SiteFooter />
+
 <style>
-	main {
-		max-width: 1240px;
-		margin: 0 auto;
-		padding: var(--space-7) var(--space-4) var(--space-9);
-	}
-
-	.hero {
-		max-width: 40rem;
-		margin-bottom: var(--space-8);
-	}
-
-	.kicker {
-		margin: 0 0 var(--space-2);
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+	.page-head {
+		border-bottom: 1px solid var(--line);
+		background: var(--paper-2);
+		padding-block: var(--space-8) var(--space-7);
 	}
 
 	h1 {
+		max-width: 16ch;
 		margin: 0 0 var(--space-4);
-		font-size: var(--text-3xl);
+		font-size: var(--text-4xl);
 	}
 
-	.lede,
-	.heading > p {
+	.lede {
+		max-width: 52ch;
 		margin: 0;
 		color: var(--ink-60);
 		font-size: var(--text-lg);
@@ -194,51 +194,29 @@
 		margin-top: var(--space-6);
 	}
 
-	.block + .block {
-		margin-top: var(--space-9);
-		padding-top: var(--space-8);
+	.disclosure {
+		max-width: 78ch;
+		margin-top: var(--space-6);
+		padding-top: var(--space-4);
 		border-top: 1px solid var(--line);
 	}
 
-	.heading {
+	.filter-row {
 		display: grid;
 		gap: var(--space-3);
 		margin-bottom: var(--space-6);
 	}
 
-	h2 {
+	.showing {
 		margin: 0;
-		font-size: var(--text-2xl);
-	}
-
-	.filters {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-2);
-		margin-bottom: var(--space-6);
-	}
-
-	.filters button {
-		min-height: 44px;
-		padding: 0 var(--space-4);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-full);
 		color: var(--ink-60);
-		background: transparent;
 		font-size: var(--text-sm);
-		font-weight: 600;
-		cursor: pointer;
-	}
-
-	.filters button.active {
-		border-color: var(--aqua-deep);
-		color: white;
-		background: var(--aqua-deep);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.empty {
-		padding: var(--space-6);
-		border: 1px dashed var(--line);
+		padding: var(--space-7) var(--space-6);
+		border: 1px dashed var(--border);
 		border-radius: var(--radius-md);
 		text-align: center;
 	}
@@ -248,25 +226,14 @@
 		color: var(--ink-60);
 	}
 
-	.grid {
-		display: grid;
-		gap: var(--space-5);
-	}
-
-	@media (max-width: 719px) {
-		.mine-grid {
-			grid-template-columns: 1fr;
-		}
-	}
-
 	@media (min-width: 720px) {
-		.grid {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
+		.filter-row {
+			grid-template-columns: minmax(0, 1fr) auto;
+			align-items: center;
 		}
 
-		.heading {
-			grid-template-columns: 1fr 1fr;
-			align-items: end;
+		.showing {
+			justify-self: end;
 		}
 	}
 </style>

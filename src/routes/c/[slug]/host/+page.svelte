@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import AttestationRow from '$lib/components/AttestationRow.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ProgressCoinBar from '$lib/components/ProgressCoinBar.svelte';
 	import SupportWall from '$lib/components/SupportWall.svelte';
@@ -93,14 +94,14 @@
 	showStartAction={false}
 />
 
-<main>
+<main class="shell">
 	{#if !campaign}
 		<section class="empty">
 			<p>Campaign not found in this browser.</p>
 			<a class="primary" href={resolve('/start')}>Start a campaign</a>
 		</section>
 	{:else}
-		<p class="kicker">Host dashboard</p>
+		<p class="eyebrow">Host dashboard</p>
 		<h1>{campaign.title}</h1>
 		<p class="lede">
 			Mark what actually arrived in your bank. Only amounts you mark received count toward public
@@ -158,6 +159,8 @@
 	{/if}
 </main>
 
+<SiteFooter />
+
 <style>
 	.prototype-banner {
 		display: flex;
@@ -178,22 +181,12 @@
 
 	main {
 		max-width: 800px;
-		margin: 0 auto;
-		padding: var(--space-7) var(--space-4) var(--space-9);
-	}
-
-	.kicker {
-		margin: 0 0 var(--space-2);
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		margin-inline: auto;
+		padding-block: var(--space-7) var(--space-9);
 	}
 
 	h1 {
 		margin: 0 0 var(--space-4);
-		font-size: var(--text-2xl);
 	}
 
 	.lede {
@@ -209,7 +202,6 @@
 		margin-bottom: var(--space-8);
 		padding: var(--space-6);
 		border: 1px solid var(--line);
-		border-top: 6px solid var(--gold);
 		border-radius: var(--radius-md);
 		background: var(--surface);
 	}

@@ -4,8 +4,15 @@
 	let {
 		received,
 		goal,
-		currency = 'BSD'
-	}: { received: number; goal: number; currency?: string } = $props();
+		currency = 'BSD',
+		/**
+		 * Grow the fill when the bar first scrolls into view. Purely decorative:
+		 * the label and the ARIA value carry the real figure from the first frame,
+		 * so the growth can never be the only way to read the number, and there is
+		 * nothing to misread if it is skipped.
+		 */
+		animate = true
+	}: { received: number; goal: number; currency?: string; animate?: boolean } = $props();
 
 	let percentage = $derived(calculateProgress(received, goal));
 	let label = $derived(formatAttestedProgress(received, goal, currency));
@@ -16,10 +23,38 @@
 	 * look empty, deliberately.
 	 */
 	let started = $derived(percentage > 0);
+
+	/** What the track actually draws, which is the real figure unless growing. */
+	let drawn = $state(0);
+
+	let host = $state<HTMLElement | null>(null);
+
+	$effect(() => {
+		const target = percentage;
+		const reduce =
+			typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (!animate || reduce || typeof IntersectionObserver === 'undefined') {
+			drawn = target;
+			return;
+		}
+		drawn = 0;
+		if (!host) return;
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (!entry.isIntersecting) return;
+				drawn = target;
+				observer.disconnect();
+			},
+			{ threshold: 0.2 }
+		);
+		observer.observe(host);
+		return () => observer.disconnect();
+	});
 </script>
 
 <div
 	class="progress"
+	bind:this={host}
 	role="progressbar"
 	aria-label={label}
 	aria-valuemin="0"
@@ -27,7 +62,7 @@
 	aria-valuenow={received}
 >
 	<div class="track">
-		<div class="fill" style:width={`${percentage}%`}>
+		<div class="fill" style:width={`${drawn}%`}>
 			{#if started}
 				<span class="coin" aria-hidden="true"></span>
 			{/if}

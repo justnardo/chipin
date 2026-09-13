@@ -123,7 +123,7 @@
 	-->
 	<header class="head">
 		<div>
-			<p class="kicker">Send to</p>
+			<p class="eyebrow">Send to</p>
 			<h2 id="portal-heading">{hostName}</h2>
 			<p class="bank-name">{recipientBank.name}</p>
 		</div>
@@ -223,15 +223,6 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-4);
-	}
-
-	.kicker {
-		margin: 0;
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
 	}
 
 	h2 {

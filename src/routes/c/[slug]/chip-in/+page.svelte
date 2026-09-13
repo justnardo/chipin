@@ -5,6 +5,7 @@
 	import BankTransferPortal from '$lib/components/BankTransferPortal.svelte';
 	import DateSentField from '$lib/components/DateSentField.svelte';
 	import Field from '$lib/components/Field.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import ReceiptScanner from '$lib/components/ReceiptScanner.svelte';
 	import StatusChip from '$lib/components/StatusChip.svelte';
@@ -201,7 +202,7 @@
 
 <SiteHeader links={[{ label: 'Back to campaign', href: campaignHref }]} showStartAction={false} />
 
-<main>
+<main class="shell">
 	{#if !campaign}
 		<section class="card">
 			<h2>Campaign not found</h2>
@@ -209,7 +210,7 @@
 			<a class="primary" href={resolve('/start')}>Start a campaign</a>
 		</section>
 	{:else}
-		<p class="kicker">Chip in</p>
+		<p class="eyebrow">Chip in</p>
 		<h1>{campaign.title}</h1>
 		<p class="lede">
 			Hosted by {campaign.hostName}. You send money outside ChipIn. ChipIn only records what you
@@ -450,6 +451,8 @@
 	{/if}
 </main>
 
+<SiteFooter />
+
 <style>
 	.prototype-banner {
 		display: flex;
@@ -468,24 +471,16 @@
 		font-family: var(--font-display);
 	}
 
+	/* .shell supplies the gutters; the cap keeps the transfer steps at a
+	   single readable column. */
 	main {
 		max-width: 720px;
-		margin: 0 auto;
-		padding: var(--space-7) var(--space-4) var(--space-9);
-	}
-
-	.kicker {
-		margin: 0 0 var(--space-2);
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		margin-inline: auto;
+		padding-block: var(--space-7) var(--space-9);
 	}
 
 	h1 {
 		margin: 0 0 var(--space-4);
-		font-size: var(--text-2xl);
 	}
 
 	.lede {

@@ -14,7 +14,10 @@
 		getCampaign,
 		type PrototypeCampaign
 	} from '$lib/prototype/campaigns';
+	import { PHOTO_BAND, PROTOTYPE_PHOTO_DISCLOSURE } from '$lib/prototype/photos';
 	import { campaignAttestedCents, loadReports } from '$lib/prototype/reports';
+	import Button from '$lib/components/Button.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
 
 	let campaign = $state<PrototypeCampaign | null>(null);
 	let loaded = $state(false);
@@ -84,23 +87,29 @@
 
 <SiteHeader />
 
-<main>
+<main class="shell">
 	{#if !loaded}
 		<p class="lede">Loading…</p>
 	{:else if !campaign}
 		<section class="missing">
 			<h1>Campaign not found</h1>
 			<p>This prototype page may be from another device or browser.</p>
-			<a class="primary" href={resolve('/start')}>Start a campaign</a>
+			<Button href={resolve('/start')}>Start a campaign</Button>
 		</section>
 	{:else}
 		<figure class="cover">
-			<img src={coverBand(campaign)} alt={campaign.coverAlt} width="1600" height="760" />
+			<img
+				src={coverBand(campaign)}
+				alt={campaign.coverAlt}
+				width={PHOTO_BAND.width}
+				height={PHOTO_BAND.height}
+			/>
+			<figcaption>{PROTOTYPE_PHOTO_DISCLOSURE}</figcaption>
 		</figure>
 
 		<section class="hero">
 			<div class="intro">
-				<div class="eyebrow">
+				<div class="meta">
 					<StatusChip label={campaign.category} tone="active" />
 					<span>{campaign.location}</span>
 				</div>
@@ -113,7 +122,7 @@
 					</p>
 				</div>
 				<article class="story">
-					<p class="kicker">Their story</p>
+					<p class="eyebrow">Their story</p>
 					<p>{campaign.story}</p>
 				</article>
 				<UpdateFeed campaignSlug={campaign.slug} />
@@ -142,12 +151,12 @@
 						<span>of goal</span>
 					</div>
 				</div>
-				<a class="primary" href={resolve('/c/[slug]/chip-in', { slug: campaign.slug })}>
+				<Button full href={resolve('/c/[slug]/chip-in', { slug: campaign.slug })}>
 					Chip in now
-				</a>
+				</Button>
 				<div class="share-row">
-					<button type="button" class="ghost" onclick={shareCampaign}>Share</button>
-					<button type="button" class="ghost" onclick={shareWhatsApp}>WhatsApp</button>
+					<Button variant="secondary" size="md" full onclick={shareCampaign}>Share</Button>
+					<Button variant="secondary" size="md" full onclick={shareWhatsApp}>WhatsApp</Button>
 				</div>
 				{#if shareNote}
 					<p class="note" role="status">{shareNote}</p>
@@ -164,6 +173,8 @@
 		/>
 	{/if}
 </main>
+
+<SiteFooter />
 
 <style>
 	.prototype-banner {
@@ -184,9 +195,7 @@
 	}
 
 	main {
-		max-width: 1100px;
-		margin: 0 auto;
-		padding: var(--space-5) var(--space-4) var(--space-9);
+		padding-block: var(--space-6) var(--space-9);
 	}
 
 	@media (max-width: 760px) {
@@ -200,10 +209,20 @@
 	}
 
 	.cover img {
+		display: block;
 		width: 100%;
-		aspect-ratio: 16 / 7;
+		/* The band crop's own ratio. It was 16/7 against a 1400x665 file, which
+		   quietly shaved 8% off the scene for no reason. */
+		aspect-ratio: 1400 / 665;
 		border-radius: var(--radius-lg);
 		object-fit: cover;
+	}
+
+	.cover figcaption {
+		margin-top: var(--space-2);
+		color: var(--ink-60);
+		font-size: var(--text-xs);
+		line-height: 1.45;
 	}
 
 	.hero {
@@ -212,7 +231,9 @@
 		margin-top: var(--space-6);
 	}
 
-	.eyebrow {
+	/* A chip and a place name, not an eyebrow: it keeps the sentence-case
+	   treatment the chip needs rather than the uppercase eyebrow type. */
+	.meta {
 		display: flex;
 		align-items: center;
 		gap: var(--space-3);
@@ -223,7 +244,6 @@
 
 	h1 {
 		margin: var(--space-4) 0;
-		font-size: var(--text-2xl);
 	}
 
 	.host-byline {
@@ -252,15 +272,6 @@
 		background: var(--ink);
 		font-family: var(--font-display);
 		font-weight: 700;
-	}
-
-	.kicker {
-		margin: 0 0 var(--space-3);
-		color: var(--aqua-deep);
-		font-size: var(--text-xs);
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
 	}
 
 	.story p:last-child {
@@ -337,7 +348,7 @@
 		color: var(--ink-60);
 	}
 
-	@media (min-width: 860px) {
+	@media (min-width: 1000px) {
 		.hero {
 			grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
 		}

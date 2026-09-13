@@ -7,6 +7,33 @@ export type CampaignCategory =
 	'Community' | 'Medical' | 'Education' | 'Funeral' | 'Emergency' | 'Other';
 
 /**
+ * Where a campaign is. Separate from `location`, which is host-typed free text
+ * ("Eight Mile Rock · Grand Bahama") and not something a filter can be built
+ * on. The island list is what the discover filter is made of.
+ *
+ * `other` exists for a real reason rather than as a catch-all: drafts saved
+ * before this field existed have no island, and inventing one for them would
+ * file a stranger's fundraiser under a place they never named. They stay
+ * visible under "All islands" and under "Other islands", and a filter pill for
+ * that bucket only appears when something actually lands in it.
+ */
+export const CAMPAIGN_ISLANDS = {
+	np: 'New Providence',
+	gb: 'Grand Bahama',
+	abaco: 'Abaco',
+	eleuthera: 'Eleuthera',
+	exuma: 'Exuma',
+	other: 'Other islands'
+} as const;
+
+export type CampaignIsland = keyof typeof CAMPAIGN_ISLANDS;
+
+/** The island a campaign files under, defaulting drafts to the honest bucket. */
+export function campaignIsland(campaign: PrototypeCampaign): CampaignIsland {
+	return campaign.island ?? 'other';
+}
+
+/**
  * Where a host asks donors to send money.
  *
  * BUILD GATE (README): real receiving-account details must not ship until the
@@ -32,12 +59,18 @@ export type PrototypeCampaign = {
 	goalCents: number;
 	category: CampaignCategory;
 	location: string;
+	/**
+	 * Optional because every draft stored under `chipin.prototype.campaigns.v1`
+	 * predates it. Read it through `campaignIsland()`, never directly, so those
+	 * drafts keep working instead of vanishing from a filtered grid.
+	 */
+	island?: CampaignIsland;
 	hostName: string;
 	coverImage: string;
 	/**
-	 * The same scene composed for the 1600x760 campaign band. Cards crop the
-	 * square happily; the band does not. Optional because drafts saved before
-	 * this existed have only `coverImage` — callers fall back to it.
+	 * The same scene composed for the campaign band. Cards crop the square
+	 * happily; the band does not. Optional because drafts saved before this
+	 * existed have only `coverImage` — callers fall back to it.
 	 */
 	coverImageWide?: string;
 	coverAlt: string;
@@ -74,7 +107,9 @@ export function usableAccounts(campaign: PrototypeCampaign): ReceivingAccount[] 
 
 const STORAGE_KEY = 'chipin.prototype.campaigns.v1';
 
-export const COVER_PRESETS = (['friends', 'reading', 'food', 'table'] as const).map((id) => ({
+export const COVER_PRESETS = (
+	['friends', 'reading', 'gathering', 'food', 'table', 'kitchen'] as const
+).map((id) => ({
 	id,
 	image: photoSrc(id),
 	imageWide: photoSrc(id, 'wide'),
@@ -94,6 +129,7 @@ export const RAINBOW_CAMPAIGN: PrototypeCampaign = {
 	goalCents: 800_000,
 	category: 'Community',
 	location: 'Nassau, The Bahamas',
+	island: 'np',
 	hostName: 'Rainbow Community Centre',
 	coverImage: COVER_PRESETS[0].image,
 	coverImageWide: COVER_PRESETS[0].imageWide,
@@ -120,6 +156,141 @@ export const RAINBOW_CAMPAIGN: PrototypeCampaign = {
 	]
 };
 
+/**
+ * The campaigns the prototype shows in its grids.
+ *
+ * These exist so the home and discover pages render from the model rather than
+ * from strings pasted out of a mockup — every card's title, island, category,
+ * cover, goal and progress comes from here, and the discover filter is built
+ * from the islands actually present in this list rather than from a fixed
+ * label. Only Rainbow resolves to a route; the rest are preview cards.
+ *
+ * `attestedCents` is a fictional prototype figure standing in for what a host
+ * would have marked received. It is NOT attested, NOT verified, and NOT
+ * matched — nothing screenshot-derived may be labelled that way (build gate),
+ * and nothing here is screenshot-derived in the first place.
+ */
+export type CatalogueEntry = PrototypeCampaign & {
+	attestedCents: number;
+	/** True only when the slug resolves to a real route in this app. */
+	hasPage: boolean;
+};
+
+export const PROTOTYPE_CATALOGUE: readonly CatalogueEntry[] = [
+	{ ...RAINBOW_CAMPAIGN, attestedCents: 524_000, hasPage: true },
+	{
+		slug: 'bain-town-reading-room',
+		title: 'A reading room for Bain Town',
+		story:
+			'Thirty children share one bookshelf. The reading room needs shelving, a rug, and a set of books at each level so the after-school group can keep meeting through the summer.',
+		goalCents: 600_000,
+		category: 'Education',
+		location: 'Bain Town · New Providence',
+		island: 'np',
+		hostName: 'Bain Town Youth Group',
+		coverImage: photoSrc('reading'),
+		coverImageWide: photoSrc('reading', 'wide'),
+		coverAlt: photoAlt('reading'),
+		createdAt: '2026-06-30T10:00:00.000Z',
+		source: 'builtin',
+		receivingAccounts: [],
+		attestedCents: 318_000,
+		hasPage: false
+	},
+	{
+		slug: 'eight-mile-rock-food-cupboard',
+		title: 'Restock the Eight Mile Rock food cupboard',
+		story:
+			'The cupboard ran dry in the second week of the month. Restocking it covers tinned goods, rice, and flour for the families who come every Thursday.',
+		goalCents: 400_000,
+		category: 'Emergency',
+		location: 'Eight Mile Rock · Grand Bahama',
+		island: 'gb',
+		hostName: 'Eight Mile Rock Community Cupboard',
+		coverImage: photoSrc('food'),
+		coverImageWide: photoSrc('food', 'wide'),
+		coverAlt: photoAlt('food'),
+		createdAt: '2026-07-04T09:00:00.000Z',
+		source: 'builtin',
+		receivingAccounts: [],
+		attestedCents: 293_000,
+		hasPage: false
+	},
+	{
+		slug: 'st-agnes-hall',
+		title: 'Repair the St. Agnes hall roof',
+		story:
+			'Two rooms in the parish hall are unusable after the last storm. The roof repair lets the lunch programme move back indoors before the next one.',
+		goalCents: 600_000,
+		category: 'Community',
+		location: 'Nassau · New Providence',
+		island: 'np',
+		hostName: 'St. Agnes Parish Hall',
+		coverImage: photoSrc('table'),
+		coverImageWide: photoSrc('table', 'wide'),
+		coverAlt: photoAlt('table'),
+		createdAt: '2026-05-18T14:00:00.000Z',
+		source: 'builtin',
+		receivingAccounts: [],
+		attestedCents: 315_000,
+		hasPage: false
+	},
+	{
+		slug: 'marsh-harbour-netball',
+		title: 'Netball kits for Marsh Harbour',
+		story:
+			'The under-16 side has been borrowing kit from the senior team. New bibs, balls, and a set of goal posts let them play on their own court again.',
+		goalCents: 500_000,
+		category: 'Education',
+		location: 'Marsh Harbour · Abaco',
+		island: 'abaco',
+		hostName: 'Marsh Harbour Netball Club',
+		coverImage: photoSrc('gathering'),
+		coverImageWide: photoSrc('gathering', 'wide'),
+		coverAlt: photoAlt('gathering'),
+		createdAt: '2026-06-11T16:30:00.000Z',
+		source: 'builtin',
+		receivingAccounts: [],
+		attestedCents: 210_000,
+		hasPage: false
+	},
+	{
+		slug: 'fox-hill-kitchen',
+		title: 'Fit out the Fox Hill community kitchen',
+		story:
+			'The Sunday cooking group has a working stove and no counters. Fitting out the kitchen means they can cook for the whole street without washing up in the yard.',
+		goalCents: 350_000,
+		category: 'Community',
+		location: 'Fox Hill · New Providence',
+		island: 'np',
+		hostName: 'Fox Hill Cooking Group',
+		coverImage: photoSrc('kitchen'),
+		coverImageWide: photoSrc('kitchen', 'wide'),
+		coverAlt: photoAlt('kitchen'),
+		createdAt: '2026-07-15T11:15:00.000Z',
+		source: 'builtin',
+		receivingAccounts: [],
+		attestedCents: 259_000,
+		hasPage: false
+	}
+];
+
+/**
+ * The islands present in a set of campaigns, in the canonical island order.
+ * A filter pill for a place with nothing in it is a dead end, so the filter is
+ * built from the data it filters.
+ */
+export function islandsPresent(campaigns: readonly PrototypeCampaign[]): CampaignIsland[] {
+	const present = new Set(campaigns.map(campaignIsland));
+	return (Object.keys(CAMPAIGN_ISLANDS) as CampaignIsland[]).filter((id) => present.has(id));
+}
+
+/** Goal progress, clamped to 0-100 so a wild draft cannot overfill a bar. */
+export function progressPercent(receivedCents: number, goalCents: number): number {
+	if (goalCents <= 0) return 0;
+	return Math.min(100, Math.max(0, (receivedCents / goalCents) * 100));
+}
+
 export const EMPTY_RECEIVING: ReceivingAccount = {
 	bankId: 'other',
 	accountName: '',
@@ -131,17 +302,37 @@ export const EMPTY_RECEIVING: ReceivingAccount = {
 /** Shape of records written by older builds, kept only for migration. */
 type StoredCampaign = PrototypeCampaign & { receiving?: ReceivingAccount };
 
+/**
+ * A draft's cover, with the retired illustration set swapped out.
+ *
+ * Drafts saved before the photography change point at files that no longer
+ * exist. Handing the browser a 404 would leave the host looking at the one
+ * thing a fundraiser cannot afford to show — a broken picture — so the cover
+ * falls back to a preset, chosen from the slug so it is stable across reloads
+ * rather than shuffling every render.
+ */
+function normaliseCover(campaign: PrototypeCampaign): PrototypeCampaign {
+	if (!campaign.coverImage.endsWith('.svg')) return campaign;
+	let hash = 0;
+	for (const char of campaign.slug) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+	const preset = COVER_PRESETS[hash % COVER_PRESETS.length];
+	return { ...campaign, coverImage: preset.image, coverImageWide: preset.imageWide };
+}
+
 function loadSessionCampaigns(): PrototypeCampaign[] {
-	// Two generations of stored data must not break the portal: campaigns saved
-	// before receiving details existed, and campaigns saved when there was a
-	// single `receiving` object rather than a list.
-	return readList<StoredCampaign>(STORAGE_KEY).map(({ receiving, ...c }) => ({
-		...c,
-		receivingAccounts: (c.receivingAccounts ?? (receiving ? [receiving] : [])).map((a) => ({
-			...EMPTY_RECEIVING,
-			...a
-		}))
-	}));
+	// Three generations of stored data must not break the portal: campaigns saved
+	// before receiving details existed, campaigns saved when there was a single
+	// `receiving` object rather than a list, and campaigns saved against the
+	// retired illustration covers.
+	return readList<StoredCampaign>(STORAGE_KEY).map(({ receiving, ...c }) =>
+		normaliseCover({
+			...c,
+			receivingAccounts: (c.receivingAccounts ?? (receiving ? [receiving] : [])).map((a) => ({
+				...EMPTY_RECEIVING,
+				...a
+			}))
+		})
+	);
 }
 
 function saveSessionCampaigns(campaigns: PrototypeCampaign[]) {
