@@ -17,6 +17,7 @@
 		type PrototypeCampaign,
 		type ReceivingAccount
 	} from '$lib/prototype/campaigns';
+	import { PROTOTYPE_PHOTO_DISCLOSURE } from '$lib/prototype/photos';
 
 	const categories: CampaignCategory[] = [
 		'Community',
@@ -311,6 +312,13 @@
 							</label>
 						{/each}
 					</div>
+					<!--
+						Carried here as well as beside the preview: below 1000px the
+						preview stacks after the whole form, so from this picker the
+						footer and the preview are both far below the fold. The covers
+						are eight real photographs, so the notice rides with them.
+					-->
+					<p class="disclosure">{PROTOTYPE_PHOTO_DISCLOSURE}</p>
 				</fieldset>
 				{#if error}
 					<p class="error" role="alert">{error}</p>
@@ -462,6 +470,7 @@
 					<span class="fake-cta">Chip in now</span>
 				</div>
 			</article>
+			<p class="disclosure">{PROTOTYPE_PHOTO_DISCLOSURE}</p>
 		</aside>
 	</div>
 </main>
@@ -601,6 +610,13 @@
 		font-weight: 600;
 	}
 
+	/* `fieldset` is deliberately bold for its legend, but the disclosure under
+	   the covers is fine print and must match the footer's weight. */
+	fieldset .disclosure {
+		margin-top: var(--space-1);
+		font-weight: 400;
+	}
+
 	textarea {
 		min-height: 160px;
 		resize: vertical;
@@ -724,6 +740,12 @@
 		color: var(--ink-60);
 		font-size: var(--text-sm);
 		font-weight: 700;
+	}
+
+	/* The disclosure sits below the card, so it needs the same gap the label
+	   takes above it. */
+	.preview .disclosure {
+		margin-top: var(--space-3);
 	}
 
 	.preview-card {

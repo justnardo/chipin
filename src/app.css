@@ -140,6 +140,12 @@
 
 	--nav-height: 72px;
 	--nav-height-condensed: 56px;
+
+	/* Height of the fixed StickyChipInBar below 760px: 12px padding, a 48px
+	   control, 12px padding. `SiteFooter` reserves this much again beneath its
+	   last line when a route renders that bar, so the two are a matched pair —
+	   change the bar and this must change with it. */
+	--sticky-bar-height: 72px;
 }
 
 *,

@@ -29,6 +29,7 @@
 		CAMPAIGN_ISLANDS,
 		PROTOTYPE_CATALOGUE,
 		campaignIsland,
+		catalogueCards,
 		islandsPresent,
 		type CampaignIsland,
 		type CatalogueEntry
@@ -37,23 +38,29 @@
 
 	type Filter = 'all' | CampaignIsland;
 
-	const islands = islandsPresent(PROTOTYPE_CATALOGUE);
+	/**
+	 * Money leaves `campaigns.ts` in whole currency units, not cents — the cards
+	 * used to be handed raw cents here and rendered every figure a hundred times
+	 * too large. The conversion happens once in `catalogueCards`, which discover
+	 * shares, so the two grids cannot drift apart again.
+	 */
+	const cards = catalogueCards();
+
+	const islands = islandsPresent(cards);
 
 	let islandFilter = $state<Filter>('all');
 
 	const islandOptions: readonly { value: Filter; label: string; count: number }[] = [
-		{ value: 'all', label: 'All islands', count: PROTOTYPE_CATALOGUE.length },
+		{ value: 'all', label: 'All islands', count: cards.length },
 		...islands.map((id) => ({
 			value: id,
 			label: CAMPAIGN_ISLANDS[id],
-			count: PROTOTYPE_CATALOGUE.filter((entry) => campaignIsland(entry) === id).length
+			count: cards.filter((entry) => campaignIsland(entry) === id).length
 		}))
 	];
 
 	const shown = $derived(
-		PROTOTYPE_CATALOGUE.filter(
-			(entry) => islandFilter === 'all' || campaignIsland(entry) === islandFilter
-		)
+		cards.filter((entry) => islandFilter === 'all' || campaignIsland(entry) === islandFilter)
 	);
 
 	/**
@@ -243,8 +250,8 @@
 					location={campaign.location}
 					image={campaign.coverImage}
 					imageAlt={campaign.coverAlt}
-					received={campaign.attestedCents}
-					goal={campaign.goalCents}
+					received={campaign.received}
+					goal={campaign.goal}
 					href={hrefFor(campaign)}
 				/>
 			{/each}

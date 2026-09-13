@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { formatAttestedProgress } from '../progress';
 import {
 	accountTail,
+	catalogueCards,
 	getCampaign,
 	listSessionCampaigns,
+	PROTOTYPE_CATALOGUE,
 	RAINBOW_CAMPAIGN,
 	saveCampaign,
 	usableAccounts
@@ -112,5 +115,34 @@ describe('campaign receiving accounts', () => {
 		// The flagship demo must keep >1 usable account or the donor-side picker
 		// silently stops being demonstrated anywhere.
 		expect(usableAccounts(RAINBOW_CAMPAIGN).length).toBeGreaterThan(1);
+	});
+});
+
+describe('catalogue money units', () => {
+	// The home grid was once handed `attestedCents`/`goalCents` directly and
+	// printed every figure a hundred times too large — Rainbow read "$524,000
+	// marked received ... of $800,000 goal" while discover read "$5,240 ...
+	// $8,000". `catalogueCards` is now the one place where cents become the currency
+	// units the formatters expect, so this guards the boundary rather than the
+	// call site.
+	it('converts cents to currency units exactly once for every card', () => {
+		const cards = catalogueCards();
+		expect(cards).toHaveLength(PROTOTYPE_CATALOGUE.length);
+
+		for (const card of cards) {
+			expect(card.received * 100).toBe(card.attestedCents);
+			expect(card.goal * 100).toBe(card.goalCents);
+		}
+	});
+
+	it('renders Rainbow at $5,240 of $8,000, not a hundred times that', () => {
+		const rainbow = catalogueCards().find((card) => card.slug === 'rainbow');
+		if (!rainbow) throw new Error('Rainbow is missing from the prototype catalogue');
+
+		const line = formatAttestedProgress(rainbow.received, rainbow.goal);
+		expect(line).toContain('5,240 marked received by the campaign host of');
+		expect(line).toContain('8,000 goal');
+		expect(line).not.toContain('524,000');
+		expect(line).not.toContain('800,000');
 	});
 });

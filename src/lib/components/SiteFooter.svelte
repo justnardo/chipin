@@ -18,9 +18,18 @@
 	import { PROTOTYPE_PHOTO_DISCLOSURE } from '$lib/prototype/photos';
 
 	const islands = islandsPresent(PROTOTYPE_CATALOGUE);
+
+	/**
+	 * `StickyChipInBar` is fixed to the bottom edge below 760px and would sit
+	 * over the disclosure and the artwork credit at the end of the page. The
+	 * routes that render that bar opt in here so every other page keeps its
+	 * normal bottom padding instead of carrying dead space for a bar it never
+	 * shows.
+	 */
+	let { stickyBarClearance = false }: { stickyBarClearance?: boolean } = $props();
 </script>
 
-<footer class="site-footer band-dark on-dark">
+<footer class="site-footer band-dark on-dark" class:with-sticky-bar={stickyBarClearance}>
 	<div class="shell">
 		<div class="main">
 			<div class="brand-col">
@@ -68,6 +77,16 @@
 <style>
 	.site-footer {
 		padding-block: var(--space-8) var(--space-6);
+	}
+
+	/* Matches `StickyChipInBar`'s own 760px query exactly: the bar is only
+	   fixed below that, so above it this rule must not apply. The extra
+	   --space-4 keeps a gap between the last line and the bar's top edge
+	   rather than resting the text exactly on it. */
+	@media (max-width: 760px) {
+		.site-footer.with-sticky-bar {
+			padding-bottom: calc(var(--sticky-bar-height) + var(--space-4) + env(safe-area-inset-bottom));
+		}
 	}
 
 	.main {

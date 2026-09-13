@@ -285,6 +285,25 @@ export function islandsPresent(campaigns: readonly PrototypeCampaign[]): Campaig
 	return (Object.keys(CAMPAIGN_ISLANDS) as CampaignIsland[]).filter((id) => present.has(id));
 }
 
+/**
+ * The catalogue as the grid pages render it — the same entries, with their money
+ * converted out of cents once, here, instead of once per page.
+ *
+ * Home and discover each mapped this list by hand into the shape a card wants,
+ * and that duplication is how one of them came to hand raw cents to the progress
+ * bar. They share the mapping now, so the two surfaces cannot disagree about
+ * what a campaign has raised.
+ */
+export type CatalogueCard = CatalogueEntry & { received: number; goal: number };
+
+export function catalogueCards(): CatalogueCard[] {
+	return PROTOTYPE_CATALOGUE.map((entry) => ({
+		...entry,
+		received: toCurrencyUnits(entry.attestedCents),
+		goal: toCurrencyUnits(entry.goalCents)
+	}));
+}
+
 /** Goal progress, clamped to 0-100 so a wild draft cannot overfill a bar. */
 export function progressPercent(receivedCents: number, goalCents: number): number {
 	if (goalCents <= 0) return 0;
@@ -377,8 +396,24 @@ export function saveCampaign(
 	return campaign;
 }
 
+/**
+ * Cents to whole currency units, at the boundary where money is displayed.
+ *
+ * Every amount in the prototype is held in cents, but the progress bar and
+ * `formatAttestedProgress` in `$lib/progress` speak whole currency units. That
+ * conversion was written out by hand wherever the two met, and the home page's
+ * grid forgot it: the card read "$524,000 marked received by the campaign host
+ * of $800,000 goal" for a campaign whose own page said $5,240 of $8,000. A
+ * hundredfold error is not obviously wrong on a fictional fundraiser, which is
+ * why it survived — so the division has one name and one test rather than six
+ * call sites each having to remember.
+ */
+export function toCurrencyUnits(cents: number): number {
+	return cents / 100;
+}
+
 export function formatGoal(cents: number): string {
-	return `BSD $${(cents / 100).toLocaleString('en-BS', {
+	return `BSD $${toCurrencyUnits(cents).toLocaleString('en-BS', {
 		minimumFractionDigits: 0,
 		maximumFractionDigits: 0
 	})}`;
