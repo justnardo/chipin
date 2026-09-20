@@ -31,9 +31,9 @@ the root README rather than a nicety.
 
 Attribution, as it appears in the footer:
 
-> Prototype photography: Nassau preschool children via Wikimedia Commons; other
-> scenes are illustrative. Final imagery will be commissioned locally, with
-> consent, and served from ChipIn's origin. Artwork © Traceline Bahamas Ltd.
+> Prototype photography: illustrative images, not photographs of this campaign
+> or the community it serves. Final imagery will be commissioned locally, with
+> consent, and served from ChipIn’s origin. Artwork © Traceline Bahamas Ltd.
 
 ## The scenes
 
