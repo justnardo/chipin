@@ -45,21 +45,34 @@ export type PrototypePhotoId = keyof typeof PROTOTYPE_PHOTOS;
  * The mockup's footer attribution named a specific source for the one scene
  * that was a real photograph of real children. That provenance arrived inside
  * the mockup, nobody here has verified it, and it is therefore not carried into
- * the text below. It would also work against this notice: naming a specific
- * real source lends the picture weight as evidence of the campaign beside it,
- * which is the opposite of what the notice is for.
+ * the text below.
  *
- * The commitment that final imagery will be commissioned locally, with consent,
- * and served from ChipIn's origin is kept word for word. The artwork line that
- * followed it in the mockup is a separate line in `SiteFooter`, because it
- * credits the illustrated mark, not the photography.
+ * Dropping it was not enough on its own. The first replacement denied the
+ * images were of "the community it serves", which is the same species of claim
+ * inverted — negative provenance is no more knowable than positive provenance.
+ * The site makes that concrete: the reading room campaign in `campaigns.ts` is
+ * set in Bain Town, New Providence and carries the preschool photograph, so a
+ * sentence denying the picture was of that community asserted something we
+ * cannot check and that is plausibly false. The named source was not worth
+ * keeping either: identifying a real source lends the picture weight as
+ * evidence of the campaign beside it, which is the opposite of what this notice
+ * is for.
+ *
+ * So the notice asserts evidentiary status instead of origin, which the
+ * campaigns being fictional makes verifiably true: a fictional campaign cannot
+ * have photographic evidence, and these images were not commissioned for it.
+ * That second clause sets up the sentence after it, where the final imagery is
+ * commissioned locally and with consent from ChipIn's origin — both kept word
+ * for word. The artwork line that followed the attribution in the mockup stays
+ * a separate line in `SiteFooter`, because it credits the illustrated mark, not
+ * the photography.
  *
  * The closing sentence is our own: the mockup covered the pictures, not the
  * campaigns, and a reader who gets only the photographic half can still believe
  * the fundraiser beside it is real.
  */
 export const PROTOTYPE_PHOTO_DISCLOSURE =
-	'Prototype photography: illustrative images, not photographs of this campaign or the community it serves. Final imagery will be commissioned locally, with consent, and served from ChipIn’s origin. Prototype campaigns, hosts, and totals are fictional.';
+	'Prototype photography: illustrative images, not evidence of this campaign and not commissioned for it. Final imagery will be commissioned locally, with consent, and served from ChipIn’s origin. Prototype campaigns, hosts, and totals are fictional.';
 
 /**
  * Three roles per scene, because `object-fit: cover` crops rather than fits and

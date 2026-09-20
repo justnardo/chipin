@@ -31,9 +31,10 @@ the root README rather than a nicety.
 
 Attribution, as it appears in the footer:
 
-> Prototype photography: illustrative images, not photographs of this campaign
-> or the community it serves. Final imagery will be commissioned locally, with
-> consent, and served from ChipIn’s origin. Artwork © Traceline Bahamas Ltd.
+> Prototype photography: illustrative images, not evidence of this campaign
+> and not commissioned for it. Final imagery will be commissioned locally, with
+> consent, and served from ChipIn’s origin. Prototype campaigns, hosts, and
+> totals are fictional. Artwork © Traceline Bahamas Ltd.
 
 ## The scenes
 
